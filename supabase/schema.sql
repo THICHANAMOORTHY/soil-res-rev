@@ -1,6 +1,23 @@
 -- ============================================================
--- CropSmart P025: Supabase Schema Migration
+-- CropSmart & Uzhavu Kaappaan + DairyFeed AI: Full Supabase Schema
 -- ============================================================
+
+-- 0. Clean Slate: Drop old tables if re-initializing
+DROP TABLE IF EXISTS silage_samples CASCADE;
+DROP TABLE IF EXISTS silage_devices CASCADE;
+DROP TABLE IF EXISTS recommendations CASCADE;
+DROP TABLE IF EXISTS soil_simulation_log CASCADE;
+DROP TABLE IF EXISTS rotation_plan_seasons CASCADE;
+DROP TABLE IF EXISTS rotation_plans CASCADE;
+DROP TABLE IF EXISTS crop_evaluations CASCADE;
+DROP TABLE IF EXISTS crop_history CASCADE;
+DROP TABLE IF EXISTS weather_data CASCADE;
+DROP TABLE IF EXISTS soil_data CASCADE;
+DROP TABLE IF EXISTS crops CASCADE;
+DROP TABLE IF EXISTS seasons CASCADE;
+DROP TABLE IF EXISTS farms CASCADE;
+DROP TABLE IF EXISTS farmers CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -253,3 +270,90 @@ BEGIN
         EXECUTE format('CREATE POLICY "Public access on %I" ON %I FOR ALL USING (true) WITH CHECK (true);', tbl, tbl);
     END LOOP;
 END $$;
+
+-- ─────────────────────────────────────────────────────────────
+-- DairyFeed AI (Silage Monitoring & IoT Diagnostics)
+-- ─────────────────────────────────────────────────────────────
+
+-- 14. Silage Devices (sensor nodes)
+CREATE TABLE IF NOT EXISTS silage_devices (
+    device_id        TEXT PRIMARY KEY,               -- e.g. 'DF01'
+    name             TEXT,
+    last_seen_at     TIMESTAMPTZ,
+    pending_sync     INTEGER NOT NULL DEFAULT 0,     -- queued readings the device reports
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 15. Silage Samples (tests with pH, moisture, temp, RGB, scores, advisory)
+CREATE TABLE IF NOT EXISTS silage_samples (
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sample_id            TEXT NOT NULL UNIQUE,        -- e.g. 'DF01-20261002T103015-0007'
+    device_id            TEXT NOT NULL,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    time_source          TEXT NOT NULL DEFAULT 'server'
+                         CHECK (time_source IN ('ntp', 'server')),
+    feed_type            TEXT NOT NULL DEFAULT 'other'
+                         CHECK (feed_type IN ('maize_silage', 'sorghum_silage', 'napier_silage', 'other')),
+    farm_id              TEXT,
+
+    -- Sensor readings
+    ph                   NUMERIC(4, 2) CHECK (ph BETWEEN 0 AND 14),
+    moisture_raw         INTEGER,
+    moisture_pct         NUMERIC(5, 2) CHECK (moisture_pct BETWEEN 0 AND 100),
+    sample_temp_c        NUMERIC(5, 2),
+    ambient_temp_c       NUMERIC(5, 2),
+    rgb_r                SMALLINT CHECK (rgb_r BETWEEN 0 AND 255),
+    rgb_g                SMALLINT CHECK (rgb_g BETWEEN 0 AND 255),
+    rgb_b                SMALLINT CHECK (rgb_b BETWEEN 0 AND 255),
+
+    -- Silage photo
+    image_path           TEXT,
+    image_received_at    TIMESTAMPTZ,
+
+    -- AI Predictions
+    quality              TEXT CHECK (quality IN ('Good', 'Moderate', 'Poor')),
+    spoilage_risk        TEXT CHECK (spoilage_risk IN ('Low', 'Medium', 'High')),
+    mould_risk           TEXT CHECK (mould_risk IN ('Low', 'High', 'Unknown')),
+    score                SMALLINT CHECK (score BETWEEN 0 AND 100),
+    method               TEXT CHECK (method IN ('rules', 'ml')),
+    model_version        TEXT,
+    mould_model_version  TEXT,
+    breakdown            JSONB,
+
+    -- Advisory feedback
+    advisory_level       TEXT CHECK (advisory_level IN ('ok', 'warn', 'danger')),
+    advisory_en          TEXT,
+    advisory_ta          TEXT,
+
+    -- Expert label (ground truth for ML training)
+    label_quality        TEXT CHECK (label_quality IN ('Good', 'Moderate', 'Poor')),
+    label_mould          TEXT CHECK (label_mould IN ('Low', 'High')),
+    label_spoilage       TEXT CHECK (label_spoilage IN ('Low', 'Medium', 'High')),
+    labelled_by          TEXT,
+    label_reference      TEXT,
+    labelled_at          TIMESTAMPTZ,
+
+    -- Data integrity flags
+    is_simulated         BOOLEAN NOT NULL DEFAULT FALSE,
+    is_demo              BOOLEAN NOT NULL DEFAULT FALSE,
+    synced_from_offline  BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS silage_samples_device_time_idx
+    ON silage_samples (device_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS silage_samples_label_quality_idx
+    ON silage_samples (label_quality);
+
+ALTER TABLE silage_devices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE silage_samples ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public access on silage_devices" ON silage_devices;
+CREATE POLICY "Public access on silage_devices" ON silage_devices FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public access on silage_samples" ON silage_samples;
+CREATE POLICY "Public access on silage_samples" ON silage_samples FOR ALL USING (true) WITH CHECK (true);
+
+-- Private storage bucket for sample photos
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('silage-images', 'silage-images', false)
+ON CONFLICT (id) DO NOTHING;

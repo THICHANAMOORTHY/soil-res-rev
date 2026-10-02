@@ -71,26 +71,96 @@ function climateFitScore(crop, weather) {
   return clamp(tempScore * 0.6 + humScore * 0.4);
 }
 
+// ── Deterministic Rule-Based Season Suitability ──────────────
+function calcSeasonSuitability(crop, targetSeason) {
+  if (!targetSeason) {
+    const month = new Date().getMonth() + 1;
+    targetSeason = (month >= 6 && month <= 10) ? 'Kharif' : (month >= 11 || month <= 3) ? 'Rabi' : 'Zaid';
+  }
+  const isSuitable = crop.suitable_seasons && crop.suitable_seasons.includes(targetSeason);
+  if (!isSuitable) return 25; // Severe off-season penalty
+
+  let score = 90;
+  if (crop.suitable_seasons.length === 1) {
+    score = 100; // Peak specialized seasonal adaptation
+  } else if (crop.suitable_seasons.length === 2) {
+    score = 92;  // Versatile two-season crop
+  } else {
+    score = 85;  // Multi-season or perennial
+  }
+
+  if (targetSeason === 'Zaid' && crop.growth_duration_days <= 75) {
+    score = Math.min(100, score + 5);
+  }
+  return score;
+}
+
+// ── Deterministic Rule-Based Rotation Score ──────────────────
+function calcRotationScore(crop, history) {
+  if (!history || history.length === 0) return 90;
+
+  const sorted = [...history].sort((a, b) => (b.sequence_order || 0) - (a.sequence_order || 0));
+  const prevRec = sorted[0];
+  const prevCrop = prevRec ? db.crops.find(c => c.crop_id === prevRec.crop_id) : null;
+
+  // 1. Direct Crop Monoculture Penalty
+  if (prevCrop && prevCrop.crop_id === crop.crop_id) {
+    return 30; // Severe penalty for back-to-back same crop
+  }
+
+  // 2. Family repetition & pest reservoir carryover
+  const prevFam = prevCrop?.crop_family;
+  const isSameFam = prevFam && prevFam === crop.crop_family;
+
+  const recent3 = sorted.slice(0, 3);
+  const famCount = recent3.map(h => db.crops.find(c => c.crop_id === h.crop_id)?.crop_family).filter(f => f === crop.crop_family).length;
+
+  let score = 90;
+  if (isSameFam) {
+    score = 45; // Family pest carryover
+  } else if (famCount >= 2) {
+    score = 55; // Repeated family in recent seasons
+  } else if (famCount === 1) {
+    score = 78; // Present in history, but not back-to-back
+  } else {
+    score = 95; // Completely fresh family break
+  }
+
+  // 3. Agronomic Restorative Sequencing Bonus:
+  // If previous crop was a heavy feeder, reward legume/N-fixer
+  const heavyFeeders = ['Cereal', 'Solanaceae', 'Commercial', 'Vegetable'];
+  if (heavyFeeders.includes(prevFam) && crop.is_nitrogen_fixer) {
+    score = Math.min(100, score + 5);
+  } else if (heavyFeeders.includes(prevFam) && heavyFeeders.includes(crop.crop_family)) {
+    score = Math.max(0, score - 5);
+  }
+
+  return score;
+}
+
 // ── Master Scorer ────────────────────────────────────────────
-function scoreCrop(crop, soil, farm, history, weather) {
+function scoreCrop(crop, soil, farm, history, weather, targetSeason) {
   const stats = crop.stats || {};
 
   // 1. Soil suitability: pH match (50%) + N/P/K nutrient match (50%)
   const phScore = phMatchScore(soil.ph || 6.5, crop);
-  const nScore  = nutrientScore(soil.nitrogen   || 50, stats.N?.mean,  stats.N?.stdev);
-  const pScore  = nutrientScore(soil.phosphorus || 40, stats.P?.mean,  stats.P?.stdev);
-  const kScore  = nutrientScore(soil.potassium  || 60, stats.K?.mean,  stats.K?.stdev);
+  const nMean = stats.N?.mean ?? crop.n_demand;
+  const nStd  = stats.N?.stdev ?? (crop.n_demand ? Math.max(5, crop.n_demand * 0.20) : 0);
+  const pMean = stats.P?.mean ?? crop.p_demand;
+  const pStd  = stats.P?.stdev ?? (crop.p_demand ? Math.max(3, crop.p_demand * 0.20) : 0);
+  const kMean = stats.K?.mean ?? crop.k_demand;
+  const kStd  = stats.K?.stdev ?? (crop.k_demand ? Math.max(3, crop.k_demand * 0.20) : 0);
+
+  const nScore  = nutrientScore(soil.nitrogen   || 50, nMean, nStd);
+  const pScore  = nutrientScore(soil.phosphorus || 40, pMean, pStd);
+  const kScore  = nutrientScore(soil.potassium  || 60, kMean, kStd);
   const soil_suitability = clamp(phScore * 0.4 + nScore * 0.2 + pScore * 0.2 + kScore * 0.2);
 
-  // 2. Season suitability (binary, validated at candidate filter stage)
-  const season_suitability = clamp(90 + Math.random() * 10);
+  // 2. Season suitability (rule-based deterministic check)
+  const season_suitability = calcSeasonSuitability(crop, targetSeason);
 
-  // 3. Rotation score — reward crop family diversity from history
-  const histFamilies = history
-    .map(h => db.crops.find(c => c.crop_id === h.crop_id)?.crop_family)
-    .filter(Boolean);
-  const isNew = !histFamilies.includes(crop.crop_family);
-  const rotation_score = clamp(isNew ? 88 + Math.random() * 12 : 45 + Math.random() * 20);
+  // 3. Rotation score (rule-based deterministic check: monoculture & family carryover vs restorative break)
+  const rotation_score = calcRotationScore(crop, history);
 
   // 4. Water score (uses rainfall stats from dataset)
   const water_score = waterScore(crop, farm, weather);
@@ -115,12 +185,24 @@ function scoreCrop(crop, soil, farm, history, weather) {
     climate_score     * 0.04
   );
 
-  // Build predicted financials
-  const yieldVar    = 0.85 + Math.random() * 0.30;
-  const exp_yield   = Math.round(crop.avg_yield_per_acre  * yieldVar);
+  // Empirical statistics from Indian state harvest datasets
+  const yieldStats = crop.stats?.yield || {};
+  const baseYield  = crop.avg_yield_per_acre;
+  const yieldStdev = yieldStats.stdev ?? Math.round(baseYield * 0.18);
+  const yieldLow   = yieldStats.low ?? Math.max(0, Math.round(baseYield - yieldStdev));
+  const yieldHigh  = yieldStats.high ?? Math.round(baseYield + yieldStdev);
+
+  // Point predictions are deterministic historical medians (no random jitter)
+  const exp_yield   = Math.round(baseYield);
   const exp_revenue = Math.round(exp_yield * crop.avg_market_price);
-  const exp_cost    = Math.round(crop.avg_cultivation_cost * (0.90 + Math.random() * 0.20));
+  const exp_cost    = Math.round(crop.avg_cultivation_cost);
   const exp_profit  = exp_revenue - exp_cost;
+
+  // Empirical confidence intervals (±1 historical standard deviation)
+  const revLow     = Math.round(yieldLow * crop.avg_market_price);
+  const revHigh    = Math.round(yieldHigh * crop.avg_market_price);
+  const profitLow  = revLow - exp_cost;
+  const profitHigh = revHigh - exp_cost;
 
   return {
     crop_id:            crop.crop_id,
@@ -137,11 +219,23 @@ function scoreCrop(crop, soil, farm, history, weather) {
     risk_score:         Math.round(risk_score),
     climate_score:      Math.round(climate_score),
     final_score:        parseFloat(final_score.toFixed(1)),
-    // Financials
+    // Financials (deterministic point estimates)
     predicted_yield:    exp_yield,
     predicted_revenue:  exp_revenue,
     predicted_cost:     exp_cost,
     predicted_profit:   exp_profit,
+    // Real statistical confidence intervals (1 standard deviation band)
+    yield_range: {
+      low:   yieldLow,
+      mean:  exp_yield,
+      high:  yieldHigh,
+      stdev: yieldStdev,
+    },
+    profit_range: {
+      low:   profitLow,
+      mean:  exp_profit,
+      high:  profitHigh,
+    },
     // Dataset stats (useful for UI display)
     avg_n:              crop.n_demand,
     avg_p:              crop.p_demand,
@@ -156,7 +250,7 @@ function scoreCrop(crop, soil, farm, history, weather) {
 
 // ── POST /api/crop-evaluation ────────────────────────────────
 router.post('/', (req, res) => {
-  const { farm_id = 101, run_id, candidate_crop_ids } = req.body;
+  const { farm_id = 101, run_id, candidate_crop_ids, season } = req.body;
 
   if (!candidate_crop_ids || !Array.isArray(candidate_crop_ids)) {
     return res.status(400).json({ error: 'candidate_crop_ids array required' });
@@ -170,11 +264,12 @@ router.post('/', (req, res) => {
   const farm    = db.farms.find(f => f.farm_id === farm_id) || {};
   const history = db.crop_history.filter(h => h.farm_id === farm_id);
   const weather = db.weather_data.find(w => w.farm_id === farm_id);
+  const targetSeason = season || farm.current_season || null;
 
   const results = candidate_crop_ids
     .map(id => db.crops.find(c => c.crop_id === id))
     .filter(Boolean)
-    .map(crop => scoreCrop(crop, soil, farm, history, weather))
+    .map(crop => scoreCrop(crop, soil, farm, history, weather, targetSeason))
     .sort((a, b) => b.final_score - a.final_score)
     .map((r, i) => ({ ...r, rank: i + 1 }));
 

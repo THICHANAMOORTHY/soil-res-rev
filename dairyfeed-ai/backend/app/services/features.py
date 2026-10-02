@@ -17,12 +17,12 @@ FEED_TYPES = ["maize_silage", "sorghum_silage", "napier_silage", "other"]
 TABULAR_FEATURES = [
     "ph",
     "moisture_pct",
-    "temperature_rise_c",   # sample minus air temperature: heating is a spoilage sign
+    "temperature_rise_c",
     "ambient_temp_c",
     "rgb_r",
     "rgb_g",
     "rgb_b",
-    *[f"feed_{feed}" for feed in FEED_TYPES],   # 1 for this sample's feed type, else 0
+    *[f"feed_{feed}" for feed in FEED_TYPES],
 ]
 
 
@@ -50,9 +50,6 @@ def tabular_features(row: dict[str, Any]) -> list[float] | None:
     ]
 
 
-# ---------- Image (mould) model ----------
-# Each photo is reduced to simple colour statistics. The model then LEARNS from expert mould
-# labels which combinations matter; no thresholds here decide "mould" on their own.
 
 IMAGE_FEATURES = [
     "white_fraction",    # pale, unsaturated pixels (white mould)

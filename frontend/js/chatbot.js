@@ -320,8 +320,8 @@
       : `Hello! I am your **UZHAVU KAAPPAAN AI Agronomist** 🌱\n\nI have full context of your 4.5-acre farm, your current soil test (Score: 63, N: 42 kg/ha), continuous tomato cultivation history, and 23k+ APMC Mandi market quotes. Speak or type below!`;
 
     const initialSuggestions = isTa
-      ? ["அடுத்த பயிர் என்ன நடலாம்?", "என் மண் வளம் ஏன் குறைந்துள்ளது?", "மண்டி சந்தை விலைகள் என்ன?", "3-பருவ சுழற்சி திட்டம்"]
-      : ["What crop to plant next?", "Explain my soil test", "Current Mandi prices", "Why avoid continuous Tomato?"];
+      ? ["அடுத்த பயிர் என்ன நடலாம்?", "என் மண் வளம் ஏன் குறைந்துள்ளது?", "சைலேஜ் தரம் & மாட்டு தீவனம்", "மண்டி சந்தை விலைகள் என்ன?"]
+      : ["What crop to plant next?", "Explain my soil test", "Silage quality & Dairy Feed", "Why avoid continuous Tomato?"];
 
     // Clear previous chat when language switches
     const msgBox = document.getElementById('kisan-chat-messages');

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "test": "node ../scripts/run_all_tests.js",
     "db:sync": "node scripts/sync_to_supabase.js",
     "mail:test": "node scripts/test_mail.js",
     "sim:esp32": "node scripts/simulate_esp32.js",

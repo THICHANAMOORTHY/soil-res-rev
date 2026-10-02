@@ -26,7 +26,11 @@ router.get('/', (req, res) => {
       .sort((a, b) => a.season_order - b.season_order);
     rotation_plan = planSeasons.map(ps => db.crops.find(c => c.crop_id === ps.crop_id)?.name || 'Unknown');
   } else {
-    rotation_plan = ['Tomato', 'Green Gram', 'Groundnut', 'Tomato'];
+    // Derive rotation sequence dynamically from farm's real crop history
+    const history = db.crop_history.filter(h => h.farm_id === farm_id).sort((a, b) => b.year - a.year);
+    const lastCrop = history.length ? (db.crops.find(c => c.crop_id === history[0].crop_id)?.name || 'Wheat') : 'Wheat';
+    const restorer = bestCrop?.name || 'Green Gram';
+    rotation_plan = [lastCrop, restorer, 'Chickpea', lastCrop];
   }
 
   // Get soil recovery from simulation log
@@ -38,7 +42,11 @@ router.get('/', (req, res) => {
             || { soil_health_score: 58 };
 
   const soil_recovery = [soil.soil_health_score, ...simLog.map(s => s.predicted_soil_health)];
-  if (soil_recovery.length < 4) soil_recovery.push(...[70, 76, 81].slice(soil_recovery.length - 1));
+  if (soil_recovery.length < 4) {
+    const s0 = soil.soil_health_score || 60;
+    const curve = [Math.min(95, Math.round(s0 + 8)), Math.min(95, Math.round(s0 + 15)), Math.min(95, Math.round(s0 + 22))];
+    soil_recovery.push(...curve.slice(soil_recovery.length - 1));
+  }
 
   // Build reasoning
   const reasoning = [];

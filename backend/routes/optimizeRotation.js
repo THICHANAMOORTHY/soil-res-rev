@@ -2,11 +2,18 @@ const router = require('express').Router();
 const db = require('../data/seed');
 
 function healthDelta(crop) {
-  // Each crop modifies soil health differently
-  if (crop.is_nitrogen_fixer) return +12;                    // Legumes improve soil
-  if (crop.crop_family === 'Cereal') return -5;              // Cereals deplete slightly
-  if (crop.water_requirement === 'High') return -8;          // High-water crops deplete more
-  return -2;
+  if (!crop) return -3;
+  if (crop.is_nitrogen_fixer) {
+    return crop.name === 'Sannhamp' ? 14 : 10;
+  }
+  const nDemand = crop.stats?.N?.mean ?? crop.n_demand ?? 50;
+  if (['Solanaceae', 'Commercial', 'Vegetable'].includes(crop.crop_family) || nDemand > 90) {
+    return -7; // Heavy nutrient extraction & tillage pressure
+  }
+  if (crop.crop_family === 'Cereal') {
+    return -5; // Moderate cereal extraction
+  }
+  return -3; // Balanced extraction
 }
 
 function clamp(v, lo = 0, hi = 100) { return Math.min(hi, Math.max(lo, v)); }
@@ -14,7 +21,7 @@ function clamp(v, lo = 0, hi = 100) { return Math.min(hi, Math.max(lo, v)); }
 function buildPlan(label, sequence, baseHealth, baseProfit, isRecommended = false) {
   let health = baseHealth;
   const seasonal_profit = [];
-  const profitMult = { A: 0.85, B: 1.0, C: 0.93 };
+  const profitMult = { A: 0.82, B: 1.0, C: 0.94 }; // Monoculture A suffers pest/disease yield penalty
 
   sequence.forEach(cropName => {
     const crop   = db.crops.find(c => c.name === cropName);
@@ -45,9 +52,11 @@ router.post('/', (req, res) => {
   // Get base state
   const soil    = [...db.soil_data].filter(s => s.farm_id === farm_id).sort((a,b) => b.soil_id - a.soil_id)[0]
                || { soil_health_score: 58 };
-  const history = db.crop_history.filter(h => h.farm_id === farm_id);
-  const lastCrop= history.length
-    ? db.crops.find(c => c.crop_id === history[history.length - 1].crop_id)?.name || 'Tomato'
+  const sortedHistory = [...db.crop_history]
+    .filter(h => h.farm_id === farm_id)
+    .sort((a, b) => (b.sequence_order || 0) - (a.sequence_order || 0));
+  const lastCrop= sortedHistory.length
+    ? db.crops.find(c => c.crop_id === sortedHistory[0].crop_id)?.name || 'Tomato'
     : 'Tomato';
 
   // Determine best candidates from evaluations
@@ -61,12 +70,12 @@ router.post('/', (req, res) => {
 
   const baseHealth = soil.soil_health_score;
 
-  // Plan A: continue current (bad)
+  // Plan A: Status quo monoculture (continues previous crop)
   const planA = buildPlan('A', Array(horizon_seasons).fill(lastCrop), baseHealth, 0, false);
-  // Plan B: recommended rotation (best)
-  const planB = buildPlan('B', [lastCrop, top1, top2], baseHealth, 0, true);
-  // Plan C: alternative rotation
-  const planC = buildPlan('C', [lastCrop, top2, top3 || top1], baseHealth, 0, false);
+  // Plan B: Recommended restorative rotation (rotates into top ranked restorative crops)
+  const planB = buildPlan('B', [top1, top2, top3 || top1], baseHealth, 0, true);
+  // Plan C: Alternative balanced rotation
+  const planC = buildPlan('C', [top2, top3 || top1, top1], baseHealth, 0, false);
 
   const plans = [planA, planB, planC];
 

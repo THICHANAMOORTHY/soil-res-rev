@@ -27,6 +27,8 @@ Everything external is optional. With no configuration at all the app runs on bu
 - [Configuration](#configuration)
 - [Accounts and email verification](#accounts-and-email-verification)
 - [ESP32 live soil sensor](#esp32-live-soil-sensor)
+- [DairyFeed AI & Integrated Farming (IFS)](#dairyfeed-ai--integrated-farming-system-ifs)
+- [B2B Enterprise Model & FPO Command](#b2b-enterprise-model--fpo-command)
 - [API reference](#api-reference)
 - [Frontend](#frontend)
 - [Project structure](#project-structure)
@@ -48,6 +50,8 @@ Everything external is optional. With no configuration at all the app runs on bu
 | **Crop evaluation** | Filters candidate crops by season, water and rotation, then ranks them on seven weighted dimensions with projected yield, revenue and profit per acre. |
 | **Rotation optimizer** | Builds three 3-season plans — status quo, recommended restorative, and alternative — and projects profit and final soil health for each. |
 | **Soil simulation** | Season-by-season model of nitrogen, phosphorus, potassium and organic carbon under a chosen plan (legumes fix nitrogen, heavy feeders draw it down). |
+| **DairyFeed AI & IFS** | Rapid silage & forage testing with dual-node IoT (ESP32 + ESP32-CAM), 0–100 scoring, bilingual advisory (EN / தமிழ்), and closed-loop cattle nutrition & manure-to-soil cycling. |
+| **B2B & FPO Command** | Multi-tenant platform for Farmer Producer Organizations (FPOs), agribusinesses and dairy cooperatives: cluster-level farm hierarchies, soil health heatmaps, crop production forecasts, IoT fleet status, and `/api/orgs/*` enterprise APIs. |
 | **Recommendation** | The top crop for the farm, the best rotation sequence and the reasons behind them. |
 | **GPS zones** | Splits a farm into precision micro-zones from a location. Uses preset demo zones, not real spatial data. |
 | **Weather** | Live conditions and a 7-day forecast from Open-Meteo (no API key), spray, irrigation and pest-risk advisories, and a place search to switch location. |
@@ -71,6 +75,8 @@ Signing in is required to use the app: the UI opens a sign-in dialog and blocks 
     ├── Agronomy engine   /api/soil-analysis  /api/crop-history  /api/candidate-crops
     │                     /api/crop-evaluation  /api/optimize-rotation  /api/soil-simulation
     │                     /api/recommendation  /api/dashboard  /api/gps-zones  /api/report
+    ├── DairyFeed & IFS   /api/dairyfeed  /api/silage ──► FastAPI backend (dairyfeed-ai/)
+    │                     (Silage test, batch history, cattle feeding & manure return plan)
     ├── /api/auth         accounts, sessions, email verification ──► SMTP server
     ├── /api/soil-sensor  X-Device-Key auth ◄────────────────────── ESP32 (Wi-Fi, HTTP POST)
     ├── /api/chat         ──► Google Gemini (optional)
@@ -467,6 +473,95 @@ The DHT11 sketch also serves a small local debug web page from the ESP32.
 
 ---
 
+## DairyFeed AI & Integrated Farming System (IFS)
+
+**SIH Problem ID:** 26111 &nbsp;·&nbsp; **Ministry:** Fisheries, Animal Husbandry & Dairying &nbsp;·&nbsp; **Theme:** Agriculture, FoodTech & Rural Development
+
+UZHAVU KAAPPAAN integrates **DairyFeed AI** to create a complete **Integrated Farming System (IFS) closed biological loop**. Fodder crops recommended during restorative rotations (such as Maize, Sorghum, and Cowpea) feed the farm's dairy cattle herd, while fermented silage quality is monitored rapidly on-farm, and farmyard manure (FYM) returns vital organic carbon and NPK back into the soil:
+
+```
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │                 UZHAVU KAAPPAAN — INTEGRATED FARMING LOOP              │
+  │                                                                        │
+  │     [Soil Restoration] ───────────────► [Fodder Crop Rotation]        │
+  │     (N-P-K & pH Scoring)               (Maize, Sorghum, Cowpea)        │
+  │            ▲                                      │                    │
+  │            │                                      ▼                    │
+  │     [Farmyard Manure / FYM]            [Silage Bunk Ensiling]          │
+  │     (Nutrient Replenishment)                      │                    │
+  │            ▲                                      ▼                    │
+  │            │                               [DairyFeed AI IoT]          │
+  │     [Dairy Cattle Herd] ◄───────────────── (Rapid Quality Screening)   │
+  │     (Milk Yield & Dung)                    (Safe Feed Assurance)       │
+  └────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Capabilities
+
+1. **Dual-Node Portable Probe (ESP32 + ESP32-CAM)**:
+   - **Sensor Node (ESP32)**: Measures silage acidity (pH probe via ADS1115 16-bit ADC), relative moisture (capacitive probe v1.2), temperature elevation ($\Delta T = T_{sample} - T_{ambient}$ via dual DS18B20 probes), and RGB colour reflection (TCS3200 in a sealed chamber).
+   - **Camera Node (ESP32-CAM)**: Takes a synchronized macro photograph triggered via UART by shared `sample_id`.
+   - **Instant OLED Display**: Shows the result directly at the silage pit in under 60 seconds.
+2. **Transparent Scoring (0–100 Points)**:
+   - **Acidity (40 pts)**: Optimal pH 3.8–4.2 (lactic fermentation); 0 pts if pH > 5.0.
+   - **Moisture (30 pts)**: Optimal 60%–70%; penalises over-wet seepage (< 50% or > 80%).
+   - **Temperature Rise (20 pts)**: Full points for $\Delta T \le 3$°C; zero points if $\Delta T > 6$°C (aerobic breakdown).
+   - **Visual Appearance (10 pts)**: Evaluated from camera photo; normalised out of 90 pts when no photo is attached.
+   - **Safety Caps**: High spoilage caps quality at "Moderate"; active mould forces quality to "Poor" with an immediate Danger alert.
+3. **Bilingual Farmer Advisories (English & தமிழ்)**:
+   - Plain-language remediation advice (ok, warn, danger) covering aerobic heating, surface spoiling, and veterinary precautions, with speech audio playback.
+4. **Cattle Feed & Manure Nutrient Planner (`/api/dairyfeed/cattle-plan`)**:
+   - Calculates daily silage requirements per cow (15–20 kg/day).
+   - Projects herd feeding duration from harvested rotation acreage.
+   - Computes daily and seasonal farmyard manure (FYM) returned to the soil, driving the Organic Carbon recovery in UZHAVU KAAPPAAN's Soil Simulation.
+
+For comprehensive hardware schematics, calibration instructions, ML validation gating, and PlatformIO source code, see the dedicated [DairyFeed AI Documentation](dairyfeed-ai/README.md).
+
+---
+
+## B2B Enterprise Model & FPO Command
+
+UZHAVU KAAPPAAN scales beyond individual smallholders into an enterprise-grade **Agri-Intelligence & Integrated Farming System (IFS) Command Platform** for Farmer Producer Organizations (FPOs), Agribusinesses, Dairy Cooperatives, and Government Programs.
+
+```
+                         UZHAVU KAAPPAAN
+                                │
+              ┌─────────────────┼─────────────────┐
+              │                 │                 │
+           FARMERS        B2B PARTNERS       INSTITUTIONS
+              │                 │                 │
+         Individual         Agribusinesses       FPOs
+         Farmers            Agri Companies      Cooperatives
+                             Dairy Companies    NGOs
+                             Food Companies     Govt Programs
+                             Input Companies
+```
+
+### 1. FPO Cluster-Level Multi-Tenancy
+Instead of isolated single-farmer silos, the platform deploys a multi-tiered hierarchy:
+`FPO Organization → Regional Village Clusters → Member Farms → Individual Farmers`.
+
+The **FPO Command Center** (`GET /api/orgs/:id/dashboard`) provides:
+- **Total Footprint Overview:** Registered farmers (e.g. 1,240), active farms (860), and managed acreage (5,420 acres).
+- **Regional Soil Health Indices:** Geospatial distributions (Healthy 42%, Moderate 38%, Degraded 20%) with cluster-level nitrogen, phosphorus, and organic carbon deficiency trends.
+- **Aggregated Crop Production:** Forecasts harvest volumes across member farms for collective market bargaining and Mandi procurement.
+- **IoT Telemetry Fleet:** Real-time visibility into active/offline soil sensor and silage probe nodes.
+
+### 2. Agribusiness & Food Processor Integration
+- **Forward Production Visibility:** Seed, fertilizer, and food processing companies monitor crop variety adoption and harvest timing across contract-farming networks.
+- **Strict Agronomic Neutrality:** Rotation optimization remains 100% transparent and objective; recommendations are never biased toward commercial sponsor inputs.
+
+### 3. Dairy Cooperatives & The Closed-Loop Differentiator
+- Combines crop rotation (fodder maize/sorghum/cowpea) with **DairyFeed AI** silage screening to protect dairy herds from mycotoxins and acidosis.
+- Quantifies seasonal farmyard manure (FYM) returned to the soil to rebuild organic carbon, closing the biological nutrient cycle.
+
+### 4. IoT-as-a-Service (IoTaaS)
+- Commercial bundles combining hardware deployment, routine sensor probe calibration, continuous telemetry ingestion, and automated SMS/WhatsApp alerts.
+
+For full architectural blueprints, tenant schemas, and revenue models, see [B2B Business Model & Architecture](B2B_BUSINESS_MODEL.md).
+
+---
+
 ## API reference
 
 Base URL `http://localhost:3000`. All endpoints return JSON except the downloads. Farm-scoped endpoints take `farm_id` (default `101`).
@@ -523,6 +618,28 @@ The user object returned by login, refresh and `/me` includes `farm_id`.
 | `POST` | `/ingest` | Device-authenticated reading (`X-Device-Key`). See [ESP32 live soil sensor](#esp32-live-soil-sensor). |
 | `GET` | `/latest?farm_id=…` | Latest reading with `connected`, `ever_connected`, `seconds_ago`, `device_id` |
 
+### DairyFeed & Silage Quality (`/api/dairyfeed`, `/api/silage`)
+
+| Method | Endpoint | Body / query | Description |
+|---|---|---|---|
+| `GET` | `/api/dairyfeed/summary` | — | Aggregate sample count, average quality score, quality breakdown percentages |
+| `GET` | `/api/dairyfeed/history` | `page, page_size, feed_type?` | Paginated silage batch telemetry and evaluation history |
+| `POST` | `/api/dairyfeed/test` | `{device_id, feed_type, farm_id, readings: {ph, moisture_pct, sample_temp_c, ambient_temp_c, rgb}}` | Scores silage sample (0–100), determines spoilage and mould risks, returns bilingual advisory (EN / TA) |
+| `GET` | `/api/dairyfeed/cattle-plan` | `farm_id, cows_count, rotation_crop, area_acres` | Integrated Farming System (IFS) calculator: cattle feed requirements, silage storage duration, and farmyard manure soil replenishment |
+| `GET` | `/api/dairyfeed/devices` | — | Fleet status of ESP32 silage testing probes |
+
+### B2B Organization & FPO Command (`/api/orgs`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/orgs` | List registered FPOs, dairy cooperatives, and agribusiness organizations |
+| `GET` | `/api/orgs/:id` | Organization profile, leadership, and village cluster hierarchy |
+| `GET` | `/api/orgs/:id/dashboard` | **B2B Command Center:** Total acreage, soil health distributions, crop split, IoT fleet status, action alerts |
+| `GET` | `/api/orgs/:id/farms` | List of member farms, farmer profiles, and soil health scores |
+| `GET` | `/api/orgs/:id/soil-health` | Aggregated soil N-P-K, pH, and Organic Carbon averages across the organization |
+| `GET` | `/api/orgs/:id/crops` | Macro crop distribution, harvest tonnage projections, and Mandi price benchmarks |
+| `GET` | `/api/orgs/:id/sensors` | Fleet telemetry: online/offline sensor nodes, battery levels, maintenance alerts |
+
 ### Downloads
 
 | Endpoint | File |
@@ -560,6 +677,8 @@ A dependency-free single-page app in [`frontend/`](frontend/): `index.html`, one
 │   │   ├── auth.js                Accounts, sessions, email verification
 │   │   ├── soilAnalysis.js        Soil test scoring and storage
 │   │   ├── soilSensor.js          ESP32 ingestion and live-status polling
+│   │   ├── dairyFeed.js           Silage quality engine & IFS cattle-soil nutrient loop
+│   │   ├── orgs.js                B2B Multi-tenant FPO command center & analytics
 │   │   ├── cropHistory.js         Monoculture detection
 │   │   ├── candidateCrops.js      Season / water / rotation filtering
 │   │   ├── cropEvaluation.js      Seven-dimension scoring engine
@@ -584,12 +703,19 @@ A dependency-free single-page app in [`frontend/`](frontend/): `index.html`, one
 │   │   └── test_mail.js           Verify SMTP settings
 │   ├── .env.example
 │   └── package.json
+├── dairyfeed-ai/                  SIH 26111 Smart Rapid Feed & Silage Quality System
+│   ├── backend/                   FastAPI service (scoring, image analysis, ML, advisories)
+│   ├── frontend/                  React + Vite bilingual dashboard (EN / TA)
+│   ├── firmware/                  PlatformIO firmware (ESP32 sensor node + ESP32-CAM node)
+│   ├── ml/                        Cross-validated ML pipelines & validation gates
+│   ├── docs/                      Wiring, calibration, architecture & judges' guide
+│   └── supabase/                  Postgres schema & silage-images bucket configuration
 ├── frontend/
 │   ├── index.html                 App shell
 │   ├── css/style.css              Design system
 │   ├── js/                        app, auth, dashboard, soilAnalysis, cropHistory, evaluation,
 │   │                              rotation, simulation, recommendation, gpsZones, weather,
-│   │                              chatbot, i18n, reportPdf
+│   │                              chatbot, i18n, reportPdf, dairyfeed
 │   ├── downloads/                 Copy of downloads/ served by static hosting
 │   └── _redirects                 Netlify redirects
 ├── esp32/
@@ -603,6 +729,8 @@ A dependency-free single-page app in [`frontend/`](frontend/): `index.html`, one
 ├── process_indian_crop_yield.py   Legacy single-dataset script (do not run)
 ├── generate_farmer_pdf.py         Builds the Action Plan PDF (needs reportlab)
 ├── test_all_apis.py               End-to-end API test
+├── test_dairyfeed_integration.py  Verification test for DairyFeed AI & IFS integration
+├── B2B_BUSINESS_MODEL.md          B2B enterprise model, customer segments & multi-tenancy
 ├── P025_database_and_backend_design.md   Database and data-structure design notes
 └── README.md
 ```
@@ -712,3 +840,5 @@ Put the environment variables in the host's secret store rather than a `.env` fi
 - Built for sustainable agriculture and farmer empowerment across India.
 
 No `LICENSE` file is included in the repository yet. Add one before redistributing.
+
+# soil-res-rev

@@ -28,7 +28,7 @@ if (hasCredentials) {
       global: {
         fetch: (...args) => {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 2500);
+          const timer = setTimeout(() => controller.abort(), 8000);
           return fetch(args[0], { ...args[1], signal: controller.signal })
             .finally(() => clearTimeout(timer));
         }

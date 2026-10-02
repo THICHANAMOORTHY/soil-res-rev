@@ -60,6 +60,7 @@ FARM CONTEXT:
 - Live Soil Scout IoT Probe: Moisture=${probeMoist}%, Sunlight=${probeLight}%, Temperature=${probeTemp}°C, TDS Mineral Salts=${probeTds} ppm.
 - Measured Chemical Nutrients: Nitrogen=${soil.nitrogen} kg/ha (Deficient), Phosphorus=${soil.phosphorus} kg/ha, Potassium=${soil.potassium} kg/ha, pH=${soil.ph}, Organic Carbon=${soil.organic_carbon}%.
 - History: Cultivated Tomato consecutively for 3 seasons (severe monoculture penalty applied, high solanaceae blight risk).
+- Integrated Farming System (IFS): Farm has 5 dairy cows fed with farm-rotation silage (Maize/Napier). Silage fermentation score is 92/100 (Optimal, pH 4.12, 65% moisture). Cow dung produces 6 tonnes FYM/season, recycling 30kg N + 0.15% organic carbon back to the soil!
 - AI Top Recommendation: ${recCropObj.name} (Legume, biological nitrogen fixer, ₹${recCropObj.avg_market_price}/kg).
 - User Language: ${isTa ? 'Tamil (தமிழ்)' : 'English'}.
 
@@ -218,6 +219,23 @@ User Question: "${message}"`;
           `2. **Nutrient Depletion**: Tomato heavily exhausts nitrates, dropping your soil nitrogen to 42 kg/ha.\n` +
           `3. **Optimizer Action**: CropSmart has applied a **-30% penalty** to Tomato to protect your farm from catastrophic crop failure. Rotating to Green Gram breaks this pathogen cycle completely!`;
         suggestions = ["What to plant instead?", "Show Soil Health Score", "View 3-Season Plan"];
+      }
+    }
+
+    // Question: Dairy, Silage, Cattle Feed, Milk Yield (IFS)
+    else if (q.includes("silage") || q.includes("dairy") || q.includes("feed") || q.includes("cattle") || q.includes("cow") || q.includes("milk") || q.includes("தீவனம்") || q.includes("சைலேஜ்") || q.includes("மாடு") || q.includes("பால்")) {
+      if (isTa) {
+        reply = `🐄 **கால்நடை தீவனம் & சைலேஜ் தர ஆய்வு (Dairy Feeder IFS):**\n\n` +
+          `• **சைலேஜ் தரம் (Quality):** உகந்த லாக்டிக் நொதித்தல் (மதிப்பெண்: 92/100, pH 4.12, ஈரப்பதம் 65.4%).\n` +
+          `• **பால் உற்பத்தி உயர்வு:** தரமான சைலேஜ் அளிப்பதால் ஒரு மாட்டுக்கு நாளொன்றுக்கு **+2.2 லிட்டர் பால்** கூடுதலாகக் கிடைக்கிறது (மாத கூடுதல் வருமானம்: ₹10,032).\n` +
+          `• **மண் சத்து மறுசுழற்சி (FYM):** 5 கறவை மாடுகளின் சாணம் மூலம் ஒரு பருவத்திற்கு 6 டன் தொழு உரம் கிடைக்கிறது. இதன் மூலம் **30 கிலோ தழைச்சத்து (N) மற்றும் +0.15% மண் கரிம வளம்** உங்கள் சுழற்சி நிலத்திற்கு மீண்டும் கிடைக்கிறது!`;
+        suggestions = ["சைலேஜ் பரிசோதனை செய்", "3-பருவ சுழற்சி திட்டம்", "மண் பரிசோதனை அறிக்கை"];
+      } else {
+        reply = `🐄 **Dairy Feeder & Silage Quality Hub (IFS Integration):**\n\n` +
+          `• **Silage Fermentation Index:** 92/100 (Optimal lactic acid fermentation, pH 4.12, moisture 65.4%, ΔT +0.7°C).\n` +
+          `• **Milk Yield Impact:** Feeding high-quality ensiled maize/napier yields **+2.2 L/cow/day extra milk**, adding **+₹10,032/month** in net dairy revenue.\n` +
+          `• **Soil Restorer Closed-Loop:** 5 dairy cattle produce 6 tonnes of Farmyard Manure (FYM) per season, recycling **30 kg Nitrogen, 15 kg Phosphorus, 30 kg Potassium**, and increasing soil organic carbon by **+0.15%** for the next crop rotation cycle!`;
+        suggestions = ["Run Silage Test", "Cattle Feed Ration Calculator", "Soil Health Score"];
       }
     }
 

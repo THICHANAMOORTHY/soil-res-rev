@@ -1,11 +1,22 @@
 {
   "name": "uzhavu-kaappaan",
   "version": "1.0.0",
-  "description": "Smart Crop Rotation & Soil Restorer (P025)",
+  "description": "Smart Crop Rotation & Soil Restorer (P025) — Precision Agronomy & B2B FPO Intelligence Platform",
   "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "dairyfeed": "cd dairyfeed-ai/backend && .venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+    "test": "node scripts/run_all_tests.js",
+    "test:all": "node scripts/run_all_tests.js",
+    "test:b2b": "python -u test_b2b_apis.py",
+    "test:system": "python -u test_full_system.py",
+    "test:dairyfeed": "python -u test_dairyfeed_integration.py",
+    "test:auth": "python -u test_auth_otp_suite.py",
+    "test:chatbot": "python -u test_chatbot_suite.py",
+    "test:pdf": "python -u test_pdf_content.py",
+    "test:pytest": "cd dairyfeed-ai/backend && .venv\\Scripts\\python.exe -m pytest tests/",
     "build": "npm --prefix backend install",
-    "postinstall": "npm --prefix backend install",
-    "start": "node backend/server.js"
+    "postinstall": "npm --prefix backend install"
   },
   "dependencies": {
     "serverless-http": "^3.2.0"

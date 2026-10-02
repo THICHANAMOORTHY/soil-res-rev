@@ -42,7 +42,7 @@ endobj
 endobj
 8 0 obj
 <<
-/Author (\(anonymous\)) /CreationDate (D:20261002212331+05'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261002212331+05'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+/Author (\(anonymous\)) /CreationDate (D:20261002212339+05'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261002212339+05'00') /Producer (ReportLab PDF Library - \(opensource\)) 
   /Subject (\(unspecified\)) /Title (\(anonymous\)) /Trapped /False
 >>
 endobj
@@ -53,7 +53,7 @@ endobj
 endobj
 10 0 obj
 <<
-/Length 22736
+/Length 22709
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -78,25 +78,25 @@ Q
 q
 1 0 0 1 6 1 cm
 q
-BT 1 0 0 1 0 12 Tm 10 TL /F2 8 Tf .278431 .333333 .411765 rg (Data Mode:) Tj /F1 8 Tf ( ) Tj /F3 8 Tf 10 TL (n) Tj /F1 8 Tf 10 TL ( Verified Lab Ingestion \(Device: soil-scout-01\) \267 Certified P025) Tj T* (Model) Tj T* ET
+BT 1 0 0 1 0 12 Tm 10 TL /F2 8 Tf .278431 .333333 .411765 rg (Data Mode:) Tj /F1 8 Tf ( ) Tj /F3 8 Tf 10 TL (n) Tj /F1 8 Tf 10 TL ( Verified Lab Ingestion \(Device: soil-scout-02\) \267 Certified P025) Tj T* (Model) Tj T* ET
 Q
 Q
 q
 1 0 0 1 296 57 cm
 q
-BT 1 0 0 1 0 2.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Farmer:) Tj /F1 7.5 Tf ( Ramesh Kumar | ) Tj /F2 7.5 Tf (Land Area:) Tj /F1 7.5 Tf ( 4.5 Acres) Tj T* ET
+BT 1 0 0 1 0 2.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Farmer:) Tj /F1 7.5 Tf ( Suresh Patil | ) Tj /F2 7.5 Tf (Land Area:) Tj /F1 7.5 Tf ( 6.0 Acres) Tj T* ET
 Q
 Q
 q
 1 0 0 1 296 37 cm
 q
-BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Location:) Tj /F1 7.5 Tf ( Coimbatore, Tamil Nadu \(11.0168\260 N, 76.9558\260 E\) | ) Tj /F2 7.5 Tf (Irrigation:) Tj /F1 7.5 Tf  T* (Drip Irrigation) Tj T* ET
+BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Location:) Tj /F1 7.5 Tf ( Nashik, Maharashtra \(19.9975\260 N, 73.7898\260 E\) | ) Tj /F2 7.5 Tf (Irrigation:) Tj /F1 7.5 Tf  T* (Sprinkler Irrigation) Tj T* ET
 Q
 Q
 q
 1 0 0 1 296 17 cm
 q
-BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Plan Ref ID:) Tj /F1 7.5 Tf ( #UK-P025-FARM-101 | ) Tj /F2 7.5 Tf (Report Date:) Tj /F1 7.5 Tf ( 02 Oct 2026, 09:23 PM) Tj T* (IST) Tj T* ET
+BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Plan Ref ID:) Tj /F1 7.5 Tf ( #UK-P025-FARM-102 | ) Tj /F2 7.5 Tf (Report Date:) Tj /F1 7.5 Tf ( 02 Oct 2026, 09:23 PM) Tj T* (IST) Tj T* ET
 Q
 Q
 q
@@ -272,7 +272,7 @@ q
 1 0 0 1 101 63 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (42.0 kg/ha) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (65.0 kg/ha) Tj T* ET
 Q
 Q
 q
@@ -286,7 +286,7 @@ q
 1 0 0 1 256 63 cm
 q
 .862745 .14902 .14902 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-38.0 kg/ha \(Deficit\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-15.0 kg/ha \(Deficit\)) Tj T* ET
 Q
 Q
 q
@@ -307,7 +307,7 @@ q
 1 0 0 1 101 48 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (28.0 kg/ha) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (35.0 kg/ha) Tj T* ET
 Q
 Q
 q
@@ -320,8 +320,8 @@ Q
 q
 1 0 0 1 256 48 cm
 q
-.85098 .466667 .023529 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-2.0 kg/ha \(Slight Deficit\)) Tj T* ET
+.086275 .639216 .290196 rg
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Sufficient) Tj T* ET
 Q
 Q
 q
@@ -341,7 +341,7 @@ q
 1 0 0 1 101 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (55.0 kg/ha) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (72.0 kg/ha) Tj T* ET
 Q
 Q
 q
@@ -354,8 +354,8 @@ Q
 q
 1 0 0 1 256 33 cm
 q
-.85098 .466667 .023529 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-5.0 kg/ha \(Sub-optimal\)) Tj T* ET
+.086275 .639216 .290196 rg
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Sufficient) Tj T* ET
 Q
 Q
 q
@@ -375,7 +375,7 @@ q
 1 0 0 1 101 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (6.50) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (7.20) Tj T* ET
 Q
 Q
 q
@@ -409,7 +409,7 @@ q
 1 0 0 1 101 3 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (0.52%) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (0.68%) Tj T* ET
 Q
 Q
 q
@@ -423,7 +423,7 @@ q
 1 0 0 1 256 3 cm
 q
 .862745 .14902 .14902 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-0.28% Deficit) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (-0.12% Deficit) Tj T* ET
 Q
 Q
 q
@@ -461,7 +461,7 @@ Q
 q
 1 0 0 1 28 576.6898 cm
 q
-BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (2. Prescribed Soil Feeding & Fertilizer Dosage Schedule \(for 4.5 Acres Land\)) Tj T* ET
+BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (2. Prescribed Soil Feeding & Fertilizer Dosage Schedule \(for 6.0 Acres Land\)) Tj T* ET
 Q
 Q
 q
@@ -496,7 +496,7 @@ q
 1 0 0 1 311 126 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Total \(4.5 Ac\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Total \(6.0 Ac\)) Tj T* ET
 Q
 Q
 q
@@ -526,7 +526,7 @@ Q
 q
 1 0 0 1 311 93 cm
 q
-BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (18.0 Tonnes) Tj  T* (450 kg) Tj  T* (18.0 kg) Tj T* ET
+BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (24.0 Tonnes) Tj  T* (600 kg) Tj  T* (24.0 kg) Tj T* ET
 Q
 Q
 q
@@ -556,7 +556,7 @@ Q
 q
 1 0 0 1 311 60 cm
 q
-BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (112.5 kg) Tj  T* (67.5 kg) Tj  T* (45.0 kg) Tj T* ET
+BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (150.0 kg) Tj  T* (90.0 kg) Tj  T* (60.0 kg) Tj T* ET
 Q
 Q
 q
@@ -587,14 +587,14 @@ Q
 q
 1 0 0 1 311 27 cm
 q
-BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (67.5 kg) Tj  T* /F2 6.5 Tf .086275 .639216 .290196 rg (Save 45 kg \(Rs.) Tj T* (1,575\)) Tj T* ET
+BT 1 0 0 1 0 19.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (90.0 kg) Tj  T* /F2 6.5 Tf .086275 .639216 .290196 rg (Save 60 kg \(Rs.) Tj T* (2,100\)) Tj T* ET
 Q
 Q
 q
 1 0 0 1 386 27 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 19.8 Tm /F1 7.2 Tf 9 TL (Groundnut biologically fixes nitrogen; saves 45 kg) Tj T* (urea \(Rs. 1,575\) across 4.5 acres and prevents) Tj T* (lodging) Tj T* ET
+BT 1 0 0 1 0 19.8 Tm /F1 7.2 Tf 9 TL (Chickpea biologically fixes nitrogen; saves 60 kg) Tj T* (urea \(Rs. 2,100\) across 6.0 acres and prevents) Tj T* (lodging) Tj T* ET
 Q
 Q
 q
@@ -618,7 +618,7 @@ Q
 q
 1 0 0 1 311 3 cm
 q
-BT 1 0 0 1 0 10.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (4.5 kg) Tj  T* (0.90 kg) Tj T* ET
+BT 1 0 0 1 0 10.8 Tm 9 TL /F1 7.2 Tf .117647 .160784 .231373 rg (6.0 kg) Tj  T* (1.20 kg) Tj T* ET
 Q
 Q
 q
@@ -660,50 +660,50 @@ BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (3. Agronomic Ri
 Q
 Q
 q
-1 0 0 1 22.1378 341.6898 cm
+1 0 0 1 22.1378 332.6898 cm
 q
 .941176 .992157 .956863 rg
-n 0 75 551 -15 re f*
+n 0 84 551 -15 re f*
 1 1 1 rg
-n 0 60 551 -60 re f*
+n 0 69 551 -69 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 6 63 cm
+1 0 0 1 6 72 cm
 q
 .023529 .372549 .27451 rg
 BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Season 1 \(Immediate Restoration\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 189 63 cm
+1 0 0 1 189 72 cm
 q
 .023529 .372549 .27451 rg
 BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Season 2 \(Soil Building\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 373 63 cm
+1 0 0 1 373 72 cm
 q
 BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .023529 .372549 .27451 rg (Season 3 \(Biomass & Stabilization\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 3 cm
+1 0 0 1 6 12 cm
 q
-BT 1 0 0 1 0 45 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Groundnut \(Top Match: 88.5%\)) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Legume) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 65-85 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 33,500 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Biologically fixes 35-45 kg N/ha) Tj T* (naturally, cuts synthetic urea, and breaks pest cycles.) Tj T* ET
+BT 1 0 0 1 0 45 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Chickpea \(Top Match: 88.5%\)) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Legume) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 65-85 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 33,500 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Biologically fixes 35-45 kg N/ha) Tj T* (naturally, cuts synthetic urea, and breaks pest cycles.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 189 3 cm
+1 0 0 1 189 12 cm
 q
-BT 1 0 0 1 0 45 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Guar seed) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Legume) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 65-85 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 15,000 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Biologically fixes 35-45 kg N/ha) Tj T* (naturally, cuts synthetic urea, and breaks pest cycles.) Tj T* ET
+BT 1 0 0 1 0 45 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Soybean) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Legume) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 65-85 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 5,515 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Biologically fixes 35-45 kg N/ha) Tj T* (naturally, cuts synthetic urea, and breaks pest cycles.) Tj T* ET
 Q
 Q
 q
 1 0 0 1 373 3 cm
 q
-BT 1 0 0 1 0 45 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Green Gram) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Legume) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 65-85 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 6,482 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Biologically fixes 35-45 kg N/ha) Tj T* (naturally, cuts synthetic urea, and breaks pest cycles.) Tj T* ET
+BT 1 0 0 1 0 54 Tm 9 TL /F2 9 Tf .023529 .372549 .27451 rg (Wheat) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* (\177 ) Tj /F2 7.2 Tf (Crop Family:) Tj /F1 7.2 Tf ( Cereal) Tj  T* (\177 ) Tj /F2 7.2 Tf (Duration:) Tj /F1 7.2 Tf ( 100-120 Days) Tj  T* (\177 ) Tj /F2 7.2 Tf (Est. Net Profit:) Tj /F1 7.2 Tf ( Rs. 15,000 / acre) Tj  T* (\177 ) Tj /F2 7.2 Tf (Biological Role:) Tj /F1 7.2 Tf ( Deep fibrous root system absorbs) Tj T* (subsoil nutrients, adds carbon-rich stubble, and) Tj T* (completes recovery.) Tj T* ET
 Q
 Q
 q
@@ -711,29 +711,29 @@ q
 1 j
 .52549 .937255 .67451 RG
 .8 w
-n 0 75 m 551 75 l S
+n 0 84 m 551 84 l S
 n 0 0 m 551 0 l S
-n 0 0 m 0 75 l S
-n 551 0 m 551 75 l S
+n 0 0 m 0 84 l S
+n 551 0 m 551 84 l S
 .733333 .968627 .815686 RG
 .5 w
-n 0 60 m 551 60 l S
-n 183 0 m 183 75 l S
-n 367 0 m 367 75 l S
+n 0 69 m 551 69 l S
+n 183 0 m 183 84 l S
+n 367 0 m 367 84 l S
 Q
 Q
 Q
 q
-1 0 0 1 28 338.6898 cm
+1 0 0 1 28 329.6898 cm
 Q
 q
-1 0 0 1 28 323.6898 cm
+1 0 0 1 28 314.6898 cm
 q
 BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (4. Multi-Season Financial Returns & Soil Health Recovery Trajectory) Tj T* ET
 Q
 Q
 q
-1 0 0 1 22.1378 231.6898 cm
+1 0 0 1 22.1378 222.6898 cm
 q
 .945098 .960784 .976471 rg
 n 0 90 551 -15 re f*
@@ -780,7 +780,7 @@ q
 1 0 0 1 394 78 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Farm Total \(4.5 Ac\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Farm Total \(6.0 Ac\)) Tj T* ET
 Q
 Q
 q
@@ -829,13 +829,13 @@ q
 1 0 0 1 394 63 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 54,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 72,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 479 63 cm
 q
-BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (58 / 100) Tj /F1 7.2 Tf ( \(Current\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (74 / 100) Tj /F1 7.2 Tf ( \(Current\)) Tj T* ET
 Q
 Q
 q
@@ -849,21 +849,21 @@ q
 1 0 0 1 86 48 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Groundnut) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Chickpea) Tj T* ET
 Q
 Q
 q
 1 0 0 1 181 48 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 18,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 11,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 241 48 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 33,700) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 17,801) Tj T* ET
 Q
 Q
 q
@@ -877,13 +877,13 @@ q
 1 0 0 1 394 48 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 150,750) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 201,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 479 48 cm
 q
-BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (62 / 100) Tj /F1 7.2 Tf ( \(+4 pts\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (78 / 100) Tj /F1 7.2 Tf ( \(+4 pts\)) Tj T* ET
 Q
 Q
 q
@@ -897,41 +897,41 @@ q
 1 0 0 1 86 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Guar seed) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Soybean) Tj T* ET
 Q
 Q
 q
 1 0 0 1 181 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 16,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 14,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 241 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 31,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 19,515) Tj T* ET
 Q
 Q
 q
 1 0 0 1 316 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 15,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 5,515) Tj T* ET
 Q
 Q
 q
 1 0 0 1 394 33 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 67,500) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 33,090) Tj T* ET
 Q
 Q
 q
 1 0 0 1 479 33 cm
 q
-BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (65 / 100) Tj /F1 7.2 Tf ( \(+3 pts\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (81 / 100) Tj /F1 7.2 Tf ( \(+3 pts\)) Tj T* ET
 Q
 Q
 q
@@ -945,41 +945,41 @@ q
 1 0 0 1 86 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Green Gram) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Wheat) Tj T* ET
 Q
 Q
 q
 1 0 0 1 181 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 11,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 18,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 241 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 17,482) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 33,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 316 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 6,482) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 15,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 394 18 cm
 q
 .117647 .160784 .231373 rg
-BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 29,169) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F1 7.2 Tf 9 TL (Rs. 90,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 479 18 cm
 q
-BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (68 / 100) Tj /F1 7.2 Tf ( \(Restored\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm 9 TL /F2 7.2 Tf .117647 .160784 .231373 rg (84 / 100) Tj /F1 7.2 Tf ( \(Restored\)) Tj T* ET
 Q
 Q
 q
@@ -1000,35 +1000,35 @@ q
 1 0 0 1 181 3 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 45,000) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 43,000) Tj T* ET
 Q
 Q
 q
 1 0 0 1 241 3 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 82,182) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 70,316) Tj T* ET
 Q
 Q
 q
 1 0 0 1 316 3 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 54,982 / ac) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 54,015 / ac) Tj T* ET
 Q
 Q
 q
 1 0 0 1 394 3 cm
 q
 .023529 .372549 .27451 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 247,419 Total) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (Rs. 324,090 Total) Tj T* ET
 Q
 Q
 q
 1 0 0 1 479 3 cm
 q
 .086275 .639216 .290196 rg
-BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (68 / 100 \(Restored\)) Tj T* ET
+BT 1 0 0 1 0 1.8 Tm /F2 7.2 Tf 9 TL (84 / 100 \(Restored\)) Tj T* ET
 Q
 Q
 q
@@ -1057,10 +1057,10 @@ Q
 Q
 Q
 q
-1 0 0 1 28 228.6898 cm
+1 0 0 1 28 219.6898 cm
 Q
 q
-1 0 0 1 22.1378 165.6898 cm
+1 0 0 1 22.1378 156.6898 cm
 q
 .972549 .980392 .988235 rg
 n 0 63 551 -63 re f*
@@ -1069,7 +1069,7 @@ BT /F1 10 Tf 12 TL ET
 q
 1 0 0 1 6 3 cm
 q
-BT 1 0 0 1 0 49.8 Tm 9.5 TL /F2 7.2 Tf .117647 .160784 .231373 rg /F3 7.2 Tf 9.5 TL (n) Tj /F2 7.2 Tf 9.5 TL ( Mandatory Agronomic Field Guidelines for Ramesh Kumar:) Tj /F1 7.2 Tf  T* (1. ) Tj /F2 7.2 Tf (Bio-Inoculation:) Tj /F1 7.2 Tf ( Treat Groundnut seeds with ) Tj /F4 7.2 Tf (Rhizobium) Tj /F1 7.2 Tf ( bio-fertilizer @ 25g/kg seed to maximize root nodulation.) Tj  T* (2. ) Tj /F2 7.2 Tf (Input Cost Savings:) Tj /F1 7.2 Tf ( Restricting top-dressed urea to 15 kg/acre saves 45 kg chemical urea \(Rs. 1,575 direct savings across 4.5 acres\) thanks to legume atmospheric) Tj T* (N fixation.) Tj  T* (3. ) Tj /F2 7.2 Tf (Crop Residue Retention:) Tj /F1 7.2 Tf ( Do not burn crop stubbles. Plough haulms back into soil to lift Organic Carbon from 0.52% towards 0.80%.) Tj  T* (4. ) Tj /F2 7.2 Tf (Precision IoT Monitoring:) Tj /F1 7.2 Tf ( Keep Soil Scout probe clean; observe moisture reading \(45%\) to trigger irrigation when soil reaches 35%.) Tj T* ET
+BT 1 0 0 1 0 49.8 Tm 9.5 TL /F2 7.2 Tf .117647 .160784 .231373 rg /F3 7.2 Tf 9.5 TL (n) Tj /F2 7.2 Tf 9.5 TL ( Mandatory Agronomic Field Guidelines for Suresh Patil:) Tj /F1 7.2 Tf  T* (1. ) Tj /F2 7.2 Tf (Bio-Inoculation:) Tj /F1 7.2 Tf ( Treat Chickpea seeds with ) Tj /F4 7.2 Tf (Rhizobium) Tj /F1 7.2 Tf ( bio-fertilizer @ 25g/kg seed to maximize root nodulation.) Tj  T* (2. ) Tj /F2 7.2 Tf (Input Cost Savings:) Tj /F1 7.2 Tf ( Restricting top-dressed urea to 15 kg/acre saves 60 kg chemical urea \(Rs. 2,100 direct savings across 6.0 acres\) thanks to legume atmospheric) Tj T* (N fixation.) Tj  T* (3. ) Tj /F2 7.2 Tf (Crop Residue Retention:) Tj /F1 7.2 Tf ( Do not burn crop stubbles. Plough haulms back into soil to lift Organic Carbon from 0.68% towards 0.80%.) Tj  T* (4. ) Tj /F2 7.2 Tf (Precision IoT Monitoring:) Tj /F1 7.2 Tf ( Keep Soil Scout probe clean; observe moisture reading \(45%\) to trigger irrigation when soil reaches 35%.) Tj T* ET
 Q
 Q
 q
@@ -1085,23 +1085,23 @@ Q
 Q
 Q
 q
-1 0 0 1 28 162.6898 cm
+1 0 0 1 28 153.6898 cm
 Q
 q
-1 0 0 1 22.1378 126.6898 cm
+1 0 0 1 22.1378 117.6898 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
 1 0 0 1 6 13 cm
 q
-BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Certified by:) Tj /F1 7.5 Tf ( UZHAVU KAAPPAAN P025 Model) Tj  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Telemetry: Live Soil Scout Probe #soil-scout-01 \267 45,000+ Agricultural Training Records) Tj T* ET
+BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Certified by:) Tj /F1 7.5 Tf ( UZHAVU KAAPPAAN P025 Model) Tj  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Telemetry: Live Soil Scout Probe #soil-scout-02 \267 45,000+ Agricultural Training Records) Tj T* ET
 Q
 Q
 q
 1 0 0 1 326 3 cm
 q
-BT 1 0 0 1 0 22.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Authorized Agronomist Extension Officer:) Tj /F1 7.5 Tf  T* (____________________________________________) Tj  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Department of Agriculture & Precision Agronomy, Coimbatore, Tamil Nadu) Tj T* ET
+BT 1 0 0 1 0 22.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Authorized Agronomist Extension Officer:) Tj /F1 7.5 Tf  T* (____________________________________________) Tj  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Department of Agriculture & Precision Agronomy, Nashik, Maharashtra) Tj T* ET
 Q
 Q
 q
@@ -1127,7 +1127,7 @@ xref
 trailer
 <<
 /ID 
-[<0d0a0b4281b23b094437d6c4511a7b34><0d0a0b4281b23b094437d6c4511a7b34>]
+[<41c0879f7416cc2c69f45c7bec49407d><41c0879f7416cc2c69f45c7bec49407d>]
 % ReportLab generated PDF document -- digest (opensource)
 
 /Info 8 0 R
@@ -1135,5 +1135,5 @@ trailer
 /Size 11
 >>
 startxref
-23939
+23912
 %%EOF

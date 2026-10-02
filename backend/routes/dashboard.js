@@ -23,19 +23,27 @@ router.get('/', (req, res) => {
     ? liveSensor.light
     : (soil && soil.light !== undefined && soil.light !== null ? soil.light : null);
 
+  // Regional fallback crop recommendations and rotation sequences
+  const defaultRecCrops = {
+    101: 'Green Gram',
+  };
+  const defaultFarmPlans = {
+    101: ['Tomato', 'Green Gram', 'Groundnut', 'Tomato'],
+  };
+
   // Best recommendation
   const bestEval = db.crop_evaluations
     .filter(e => e.farm_id === farm_id && e.rank === 1)[0];
   const recCrop = bestEval
     ? db.crops.find(c => c.crop_id === bestEval.crop_id)
-    : db.crops.find(c => c.name === 'Green Gram');
+    : db.crops.find(c => c.name === (defaultRecCrops[farm_id] || 'Groundnut'));
 
   // Best rotation plan
   const recPlan = db.rotation_plans
     .filter(p => p.farm_id === farm_id && p.is_recommended)
     .sort((a, b) => b.total_projected_profit - a.total_projected_profit)[0];
 
-  let rotation_plan = ['Tomato', 'Green Gram', 'Groundnut', 'Tomato'];
+  let rotation_plan = defaultFarmPlans[farm_id] || ['Groundnut', 'Guar seed', 'Green Gram'];
   if (recPlan) {
     const ps = db.rotation_plan_seasons
       .filter(s => s.plan_id === recPlan.plan_id)
@@ -77,9 +85,12 @@ router.get('/', (req, res) => {
   res.json({
     farm: {
       farm_id,
-      name:           farm?.location_name || 'Demo Farm',      area_acres:     farm?.area_acres    || 4.5,
-      irrigation:     farm?.irrigation_type || 'Drip',
-      farmer_name:    farmer?.name || 'Ramesh Kumar',
+      name:           farm?.name || farm?.location_name || `Farm #${farm_id}`,
+      area_acres:     farm?.area_acres    || 4.5,
+      irrigation:     farm?.irrigation_type || farm?.irrigation || 'Drip',
+      farmer_name:    farmer?.name || `Farmer #${farm_id}`,
+      latitude:       farm?.latitude || 11.0168,
+      longitude:      farm?.longitude || 76.9558,
     },
     has_soil_data:          Boolean(soil),
     farm_health:            soil ? soil.soil_health_score : null,
@@ -119,6 +130,12 @@ router.get('/', (req, res) => {
     why_this_plan:       why,
     recent_history:      history,
     projected_3_season_profit: recPlan?.total_projected_profit || 102000,
+    dairy_feed_summary: {
+      integrated_farming_enabled: true,
+      silage_quality: null,
+      fermentation_score: null,
+      total_batches: 0
+    },
   });
 });
 

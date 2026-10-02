@@ -110,11 +110,14 @@ async function runEvaluation() {
   btn.disabled = true;
   btn.textContent = '⏳ Evaluating…';
 
+  const season = document.getElementById('eval-season-sel')?.value || state.candidates?.season || 'Kharif';
+
   try {
     const result = await apiPost('/crop-evaluation', {
       farm_id: state.farm_id,
       run_id:  state.run_id,
       candidate_crop_ids: selectedCropIds,
+      season:  season,
     });
     state.evaluation = result;
     renderEvaluationResults(result);
@@ -147,7 +150,10 @@ function renderEvaluationResults(result) {
       <td>${scoreBar(r.water_score)}</td>
       <td>${scoreBar(r.profit_score)}</td>
       <td style="color:var(--green-400);font-weight:700">${r.final_score}</td>
-      <td>₹${(r.predicted_profit||0).toLocaleString('en-IN')}</td>
+      <td>
+        <div style="font-weight:700">₹${(r.predicted_profit||0).toLocaleString('en-IN')}</div>
+        ${r.profit_range ? `<div style="font-size:11px;color:var(--text-secondary)" title="Statistical 1-sigma confidence range based on historical harvest variance">₹${(r.profit_range.low||0).toLocaleString('en-IN')} – ₹${(r.profit_range.high||0).toLocaleString('en-IN')}</div>` : ''}
+      </td>
     </tr>`).join('');
 
   setTimeout(() => animateBars(container), 100);

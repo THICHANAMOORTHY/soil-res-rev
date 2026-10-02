@@ -40,9 +40,26 @@ async function syncAll() {
 
   // 3. Farms
   console.log('3. Upserting farms...');
+  const farmPayload = memDb.farms.map(f => {
+    let itype = f.irrigation_type || f.irrigation || 'Rainfed';
+    const lower = itype.toLowerCase();
+    if (lower.includes('drip')) itype = 'Drip';
+    else if (lower.includes('canal')) itype = 'Canal';
+    else if (lower.includes('rainfed')) itype = 'Rainfed';
+    else itype = 'Moderate';
+    return {
+      farm_id: f.farm_id,
+      farmer_id: f.farmer_id,
+      location_name: f.location_name,
+      latitude: f.latitude,
+      longitude: f.longitude,
+      area_acres: f.area_acres,
+      irrigation_type: itype,
+    };
+  });
   const { error: farmErr } = await supabase
     .from('farms')
-    .upsert(memDb.farms, { onConflict: 'farm_id' });
+    .upsert(farmPayload, { onConflict: 'farm_id' });
   if (farmErr) console.warn('   ⚠️ Farms error:', farmErr.message);
   else console.log(`   ✅ Synced ${memDb.farms.length} farms.`);
 

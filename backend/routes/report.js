@@ -56,16 +56,28 @@ router.get('/', (req, res) => {
     monoculture_warning: {
       detected: history.length >= 2,
       consecutive_seasons: history.length,
-      past_crop: "Tomato",
-      penalty_applied: true,
-      risk_factor: "Pest accumulation & Nitrogen depletion",
+      past_crop: (() => {
+        const sorted = [...history].sort((a, b) => (b.sequence_order || 0) - (a.sequence_order || 0));
+        return sorted[0] ? (db.crops.find(c => c.crop_id === sorted[0].crop_id)?.name || 'Repeated Crop') : 'None';
+      })(),
+      penalty_applied: history.length >= 2,
+      risk_factor: "Pest accumulation & nutrient depletion",
     },
     action_plan: {
       primary_crop: rec ? db.crops.find(c => c.crop_id === rec.recommended_crop_id)?.name || "Green Gram" : "Green Gram",
       suitability_score: rec ? rec.final_score : 88.5,
-      three_season_rotation: plan ? plan.sequence : ["Tomato", "Green Gram", "Groundnut"],
-      projected_total_profit: plan ? plan.total_projected_profit : 102000,
-      soil_recovery_trajectory: [soil.soil_health_score, 65, 72, 79],
+      three_season_rotation: plan ? plan.sequence : (() => {
+        const sorted = [...history].sort((a, b) => (b.sequence_order || 0) - (a.sequence_order || 0));
+        const last = sorted[0] ? (db.crops.find(c => c.crop_id === sorted[0].crop_id)?.name || 'Wheat') : 'Wheat';
+        return [last, 'Green Gram', 'Chickpea'];
+      })(),
+      projected_total_profit: plan ? plan.total_projected_profit : Math.round((farm.area_acres || 4.5) * 24000),
+      soil_recovery_trajectory: [
+        soil.soil_health_score,
+        Math.min(95, Math.round(soil.soil_health_score + 7)),
+        Math.min(95, Math.round(soil.soil_health_score + 14)),
+        Math.min(95, Math.round(soil.soil_health_score + 21))
+      ],
       rationale: rec ? rec.reasoning : [
         "Improves nitrogen balance through biological fixation",
         "Breaks continuous cultivation disease cycle",

@@ -46,6 +46,12 @@ function renderDashboard(d) {
     ? `${d.farm.area_acres} ஏக்கர் · ${d.farm.irrigation.includes('Drip') ? 'சொட்டு நீர் பாசனம்' : d.farm.irrigation}`
     : `${d.farm.area_acres} acres · ${d.farm.irrigation}`;
 
+  // Update sidebar active farm chip
+  const fcName = document.querySelector('.fc-name');
+  if (fcName) fcName.textContent = d.farm.name;
+  const fcMeta = document.querySelector('.fc-meta');
+  if (fcMeta) fcMeta.textContent = isTa ? `${d.farm.area_acres} ஏக்கர் · ${d.farm.irrigation}` : `${d.farm.area_acres} acres · ${d.farm.irrigation}`;
+
   // KPI cards. farm_health is null until the farm has had a real soil test —
   // show that honestly rather than a made-up score.
   const hasSoil = d.has_soil_data && d.farm_health !== null && d.farm_health !== undefined;
@@ -74,16 +80,16 @@ function renderDashboard(d) {
   }
 
   // Recommended crop
-  const cropName = d.recommended_crop ? d.recommended_crop.name : 'Green Gram';
-  document.getElementById('dash-rec-crop').textContent   = window.tCrop ? tCrop(cropName) : cropName;
+  const cropName = d.recommended_crop?.name || (hasSoil ? 'Green Gram' : '—');
+  document.getElementById('dash-rec-crop').textContent   = (cropName !== '—' && window.tCrop) ? tCrop(cropName) : cropName;
   document.getElementById('dash-rec-score').textContent  = d.recommended_crop?.score || '—';
-  document.getElementById('dash-rec-icon').textContent   = cropIcon(cropName);
-  const fam = d.recommended_crop?.family || 'Legume';
-  document.getElementById('dash-rec-family').textContent = isTa ? (window.t ? t(fam.toLowerCase(), fam) : fam) : fam;
+  document.getElementById('dash-rec-icon').textContent   = cropName !== '—' ? cropIcon(cropName) : '🌱';
+  const fam = d.recommended_crop?.family || (hasSoil ? 'Legume' : '—');
+  document.getElementById('dash-rec-family').textContent = (fam !== '—' && isTa) ? (window.t ? t(fam.toLowerCase(), fam) : fam) : fam;
 
   // Profit
-  document.getElementById('dash-profit').textContent      = `₹${((d.expected_profit_per_acre||33500)/1000).toFixed(0)}K`;
-  document.getElementById('dash-profit-3s').textContent   = `₹${((d.projected_3_season_profit||102000)/1000).toFixed(0)}K`;
+  document.getElementById('dash-profit').textContent      = d.expected_profit_per_acre ? `₹${(d.expected_profit_per_acre/1000).toFixed(1)}K` : '—';
+  document.getElementById('dash-profit-3s').textContent   = d.projected_3_season_profit ? `₹${(d.projected_3_season_profit/1000).toFixed(0)}K` : '—';
 
   // ── Read Light from Sensor Table (instead of weather) ──
   const lightEl = document.getElementById('dash-sensor-light');
@@ -109,7 +115,7 @@ function renderDashboard(d) {
   if (soil) {
     const src = soil.source === 'esp32' ? (isTa ? 'நேரடி சென்சார்' : 'Live sensor')
               : soil.source === 'manual' ? (isTa ? 'கைமுறை உள்ளீடு' : 'Manual entry')
-              : (isTa ? 'ஆய்வக அறிக்கை' : 'Lab report (demo data)');
+              : (isTa ? 'ஆய்வக அறிக்கை' : 'Lab report');
     const chips = [
       chipInfo(`N: ${soil.nitrogen} kg/ha`),
       chipInfo(`P: ${soil.phosphorus} kg/ha`),

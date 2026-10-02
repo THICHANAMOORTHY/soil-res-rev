@@ -45,14 +45,22 @@ COMMODITY_ALIASES_DAILY = {
     "potato": "Potato", "onion": "Onion", "wheat": "Wheat", "tomato": "Tomato",
     "rice": "Rice", "paddy(dhan)(common)": "Rice", "banana": "Banana",
     "banana - green": "Banana", "apple": "Apple", "mango": "Mango",
-    "bengal gram(gram)(whole)": "Chickpea", "gram raw(chholia)": "Chickpea",
+    "bengal gram(gram)(whole)": "Chickpea", "gram raw(chholia)": "Chickpea", "kabuli chana(chickpeas-white)": "Chickpea",
     "maize": "Maize", "pomegranate": "Pomegranate", "mustard": "Mustard",
     "garlic": "Garlic", "ginger(green)": "Ginger", "green chilli": "Dry Chillies",
     "papaya": "Papaya", "watermelon": "Watermelon", "grapes": "Grapes",
     "orange": "Orange", "black pepper": "Black pepper", "coriander(leaves)": "Coriander",
     "cotton": "Cotton", "soyabean": "Soybean", "groundnut": "Groundnut",
-    "urad (black gram)(whole)": "Black Gram", "moong(green gram)(whole)": "Green Gram",
-    "arhar (tur/red gram)(whole)": "Pigeon Pea", "masur(whole)": "Red Lentil",
+    "black gram (urd beans)(whole)": "Black Gram", "black gram dal (urd dal)": "Black Gram",
+    "urad (black gram)(whole)": "Black Gram", "urad": "Black Gram",
+    "green gram (moong)(whole)": "Green Gram", "green gram dal (moong dal)": "Green Gram",
+    "moong(green gram)(whole)": "Green Gram", "moong": "Green Gram",
+    "arhar (tur/red gram)(whole)": "Pigeon Pea", "arhar dal(tur dal)": "Pigeon Pea", "pegeon pea (arhar fali)": "Pigeon Pea",
+    "lentil (masur)(whole)": "Red Lentil", "masur dal": "Red Lentil", "masur(whole)": "Red Lentil",
+    "cowpea (lobia/karamani)": "Cowpea", "cowpea(veg)": "Cowpea",
+    "kulthi(horse gram)": "Horse-gram",
+    "peas(dry)": "Peas & Beans", "field pea": "Peas & Beans", "white peas": "Peas & Beans", "green peas": "Peas & Beans",
+    "turmeric": "Turmeric", "bajra(pearl millet/cumbu)": "Bajra",
     "sweet potato": "Sweet Potato", "tapioca": "Tapioca", "cardamoms": "Cardamom",
 }
 
@@ -174,7 +182,7 @@ ALIASES = {
 LEGUMES = {
     "Green Gram", "Black Gram", "Pigeon Pea", "Chickpea", "Groundnut",
     "Cowpea", "Horse-gram", "Khesari", "Red Lentil", "Moth Bean",
-    "Peas & Beans", "Soybean", "Sannhamp", "Kidney Bean"
+    "Peas & Beans", "Soybean", "Sannhamp", "Kidney Bean", "Guar seed"
 }
 
 FAMILY_MAP = {
@@ -184,7 +192,7 @@ FAMILY_MAP = {
     "Chickpea": "Legume", "Groundnut": "Legume", "Cowpea": "Legume",
     "Horse-gram": "Legume", "Khesari": "Legume", "Red Lentil": "Legume",
     "Moth Bean": "Legume", "Peas & Beans": "Legume", "Soybean": "Legume",
-    "Kidney Bean": "Legume", "Sannhamp": "Legume",
+    "Kidney Bean": "Legume", "Sannhamp": "Legume", "Guar seed": "Legume",
     "Sugarcane": "Commercial", "Cotton": "Commercial", "Jute": "Commercial",
     "Tobacco": "Commercial", "Castor seed": "Oilseed", "Sunflower": "Oilseed",
     "Sesamum": "Oilseed", "Mustard": "Oilseed", "Safflower": "Oilseed",
@@ -203,7 +211,7 @@ FALLBACK_PRICES = {
     "Sugarcane": 3.5, "Coconut": 20, "Sunflower": 50, "Sesamum": 110,
     "Bajra": 22, "Jowar": 26, "Ragi": 32, "Barley": 20, "Tobacco": 95,
     "Jute": 45, "Coffee": 200, "Cashewnut": 180, "Arecanut": 220,
-    "Kidney Bean": 80, "Moth Bean": 60, "Cardamom": 1200
+    "Kidney Bean": 80, "Moth Bean": 60, "Cardamom": 1200, "Guar seed": 55
 }
 
 COST_PER_ACRE = {
@@ -261,6 +269,11 @@ for name in sorted(all_crop_names):
         avg_temp = t_stat["mean"]
         avg_hum = h_stat["mean"]
         sensor_records = len(s_data["N"])
+        crop_stats = {
+            "N": {"mean": n_stat["mean"], "stdev": n_stat["stdev"], "median": n_stat["median"]},
+            "P": {"mean": p_stat["mean"], "stdev": p_stat["stdev"], "median": p_stat["median"]},
+            "K": {"mean": k_stat["mean"], "stdev": k_stat["stdev"], "median": k_stat["median"]}
+        }
     else:
         f_stat = stat_summary(y_data["fert_per_ha"]) if y_data else {"median": 120.0}
         med_fert = f_stat["median"] if f_stat["median"] > 0 else 120.0
@@ -281,6 +294,11 @@ for name in sorted(all_crop_names):
             ideal_ph_min, ideal_ph_max = 6.0, 7.2
         avg_temp, avg_hum = 26.5, 70.0
         sensor_records = 0
+        crop_stats = {
+            "N": {"mean": n_demand, "stdev": round(max(5.0, n_demand * 0.20), 2), "median": n_demand},
+            "P": {"mean": p_demand, "stdev": round(max(3.0, p_demand * 0.20), 2), "median": p_demand},
+            "K": {"mean": k_demand, "stdev": round(max(3.0, k_demand * 0.20), 2), "median": k_demand}
+        }
 
     # Yield and production from Indian state harvest dataset
     if y_data and y_data["yields"]:
@@ -288,6 +306,14 @@ for name in sorted(all_crop_names):
         r_stat = stat_summary(y_data["rainfall"])
         p_stat = stat_summary(y_data["pest_per_ha"])
         yield_kg_acre = round(y_stat["median"] * 404.686, 1)
+        # Robust yield standard deviation (filtering out extreme reporting outliers)
+        valid_yields = [y for y in y_data["yields"] if y <= y_stat["median"] * 3.5]
+        if len(valid_yields) > 1:
+            raw_std = statistics.stdev(valid_yields) * 404.686
+        else:
+            raw_std = yield_kg_acre * 0.20
+        yield_stdev_kg_acre = round(max(yield_kg_acre * 0.12, min(raw_std, yield_kg_acre * 0.35)), 1)
+        yield_mean_kg_acre = round(y_stat["mean"] * 404.686, 1)
         avg_rain = r_stat["median"]
         med_pest = p_stat["median"]
         risk_index = round(min(max(med_pest * 40.0, 18.0), 70.0), 1)
@@ -296,11 +322,21 @@ for name in sorted(all_crop_names):
         yield_records = len(y_data["yields"])
     else:
         yield_kg_acre = 1200.0 if family == "Cereal" else 550.0 if is_n_fixer else 4000.0
+        yield_mean_kg_acre = yield_kg_acre
+        yield_stdev_kg_acre = round(yield_kg_acre * 0.20, 1)
         avg_rain = round(statistics.median(s_data["rainfall"]), 1) if s_data else 1000.0
         risk_index = 30.0
         seasons_list = ["Kharif", "Rabi"]
         top_states = ["All India"]
         yield_records = 0
+
+    crop_stats["yield"] = {
+        "mean": yield_mean_kg_acre,
+        "stdev": yield_stdev_kg_acre,
+        "median": yield_kg_acre,
+        "low": round(max(0, yield_kg_acre - yield_stdev_kg_acre), 1),
+        "high": round(yield_kg_acre + yield_stdev_kg_acre, 1)
+    }
 
     # Market Price: median modal price from the daily APMC mandi quotes
     mandi_records_count = combined_mandi_record_counts.get(name, 0)
@@ -335,6 +371,7 @@ for name in sorted(all_crop_names):
         "n_demand":             n_demand,
         "p_demand":             p_demand,
         "k_demand":             k_demand,
+        "stats":                crop_stats,
         "avg_yield_per_acre":   yield_kg_acre,
         "avg_market_price":     mkt_price,
         "avg_cultivation_cost": COST_PER_ACRE.get(name, 16000),

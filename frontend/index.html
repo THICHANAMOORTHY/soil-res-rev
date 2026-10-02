@@ -89,6 +89,18 @@
         <span class="nav-badge" style="background:#8b5cf6">PRECISION</span>
       </div>
 
+      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navLivestock">Livestock & Feed (IFS)</p>
+      <div class="nav-link" data-view="dairyfeed">
+        <span class="nav-icon">🐄</span> <span data-i18n="navDairyFeed">Dairy & Silage Feeder</span>
+        <span class="nav-badge" style="background:#059669">NEW · IFS</span>
+      </div>
+
+      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navEnterprise">B2B Enterprise</p>
+      <div class="nav-link" data-view="b2b">
+        <span class="nav-icon">🏢</span> <span data-i18n="navB2B">FPO Command Center</span>
+        <span class="nav-badge" style="background:#7c3aed">B2B · FPO</span>
+      </div>
+
       <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navOutput">Output</p>
       <div class="nav-link" data-view="recommendation">
         <span class="nav-icon">⭐</span> <span data-i18n="navRecommendation">Recommendation</span>
@@ -107,7 +119,7 @@
       <div class="downloads-box" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
         <p class="sidebar-section-label" style="font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px" data-i18n="sidebarDownloads">Downloads</p>
         <div style="display:flex;flex-direction:column;gap:5px">
-          <a href="/download/farmer-plan-pdf" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;justify-content:flex-start;text-decoration:none" download>
+          <a href="/download/farmer-plan-pdf" onclick="exportFarmerReportPDF(); return false;" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;justify-content:flex-start;text-decoration:none">
             <span>📄</span> <span data-i18n="dlActionPlan">Action Plan (PDF)</span>
           </a>
           <a href="/download/crops-csv" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;justify-content:flex-start;text-decoration:none" download>
@@ -787,7 +799,694 @@
       <div id="gps-zones-container"></div>
     </div>
 
+    <!-- ── VIEW: DAIRY & SILAGE FEEDER (IFS) ───────────── -->
+    <div id="view-dairyfeed" class="view">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="dairyFeedTitle">Dairy Feeder & Silage Quality Hub</h1>
+          <p class="view-subtitle" data-i18n="dairyFeedSubtitle">Precision Silage Fermentation Screening, IoT Telemetry, Herd Feed Planning & Soil Nutrient Recycling</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="loadDairyFeedView()">
+            <span>🔄</span> Refresh Telemetry
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Row: 4 Metric Cards -->
+      <div class="df-kpi-grid">
+        <div class="df-kpi-card">
+          <div class="df-kpi-header">
+            <span class="df-kpi-title" data-i18n="cardFermentationScore">Fermentation Index</span>
+            <span class="df-kpi-icon">⚗️</span>
+          </div>
+          <div class="df-kpi-value"><span id="df-stat-score">—</span><small style="font-size:16px;color:var(--text-muted)">/100</small></div>
+          <div class="df-kpi-sub" id="df-stat-count">0 batches recorded</div>
+        </div>
+
+        <div class="df-kpi-card">
+          <div class="df-kpi-header">
+            <span class="df-kpi-title" data-i18n="cardSilageQuality">Silage Quality Tier</span>
+            <span class="df-kpi-icon">🌿</span>
+          </div>
+          <div class="df-kpi-value" id="df-stat-quality"><span class="text-muted">Awaiting Test</span></div>
+          <div class="df-kpi-sub">Run screening probe</div>
+        </div>
+
+        <div class="df-kpi-card">
+          <div class="df-kpi-header">
+            <span class="df-kpi-title" data-i18n="cardSpoilageRisk">Spoilage & Mould Risk</span>
+            <span class="df-kpi-icon">🛡️</span>
+          </div>
+          <div class="df-kpi-value" id="df-stat-risk"><span class="chip" style="font-size:13px;background:rgba(255,255,255,0.06)">No Test Data</span></div>
+          <div class="df-kpi-sub">Sensor monitoring idle</div>
+        </div>
+
+        <div class="df-kpi-card">
+          <div class="df-kpi-header">
+            <span class="df-kpi-title" data-i18n="cardHerdMilkImpact">Herd Milk Impact</span>
+            <span class="df-kpi-icon">🥛</span>
+          </div>
+          <div class="df-kpi-value text-green" id="df-milk-gain-val">—</div>
+          <div class="df-kpi-sub" id="df-revenue-gain-val">Calculated from herd ration</div>
+        </div>
+      </div>
+
+      <!-- Integrated Farming System (IFS) Closed-Loop Synergy Card -->
+      <div class="df-loop-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <span class="chip teal" style="margin-bottom:6px">🔄 INTEGRATED FARMING SYSTEM (IFS)</span>
+            <h2 style="font-size:18px;margin:4px 0;color:#f0fdf4">Farm Rotation ↔ Dairy Feed & Soil Restorer Loop</h2>
+            <p style="font-size:12.5px;color:#cbd5e1;max-width:720px;margin:0">
+              Crop rotation produces high-energy fodder biomass. Silage quality screening protects cattle health, maximizing daily milk yield. Cattle produce Farmyard Manure (FYM) that restores Nitrogen and Organic Carbon back to the soil for the next rotation cycle!
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1)">
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block">Dairy Herd Size</label>
+              <input type="number" id="df-input-cows" value="" placeholder="0" min="0" max="100" style="width:65px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block">Lactating Cows</label>
+              <input type="number" id="df-input-lactating" value="" placeholder="0" min="0" max="100" style="width:65px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block">Rotation Fodder</label>
+              <select id="df-select-crop" style="padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
+                <option value="">Select fodder...</option>
+                <option value="Maize">Maize (மக்காச்சோளம்)</option>
+                <option value="Sorghum">Sorghum (சோளம்)</option>
+                <option value="Napier">Napier Grass (நேப்பியர்)</option>
+                <option value="Green Gram">Green Gram Residue (பயறு)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block">Farm Area (ac)</label>
+              <input type="number" id="df-input-acres" value="4.5" step="0.5" style="width:60px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Step Closed-Loop Visual -->
+        <div class="df-flow-steps">
+          <div class="df-step-box">
+            <span class="df-step-num">Step 1 · Rotation Biomass</span>
+            <span class="df-step-title">🌾 Fodder Harvest</span>
+            <div class="df-step-val" id="df-biomass-val">-- Tonnes</div>
+            <div class="df-step-desc">Ensiled fodder biomass from rotation</div>
+          </div>
+          <div class="df-step-box">
+            <span class="df-step-num">Step 2 · Herd Ration</span>
+            <span class="df-step-title">🐄 Feed Security</span>
+            <div class="df-step-val" id="df-security-val">-- Months</div>
+            <div class="df-step-desc" id="df-daily-feed-val">Daily herd silage ration</div>
+          </div>
+          <div class="df-step-box">
+            <span class="df-step-num">Step 3 · Dairy Output</span>
+            <span class="df-step-title">🥛 Milk Yield Boost</span>
+            <div class="df-step-val" style="color:var(--green-400)" id="df-step-revenue-gain">--</div>
+            <div class="df-step-desc">Projected herd milk yield revenue gain</div>
+          </div>
+          <div class="df-step-box">
+            <span class="df-step-num">Step 4 · Soil Restorer</span>
+            <span class="df-step-title">🌱 Recycled Dung (FYM)</span>
+            <div class="df-step-val" style="color:#a78bfa" id="df-soc-boost-val">-- Carbon</div>
+            <div class="df-step-desc" id="df-npk-recycle-val">Organic nutrients recycled to soil</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Interactive Grid: Silage Scanner & Diagnostics Form -->
+      <div class="df-grid-2">
+        <!-- Silage Test Card -->
+        <div class="card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>🔬</span> Rapid Silage Quality Screener
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Supports Manual Data Entry & Live IoT ESP32 Sensor Telemetry</p>
+            </div>
+            <span id="df-node-status-chip" class="chip info" style="font-size:11px">Hardware Node: Online</span>
+          </div>
+
+          <!-- Entry Mode Switcher Tabs -->
+          <div class="df-mode-switcher">
+            <button type="button" id="df-tab-manual" class="df-mode-btn active" onclick="switchDairyEntryMode('manual')">
+              <span>✍️</span> <span>Manual Data Entry (கைமுறை பதிவு)</span>
+            </button>
+            <button type="button" id="df-tab-esp" class="df-mode-btn" onclick="switchDairyEntryMode('esp')">
+              <span>⚡</span> <span>Live ESP32 Telemetry (ESP32 நேரலை)</span>
+            </button>
+          </div>
+
+          <!-- ══════ PANEL 1: MANUAL ENTRY ══════ -->
+          <div id="df-panel-manual">
+            <!-- Quick Presets -->
+            <div class="df-presets-bar">
+              <span style="font-size:11px;font-weight:600;color:var(--text-muted)">Quick Presets:</span>
+              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('good')">
+                🟢 Optimal Silage (Good)
+              </button>
+              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('moderate')">
+                🟡 Heating Pit (Moderate)
+              </button>
+              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('poor')">
+                🔴 Spoiled / High Moisture (Poor)
+              </button>
+            </div>
+
+            <form id="df-silage-form" onsubmit="submitSilageTest(event)">
+              <div class="grid-2" style="gap:14px;margin-bottom:14px">
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">Target Silage Node</label>
+                  <select id="df-in-device" style="width:100%">
+                    <option value="DF01">DF01 — Main Bunk Pit Sensor</option>
+                    <option value="DF02" selected>DF02 — Silo Tower Probe Node</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">Forage Crop Type</label>
+                  <select id="df-in-feedtype" style="width:100%">
+                    <option value="maize_silage">🌽 Maize Silage (மக்காச்சோளம்)</option>
+                    <option value="sorghum_silage">🌾 Sorghum Silage (சோளம்)</option>
+                    <option value="napier_silage">🌱 Co-4 Napier Grass (நேப்பியர்)</option>
+                    <option value="alfalfa_silage">🌿 Alfalfa / Lucerne (குதிரை மசால்)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid-2" style="gap:14px;margin-bottom:14px">
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span>Silage pH Sensor</span>
+                    <span style="color:var(--green-400);font-size:11px">Ideal: 3.8 – 4.4</span>
+                  </label>
+                  <input type="number" id="df-in-ph" step="0.01" placeholder="e.g. 4.10" min="3.0" max="7.0" style="width:100%" required>
+                </div>
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span>Moisture %</span>
+                    <span style="color:#38bdf8;font-size:11px">Ideal: 60% – 70%</span>
+                  </label>
+                  <input type="number" id="df-in-moisture" step="0.1" placeholder="e.g. 65.0" min="40" max="85" style="width:100%" required>
+                </div>
+              </div>
+
+              <div class="grid-2" style="gap:14px;margin-bottom:14px">
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span>Internal Core Temp (°C)</span>
+                    <span style="color:#fbbf24;font-size:11px">Probe DS18B20</span>
+                  </label>
+                  <input type="number" id="df-in-temp" step="0.1" placeholder="e.g. 28.0" style="width:100%" required>
+                </div>
+                <div>
+                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span>Ambient Shed Temp (°C)</span>
+                    <span style="color:var(--text-muted);font-size:11px">Air Baseline</span>
+                  </label>
+                  <input type="number" id="df-in-ambient" step="0.1" placeholder="e.g. 26.0" style="width:100%" required>
+                </div>
+              </div>
+
+              <!-- TCS3200 RGB Sensor inputs & Swatch -->
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;margin-bottom:14px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <span style="font-size:12px;font-weight:600;color:var(--text-secondary)">TCS3200 Optical Color Sensor (RGB Spectrum)</span>
+                  <div class="df-swatch-box" id="df-color-swatch" style="background-color:rgb(145, 140, 52)" title="Live TCS3200 Color Spectrum"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:10px;align-items:center">
+                  <div>
+                    <label style="font-size:10px;color:var(--text-muted);display:block">Red (R)</label>
+                    <input type="number" id="df-in-r" placeholder="140" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
+                  </div>
+                  <div>
+                    <label style="font-size:10px;color:var(--text-muted);display:block">Green (G)</label>
+                    <input type="number" id="df-in-g" placeholder="135" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
+                  </div>
+                  <div>
+                    <label style="font-size:10px;color:var(--text-muted);display:block">Blue (B)</label>
+                    <input type="number" id="df-in-b" placeholder="50" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
+                  </div>
+                  <div>
+                    <label style="font-size:10px;color:var(--text-muted);display:block">Mould Check</label>
+                    <select id="df-in-mould" style="width:100%;padding:4px 8px;font-size:12px">
+                      <option value="Low">Clean (No Mould)</option>
+                      <option value="High">Visible Mould</option>
+                      <option value="Unknown" selected>Sensor-Only</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" id="df-btn-submit-test" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;font-weight:600">
+                <span>💾</span> Save & Evaluate Manual Batch
+              </button>
+            </form>
+          </div>
+
+          <!-- ══════ PANEL 2: LIVE ESP32 TELEMETRY ══════ -->
+          <div id="df-panel-esp" style="display:none">
+            <!-- Hardware Stream Status Bar -->
+            <div class="df-live-header">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span id="df-esp-pulse" class="df-pulse-dot"></span>
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px">
+                    <span id="df-esp-device-title">ESP32 Silage Probe (DF01)</span>
+                    <span id="df-esp-badge" class="chip success" style="font-size:10px;padding:2px 6px">ONLINE</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-muted)" id="df-esp-last-seen">Broadcasting telemetry live</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="chip" style="font-size:11px;background:rgba(255,255,255,0.06)" id="df-esp-rssi">📶 -58 dBm</span>
+                <span class="chip" style="font-size:11px;background:rgba(255,255,255,0.06)" id="df-esp-battery">🔋 95%</span>
+              </div>
+            </div>
+
+            <!-- Quick Simulator Controls for Demo / Testing -->
+            <div class="df-presets-bar" style="justify-content:space-between">
+              <span style="font-size:11px;font-weight:600;color:var(--text-muted)">Simulate ESP32 Ingestion:</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('good')">
+                  ⚡ Good Stream
+                </button>
+                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('heating')">
+                  ⚡ Heating Stream
+                </button>
+                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('sour')">
+                  ⚡ Sour Stream
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Digital Telemetry Meters -->
+            <div class="df-live-meters">
+              <div class="df-live-meter-card" id="df-card-ph">
+                <div style="font-size:11px;color:var(--text-muted)">⚗️ SILAGE pH</div>
+                <div class="df-meter-val" style="color:var(--green-400)" id="df-live-val-ph">--</div>
+                <div class="df-meter-sub" id="df-live-status-ph">Awaiting Telemetry</div>
+              </div>
+              <div class="df-live-meter-card" id="df-card-moist">
+                <div style="font-size:11px;color:var(--text-muted)">💧 MOISTURE</div>
+                <div class="df-meter-val" style="color:#38bdf8" id="df-live-val-moist">--%</div>
+                <div class="df-meter-sub" id="df-live-status-moist">Ideal 60–70%</div>
+              </div>
+              <div class="df-live-meter-card" id="df-card-temp">
+                <div style="font-size:11px;color:var(--text-muted)">🌡️ CORE TEMP</div>
+                <div class="df-meter-val" style="color:#fbbf24" id="df-live-val-temp">--°C</div>
+                <div class="df-meter-sub" id="df-live-status-temp">Probe DS18B20</div>
+              </div>
+              <div class="df-live-meter-card" id="df-card-color">
+                <div style="font-size:11px;color:var(--text-muted)">🎨 TCS3200 RGB</div>
+                <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px">
+                  <div id="df-live-color-swatch" style="width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.3)"></div>
+                  <div style="font-size:12px;font-weight:700" id="df-live-val-rgb">--</div>
+                </div>
+                <div class="df-meter-sub">Optical Sensor</div>
+              </div>
+            </div>
+
+            <!-- Ingestion Parameters -->
+            <div class="grid-2" style="gap:14px;margin-bottom:14px">
+              <div>
+                <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">Active IoT Node</label>
+                <select id="df-esp-select-device" style="width:100%" onchange="changeLiveDevice(this.value)">
+                  <option value="DF01" selected>DF01 — ESP32 Bunk Pit Probe</option>
+                  <option value="DF02">DF02 — ESP32 Silo Tower Node</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">Forage Crop Batch</label>
+                <select id="df-esp-select-crop" style="width:100%">
+                  <option value="maize_silage">🌽 Maize Silage (மக்காச்சோளம்)</option>
+                  <option value="sorghum_silage">🌾 Sorghum Silage (சோளம்)</option>
+                  <option value="napier_silage">🌱 Co-4 Napier Grass (நேப்பியர்)</option>
+                  <option value="alfalfa_silage">🌿 Alfalfa / Lucerne (குதிரை மசால்)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Primary Action -->
+            <button type="button" id="df-btn-capture-esp" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;font-weight:600" onclick="captureLiveESPReading()">
+              <span>📥</span> Capture & Evaluate Live ESP Reading
+            </button>
+
+            <!-- Hardware Ingestion Endpoint Tip -->
+            <div style="margin-top:14px;padding:10px 14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid rgba(255,255,255,0.06);font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center">
+              <span>🔌 ESP32 Wi-Fi Endpoint: <code style="color:#86efac;font-size:11.5px">POST /api/dairyfeed/ingest</code></span>
+              <span class="chip" style="font-size:10px;background:rgba(34,197,94,0.15);color:#86efac">Port 3000 Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Diagnostics & Instant Result -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Real-time Result Box (Hidden until user submits a test) -->
+          <div id="df-instant-result" class="card" style="display:none;padding:20px;border-color:rgba(34, 197, 94, 0.4);background:rgba(6, 78, 59, 0.15)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green-400)">Test Diagnostics Result</span>
+              <span id="df-res-score" style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--green-400)">—</span>
+            </div>
+            <div style="margin-bottom:12px">
+              <span id="df-res-quality" class="chip success" style="font-size:12px">—</span>
+            </div>
+            <div id="df-res-breakdown" style="margin-bottom:14px"></div>
+            <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;border-left:3px solid var(--green-400)">
+              <div style="font-size:11px;font-weight:700;color:var(--green-300);margin-bottom:4px">🌾 Veterinary & Agronomic Advisory</div>
+              <div id="df-res-advisory" style="font-size:12.5px;line-height:1.5;color:var(--text-primary)"></div>
+            </div>
+          </div>
+
+          <!-- Silage Quality Benchmarks Guide -->
+          <div class="card" style="padding:18px">
+            <h4 style="margin:0 0 10px;font-size:13px;display:flex;align-items:center;gap:6px">
+              <span>📖</span> Silage Agronomic Benchmarks
+            </h4>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
+                <span style="color:var(--text-secondary)">Ideal Silage pH:</span>
+                <b style="color:var(--green-400)">3.8 – 4.4</b>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
+                <span style="color:var(--text-secondary)">Ideal Moisture Range:</span>
+                <b style="color:#38bdf8">60% – 70%</b>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
+                <span style="color:var(--text-secondary)">Max Core Temp Rise (ΔT):</span>
+                <b style="color:#fbbf24">&lt; 3.0°C over ambient</b>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text-secondary)">Optimal Olive Green RGB:</span>
+                <b style="color:#86efac">R:130-150 · G:125-145 · B:40-60</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Telemetry Log & Batch History -->
+      <div class="card" style="padding:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+              <span>📋</span> Silage Batch Log & Sensor Telemetry
+            </h3>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Live historical tests synced from ESP32 Sensor & Camera nodes</p>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11px" onclick="loadDairyFeedView()">
+            <span>🔄</span> Refresh Telemetry
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Sample ID</th>
+                <th>Node</th>
+                <th>Silage Crop</th>
+                <th>pH</th>
+                <th>Moisture</th>
+                <th>Temp Rise</th>
+                <th>Score</th>
+                <th>Quality Tier</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="df-history-tbody">
+              <tr>
+                <td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">Loading telemetry data…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: B2B ENTERPRISE & FPO COMMAND CENTER ─────────────────── -->
+    <div id="view-b2b" class="view">
+      <div class="view-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <h1 data-i18n="b2bTitle">FPO & Agribusiness Command Center</h1>
+            <span id="b2b-org-type-badge" class="nav-badge" style="background:#7c3aed;font-size:11px;padding:3px 8px">FPO</span>
+            <span id="b2b-loading-indicator" class="chip info" style="display:none;font-size:11px">Syncing…</span>
+          </div>
+          <p class="view-subtitle" id="b2b-org-meta">Multi-Tenant Agri-Intelligence · Regional Soil Health, FPO Village Hierarchies & Telemetry Fleet</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select id="b2b-org-select" class="loc-select" style="min-width:240px;background:rgba(15,23,42,0.9)" onchange="fetchOrgData(this.value)">
+            <option value="1">🏢 Kovai Farmer Producer Org (Kovai FPO)</option>
+            <option value="2">🥛 Aavin Dairy Cooperative Federation</option>
+            <option value="3">🏭 Kisan Shakti Agribusiness Consortium</option>
+          </select>
+          <button class="btn btn-secondary" onclick="fetchOrgData(currentOrgId)" title="Refresh data">
+            <span>🔄</span>
+          </button>
+          <button class="btn btn-primary" onclick="exportFPOSummary()">
+            <span>📄</span> <span data-i18n="btnExportFPO">Export FPO Intelligence</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top 4 Executive KPI Cards -->
+      <div class="grid-4" style="gap:16px;margin-bottom:20px">
+        <div class="card stat-card" style="border-top:3px solid #7c3aed">
+          <div class="stat-icon" style="background:rgba(124, 58, 237, 0.15);color:#c084fc">👥</div>
+          <div class="stat-info">
+            <span class="stat-label" data-i18n="lblTotalFarmers">Registered Farmers</span>
+            <h3 class="stat-val" id="b2b-stat-farmers">--</h3>
+            <span class="stat-sub text-muted" id="b2b-stat-clusters">Live Registered Network</span>
+          </div>
+        </div>
+
+        <div class="card stat-card" style="border-top:3px solid #38bdf8">
+          <div class="stat-icon" style="background:rgba(56, 189, 248, 0.15);color:#38bdf8">🚜</div>
+          <div class="stat-info">
+            <span class="stat-label" data-i18n="lblManagedFarms">Managed Farms</span>
+            <h3 class="stat-val" id="b2b-stat-farms">--</h3>
+            <span class="stat-sub text-muted" id="b2b-stat-avg-size">Registered Holdings</span>
+          </div>
+        </div>
+
+        <div class="card stat-card" style="border-top:3px solid #22c55e">
+          <div class="stat-icon" style="background:rgba(34, 197, 94, 0.15);color:#86efac">🌾</div>
+          <div class="stat-info">
+            <span class="stat-label" data-i18n="lblCultivatedArea">Cultivated Acreage</span>
+            <h3 class="stat-val" id="b2b-stat-acres">--</h3>
+            <span class="stat-sub text-muted" id="b2b-stat-irrigation">Active Crop Acreage</span>
+          </div>
+        </div>
+
+        <div class="card stat-card" style="border-top:3px solid #f59e0b">
+          <div class="stat-icon" style="background:rgba(245, 158, 11, 0.15);color:#fbbf24">📡</div>
+          <div class="stat-info">
+            <span class="stat-label" data-i18n="lblIoTFleet">IoT Telemetry Nodes</span>
+            <h3 class="stat-val" id="b2b-stat-iot">--</h3>
+            <span class="stat-sub" id="b2b-stat-iot-sub" style="color:#86efac">● Telemetry Online</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Analytics Row 1: Soil Health & Crop Forecast -->
+      <div class="grid-2" style="gap:20px;margin-bottom:20px">
+        <!-- Card 1: Regional Soil Health -->
+        <div class="card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                <span>🧪</span> <span data-i18n="lblRegionalSoilHealth">Regional Soil Health Distribution</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Cluster-wide NPK & Organic Carbon analysis across registered farms</p>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:11px;color:var(--text-muted)">Average Health Score</span>
+              <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#86efac" id="b2b-soil-score">--</div>
+            </div>
+          </div>
+
+          <!-- Distribution Multi-Segment Bar -->
+          <div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px">
+              <span style="color:#86efac">🟢 Healthy (75–100)</span>
+              <span style="color:#fbbf24">🟡 Moderate (50–74)</span>
+              <span style="color:#f87171">🔴 Poor (&lt;50)</span>
+            </div>
+            <div style="display:flex;height:24px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,0.06);font-size:11px;font-weight:700;line-height:24px;text-align:center">
+              <div id="b2b-bar-healthy" style="background:#22c55e;color:#052e16;width:0%">0%</div>
+              <div id="b2b-bar-mod" style="background:#f59e0b;color:#451a03;width:0%">0%</div>
+              <div id="b2b-bar-poor" style="background:#ef4444;color:#450a0a;width:0%">0%</div>
+            </div>
+          </div>
+
+          <!-- Primary Deficiencies -->
+          <h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Widespread Cluster Deficiencies</h4>
+          <div id="b2b-deficiencies-list"></div>
+        </div>
+
+        <!-- Card 2: Crop Distribution & Mandi Demand -->
+        <div class="card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                <span>🌾</span> <span data-i18n="lblCropDistMandi">Crop Distribution & Harvest Demand</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Current season acreage allocation & mandi yield forecasts</p>
+            </div>
+            <span class="chip" style="font-size:11px;background:rgba(124,58,237,0.15);color:#c084fc">Kharif 2026</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
+            <div style="height:190px;position:relative">
+              <canvas id="b2b-crop-chart"></canvas>
+            </div>
+            <div class="table-responsive" style="max-height:190px;overflow-y:auto">
+              <table class="data-table" style="font-size:12px">
+                <thead>
+                  <tr>
+                    <th>Crop</th>
+                    <th>Share</th>
+                    <th>Acreage</th>
+                  </tr>
+                </thead>
+                <tbody id="b2b-crops-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Analytics Row 2: DairyFeed Silage & IoT Hardware Fleet -->
+      <div class="grid-2" style="gap:20px;margin-bottom:20px">
+        <!-- Card 3: Livestock Silage Reserve -->
+        <div class="card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                <span>🐄</span> <span>DairyFeed AI · Livestock Silage Reserve (IFS)</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Silage bunk quality monitoring, herd feed security & manure loop</p>
+            </div>
+            <span class="chip success" style="font-size:11px">Closed-Loop Active</span>
+          </div>
+
+          <div class="grid-2" style="gap:12px;margin-bottom:14px">
+            <div style="background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05)">
+              <span style="font-size:11px;color:var(--text-muted)">Silage Batches Tested</span>
+              <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text-primary)" id="b2b-df-batches">0</div>
+              <div style="font-size:11px" id="b2b-df-quality">Silage Telemetry Ready</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05)">
+              <span style="font-size:11px;color:var(--text-muted)">Active Pit Probes</span>
+              <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:#38bdf8" id="b2b-df-probes">1 Probe</div>
+              <div style="font-size:11px;color:var(--text-muted)">DF01 Silage Node</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(6,78,59,0.15);border:1px solid rgba(34,197,94,0.25);padding:12px 14px;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <b style="font-size:12px;color:#86efac">Monthly Fodder Yield Capacity:</b>
+              <div style="font-size:11px;color:var(--text-secondary)">Closed-loop fodder recycling returns organic livestock manure directly to soil</div>
+            </div>
+            <span style="font-family:'Outfit',sans-serif;font-weight:800;color:#86efac;font-size:16px" id="b2b-df-fodder">--</span>
+          </div>
+        </div>
+
+        <!-- Card 4: IoT Telemetry Fleet -->
+        <div class="card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                <span>📡</span> <span>IoT-as-a-Service Hardware Fleet Telemetry</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Real-time telemetry, sensor health, and maintenance status</p>
+            </div>
+            <span class="chip" style="font-size:11px;background:rgba(34,197,94,0.15);color:#86efac">Live Telemetry</span>
+          </div>
+
+          <div class="grid-3" style="gap:10px;margin-bottom:14px">
+            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
+              <span style="font-size:11px;color:var(--text-muted)">Online</span>
+              <div style="font-size:18px;font-weight:700;color:#86efac" id="b2b-fleet-online">--</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
+              <span style="font-size:11px;color:var(--text-muted)">Offline</span>
+              <div style="font-size:18px;font-weight:700;color:#f87171" id="b2b-fleet-offline">0</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
+              <span style="font-size:11px;color:var(--text-muted)">Uptime Rate</span>
+              <div style="font-size:18px;font-weight:700;color:#38bdf8" id="b2b-fleet-uptime">--</div>
+            </div>
+          </div>
+
+          <div id="b2b-fleet-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- Enterprise Cluster Action Alerts -->
+      <div class="card" style="padding:22px;margin-bottom:20px">
+        <h3 style="margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px">
+          <span>⚠️</span> <span>Regional Cluster Action Alerts & Agronomic Directives</span>
+        </h3>
+        <div id="b2b-alerts-container"></div>
+      </div>
+
+      <!-- Member Farms Directory -->
+      <div class="card" style="padding:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div>
+            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+              <span>📋</span> <span>FPO Member Farms & Micro-Cluster Directory</span>
+            </h3>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Click inspect farm to view individual soil tests, crop rotation plans & sensor charts</p>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="text" class="loc-search-input" style="width:220px;padding:6px 12px;font-size:12px" placeholder="Search farmer, farm or crop…" oninput="searchB2BFarms(this.value)"/>
+            <div id="b2b-cluster-tabs" style="display:flex;gap:4px;flex-wrap:wrap">
+              <button class="btn btn-secondary b2b-tab-btn active" style="font-size:11px;padding:5px 10px" data-village="all" onclick="filterVillageCluster('all')">All Clusters</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Farmer & Farm ID</th>
+                <th>Location / Cluster</th>
+                <th>Acreage</th>
+                <th>Current Crop</th>
+                <th>Soil Health Score</th>
+                <th>IoT Sensor Node</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="b2b-farms-tbody">
+              <tr>
+                <td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Loading member farms…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </main><!-- end .main -->
+
+  <!-- Modal: Silage Detail Inspection -->
+  <div id="df-detail-modal" class="df-modal-backdrop" onclick="if(event.target === this) closeSampleDetailModal()">
+    <div class="df-modal-box">
+      <div id="df-modal-content"></div>
+      <div style="text-align:right;margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeSampleDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ══════════════════ MOBILE BOTTOM NAVIGATION ══════════════════ -->
   <nav class="mobile-bottom-nav">
@@ -802,6 +1501,10 @@
     <button class="mb-nav-item" data-view="gps-zones" onclick="navigate('gps-zones')">
       <span class="mb-icon">🛰️</span>
       <span class="mb-label" data-i18n="navGpsZonesShort">GPS Zones</span>
+    </button>
+    <button class="mb-nav-item" data-view="dairyfeed" onclick="navigate('dairyfeed')">
+      <span class="mb-icon">🐄</span>
+      <span class="mb-label" data-i18n="navDairyFeed">Dairy</span>
     </button>
     <button class="mb-nav-item" data-view="rotation" onclick="navigate('rotation')">
       <span class="mb-icon">♻️</span>
@@ -824,6 +1527,8 @@
 <script src="js/recommendation.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/gpsZones.js"></script>
+<script src="js/dairyfeed.js"></script>
+<script src="js/b2b.js"></script>
 <script src="js/reportPdf.js"></script>
 <script src="js/chatbot.js"></script>
 

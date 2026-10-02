@@ -72,6 +72,8 @@ async function handleFarmLocationChange(e) {
   // Update active farm chip in sidebar
   const fcName = document.querySelector('.fc-name');
   if (fcName) fcName.textContent = opt.dataset.name;
+  const fcMeta = document.querySelector('.fc-meta');
+  if (fcMeta && opt.dataset.meta) fcMeta.textContent = opt.dataset.meta;
 
   // Reload weather and dashboard
   await fetchLiveWeather();
