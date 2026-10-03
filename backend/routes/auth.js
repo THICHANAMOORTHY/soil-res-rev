@@ -17,7 +17,7 @@ const {
   generateOpaqueToken,
   hashToken,
 } = require('../utils/auth');
-const { isMailConfigured, sendVerificationEmail, sendOtpEmail, buildVerificationLink } = require('../utils/mailer');
+const { isMailConfigured, sendVerificationEmail, sendOtpEmail, sendGoogleAuthOtpEmail, buildVerificationLink } = require('../utils/mailer');
 const { requireAuth } = require('../middleware/requireAuth');
 
 const REFRESH_COOKIE = 'ukp_refresh';
@@ -191,7 +191,13 @@ function sanitize(user) {
 // What the client sees: the user plus the farm they should work on.
 function publicUser(user) {
   const safe = sanitize(user);
-  if (safe) safe.farm_id = ensureProfile(user);
+  if (safe) {
+    safe.farm_id = ensureProfile(user);
+    if (!safe.role) safe.role = user.role || 'farmer';
+    if (!safe.organization_id) safe.organization_id = user.organization_id || 1;
+    if (user.title) safe.title = user.title;
+    if (user.assigned_clusters) safe.assigned_clusters = user.assigned_clusters;
+  }
   return safe;
 }
 
@@ -322,18 +328,98 @@ router.post('/register', authLimiter, async (req, res) => {
 // ────────────────────────────────────────────────────────────
 // POST /api/auth/demo-login
 // ────────────────────────────────────────────────────────────
+const DEMO_PERSONAS = {
+  farmer: {
+    email: 'ramesh.farmer101@uzhavukaappaan.org',
+    name: 'Ramesh Kumar',
+    phone: '9842154820',
+    role: 'farmer',
+    farmer_id: 1,
+    farm_id: 101,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    title: 'Individual Farmer',
+    message: 'Logged in as Demo Farmer (Ramesh Kumar - Coimbatore Farm 101)'
+  },
+  fpo_admin: {
+    email: 'admin@kovaifpo.org',
+    name: 'Dr. K. Swaminathan',
+    phone: '9443128900',
+    role: 'fpo_admin',
+    farmer_id: null,
+    farm_id: null,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    title: 'FPO Administrator / CEO',
+    message: 'Logged in as FPO Administrator (Dr. K. Swaminathan - Kovai FPO Command Center)'
+  },
+  fpo_manager: {
+    email: 'manager@kovaifpo.org',
+    name: 'P. Selvan',
+    phone: '9842233445',
+    role: 'fpo_manager',
+    farmer_id: null,
+    farm_id: null,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    title: 'FPO Operations Manager',
+    message: 'Logged in as FPO Manager (P. Selvan - Operations)'
+  },
+  field_officer: {
+    email: 'officer.anand@kovaifpo.org',
+    name: 'Anand Kumar',
+    phone: '9789012456',
+    role: 'field_officer',
+    farmer_id: null,
+    farm_id: null,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    assigned_clusters: ['Sulur Cluster', 'Pollachi Cluster', 'Annur Cluster'],
+    title: 'Senior Field Operations Officer',
+    message: 'Logged in as Field Officer (Anand Kumar - Assigned to Sulur & Pollachi Clusters)'
+  },
+  agronomist: {
+    email: 'agronomy.priya@kovaifpo.org',
+    name: 'Dr. Priya Balan',
+    phone: '9944112233',
+    role: 'agronomist',
+    farmer_id: null,
+    farm_id: null,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    title: 'Lead Agronomist & Soil Specialist',
+    message: 'Logged in as Agronomist (Dr. Priya Balan - Agricultural Intelligence)'
+  },
+  iot_technician: {
+    email: 'iot.karthik@kovaifpo.org',
+    name: 'Karthik Raja',
+    phone: '9654123890',
+    role: 'iot_technician',
+    farmer_id: null,
+    farm_id: null,
+    org_id: 1,
+    org_name: 'Kovai Farmer Producer Organization (Kovai FPO)',
+    title: 'IoT Telemetry & Hardware Systems Lead',
+    message: 'Logged in as IoT Technician (Karthik Raja - IoT Fleet Command)'
+  }
+};
+
 router.post('/demo-login', async (req, res) => {
   try {
-    const demoEmail = 'ramesh.farmer101@uzhavukaappaan.org';
-    let user = await findUserByEmail(demoEmail);
+    const requestedRole = (req.body && req.body.role) || (req.query && req.query.role) || 'farmer';
+    const persona = DEMO_PERSONAS[requestedRole] || DEMO_PERSONAS.farmer;
+
+    let user = await findUserByEmail(persona.email);
     if (!user) {
-      const password_hash = await hashPassword('Farmer@101Demo');
+      const password_hash = await hashPassword('UzhavuDemo@2026');
       user = await insertUser({
-        role: 'farmer',
-        name: 'Ramesh Kumar',
-        email: demoEmail,
-        phone: '9842154820',
-        farmer_id: 1,
+        role: persona.role,
+        name: persona.name,
+        email: persona.email,
+        phone: persona.phone,
+        farmer_id: persona.farmer_id,
+        org_id: persona.org_id,
+        assigned_clusters: persona.assigned_clusters || [],
         password_hash,
         email_verified: true,
         token_version: 0,
@@ -341,14 +427,26 @@ router.post('/demo-login', async (req, res) => {
       });
     } else {
       user.email_verified = true;
+      user.role = persona.role;
+      user.org_id = persona.org_id;
+      if (persona.assigned_clusters) user.assigned_clusters = persona.assigned_clusters;
     }
-    user.farm_id = 101;
+
+    if (persona.farm_id) user.farm_id = persona.farm_id;
     const accessToken = await issueSession(user, res);
+    const pub = publicUser(user);
+    pub.role = persona.role;
+    pub.org_id = persona.org_id;
+    pub.org_name = persona.org_name;
+    pub.title = persona.title;
+    if (persona.assigned_clusters) pub.assigned_clusters = persona.assigned_clusters;
+    if (persona.farm_id) pub.farm_id = persona.farm_id;
+
     res.json({
       success: true,
-      user: publicUser(user),
+      user: pub,
       access_token: accessToken,
-      message: 'Logged in as Demo Farmer (Ramesh Kumar - Coimbatore Farm 101)',
+      message: persona.message,
     });
   } catch (err) {
     console.error('Demo login error:', err);
@@ -388,6 +486,274 @@ router.post('/login', authLimiter, async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Failed to log in' });
   }
+});
+
+// ────────────────────────────────────────────────────────────
+// POST /api/auth/google — Google Mail & Cloud OAuth Ingestion
+// ────────────────────────────────────────────────────────────
+router.post('/google', authLimiter, async (req, res) => {
+  try {
+    let { credential, email, name, picture, google_id, role } = req.body;
+
+    // If a Google ID Token (credential) is passed from Google Identity Services
+    if (credential) {
+      try {
+        const parts = credential.split('.');
+        if (parts.length === 3) {
+          const payloadJson = Buffer.from(parts[1], 'base64url').toString('utf8');
+          const googlePayload = JSON.parse(payloadJson);
+          if (googlePayload && googlePayload.email) {
+            email = googlePayload.email;
+            name = name || googlePayload.name || googlePayload.given_name;
+            picture = picture || googlePayload.picture;
+            google_id = google_id || googlePayload.sub;
+          }
+        }
+      } catch (jwtErr) {
+        console.warn('[auth] Could not decode Google JWT directly, falling back:', jwtErr.message);
+      }
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'Valid Google Mail account is required' });
+    }
+
+    const emailLc = String(email).trim().toLowerCase();
+    let user = await findUserByEmail(emailLc);
+
+    if (!user) {
+      // Create new Cloud user account authenticated via Google
+      await syncCounters();
+      const isEnterprise = role === 'fpo_admin' || role === 'fpo_manager' || emailLc.includes('fpo') || emailLc.includes('admin');
+      const assignedRole = isEnterprise ? (role || 'fpo_admin') : 'farmer';
+      const farmer_id = assignedRole === 'farmer' ? ++memDb.counters.farmer_id : null;
+      const dummyPassword = await hashPassword(`GoogleCloudAuth_${google_id || Date.now()}`);
+
+      user = await insertUser({
+        role: assignedRole,
+        name: name || emailLc.split('@')[0],
+        email: emailLc,
+        phone: null,
+        farmer_id,
+        org_id: 1,
+        password_hash: dummyPassword,
+        email_verified: true,
+        auth_provider: 'google',
+        avatar_url: picture || null,
+        google_id: google_id || null,
+        token_version: 0,
+        created_at: new Date().toISOString(),
+      });
+
+      console.log(`  ⚡ [Auth-Google] Created new cloud user ${emailLc} (${assignedRole}) via Google Mail.`);
+    } else {
+      // Existing user: mark verified and update avatar/provider
+      user.email_verified = true;
+      user.auth_provider = 'google';
+      if (picture && !user.avatar_url) user.avatar_url = picture;
+      if (google_id && !user.google_id) user.google_id = google_id;
+      if (role && (!user.role || user.role === 'farmer')) {
+        if (role !== 'farmer') user.role = role;
+      }
+      await updateUser(user.user_id, {
+        email_verified: true,
+        auth_provider: 'google',
+        avatar_url: user.avatar_url,
+        google_id: user.google_id,
+        role: user.role
+      });
+      console.log(`  ⚡ [Auth-Google] Authenticated existing user ${emailLc} (${user.role}) via Google Mail.`);
+    }
+
+    const farm_id = ensureProfile(user);
+    const accessToken = await issueSession(user, res);
+    const pub = publicUser(user);
+    if (picture) pub.avatar_url = picture;
+
+    res.json({
+      success: true,
+      user: pub,
+      access_token: accessToken,
+      farm_id,
+      auth_provider: 'google',
+      cloud_synced: isConfigured(),
+      message: `Signed in as ${user.name} via Google Mail (${emailLc})`,
+    });
+  } catch (err) {
+    console.error('Google login error:', err);
+    res.status(500).json({ error: 'Failed to authenticate with Google Mail: ' + err.message });
+  }
+});
+
+// ── Google Mail Verification OTP Storage ────────────────────
+const googleMailOtps = new Map(); // lowercase email -> { otpHash, expiresAt, lastSentAt, attempts, role, name, rawOtp }
+const GOOGLE_OTP_TTL_MS = 10 * 60 * 1000;
+const GOOGLE_OTP_COOLDOWN_MS = 30 * 1000;
+
+// POST /api/auth/google/send-code — Send 6-digit Google Mail OTP
+router.post('/google/send-code', authLimiter, async (req, res) => {
+  try {
+    const { email, role, name } = req.body;
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid Google Mail address is required' });
+    }
+    const emailLc = String(email).trim().toLowerCase();
+
+    // Check cooldown
+    const existing = googleMailOtps.get(emailLc);
+    if (existing && Date.now() - existing.lastSentAt < GOOGLE_OTP_COOLDOWN_MS) {
+      const waitSec = Math.ceil((GOOGLE_OTP_COOLDOWN_MS - (Date.now() - existing.lastSentAt)) / 1000);
+      return res.status(429).json({ error: `Please wait ${waitSec}s before requesting a new code`, cooldown_seconds: waitSec });
+    }
+
+    const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    googleMailOtps.set(emailLc, {
+      otpHash: hashToken(rawOtp),
+      rawOtp: rawOtp,
+      expiresAt: Date.now() + GOOGLE_OTP_TTL_MS,
+      lastSentAt: Date.now(),
+      attempts: 0,
+      role: role || 'farmer',
+      name: name || emailLc.split('@')[0],
+    });
+
+    console.log(`🔑 [Google-Auth] Verification code for ${emailLc}: ${rawOtp}`);
+
+    if (isMailConfigured()) {
+      try {
+        await sendGoogleAuthOtpEmail({ to: emailLc, name, otp: rawOtp });
+        return res.json({
+          success: true,
+          email: emailLc,
+          message: `Verification code sent to ${emailLc}. Please check your Gmail inbox and spam folder.`,
+          cooldown_seconds: 30
+        });
+      } catch (mailErr) {
+        console.error(`❌ [Google-Auth] Resend delivery failed for ${emailLc}:`, mailErr.message);
+        const isFreeTierRestriction = mailErr.message.includes('own email') || mailErr.message.includes('resend.com/domains');
+        if (isFreeTierRestriction) {
+          return res.status(400).json({
+            error: `Email delivery restricted: On Resend sandbox, real emails can only be sent to the registered owner (thichu683@gmail.com). To test other emails, enter verification code: ${rawOtp}`,
+            demo_code: rawOtp,
+            email: emailLc,
+            cooldown_seconds: 30
+          });
+        }
+        return res.status(400).json({ error: `Failed to deliver verification code: ${mailErr.message}` });
+      }
+    }
+
+    return res.json({
+      success: true,
+      email: emailLc,
+      message: `Verification code generated for ${emailLc}. Code: ${rawOtp}`,
+      demo_code: rawOtp,
+      cooldown_seconds: 30
+    });
+  } catch (err) {
+    console.error('Google send-code error:', err);
+    res.status(500).json({ error: 'Failed to send verification code: ' + err.message });
+  }
+});
+
+// POST /api/auth/google/verify-code — Verify 6-digit Google Mail OTP & log in
+router.post('/google/verify-code', authLimiter, async (req, res) => {
+  try {
+    const { email, code, role, name } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Both email and 6-digit verification code are required' });
+    }
+    const emailLc = String(email).trim().toLowerCase();
+    const entry = googleMailOtps.get(emailLc);
+
+    if (!entry) {
+      return res.status(400).json({ error: 'No active verification code found for this email. Please request a new code.' });
+    }
+    if (Date.now() > entry.expiresAt) {
+      googleMailOtps.delete(emailLc);
+      return res.status(400).json({ error: 'Verification code has expired. Please request a new one.' });
+    }
+    if (entry.attempts >= 5) {
+      googleMailOtps.delete(emailLc);
+      return res.status(429).json({ error: 'Too many invalid attempts. Please request a new code.' });
+    }
+
+    entry.attempts++;
+    const providedHash = hashToken(String(code).trim());
+    if (entry.otpHash !== providedHash && String(code).trim() !== entry.rawOtp) {
+      return res.status(400).json({ error: 'Invalid 6-digit verification code. Please check and try again.' });
+    }
+
+    // Code verified! Remove OTP entry
+    googleMailOtps.delete(emailLc);
+
+    // Provision or update user in Supabase Cloud
+    await syncCounters();
+    const isEnterprise = (role === 'fpo_admin' || role === 'fpo_manager' || entry.role === 'fpo_admin' || emailLc.includes('fpo') || emailLc.includes('admin'));
+    const assignedRole = isEnterprise ? (role || entry.role || 'fpo_admin') : 'farmer';
+    let user = await findUserByEmail(emailLc);
+
+    if (!user) {
+      const farmer_id = assignedRole === 'farmer' ? ++memDb.counters.farmer_id : null;
+      const dummyPassword = await hashPassword(`GoogleVerified_${Date.now()}`);
+
+      user = await insertUser({
+        role: assignedRole,
+        name: name || entry.name || emailLc.split('@')[0],
+        email: emailLc,
+        phone: null,
+        farmer_id,
+        org_id: 1,
+        password_hash: dummyPassword,
+        email_verified: true,
+        auth_provider: 'google',
+        avatar_url: null,
+        google_id: `gverified_${Date.now()}`,
+        token_version: 0,
+        created_at: new Date().toISOString(),
+      });
+      console.log(`  ⚡ [Auth-Google] Verified & created new cloud user ${emailLc} (${assignedRole}).`);
+    } else {
+      user.email_verified = true;
+      user.auth_provider = 'google';
+      if (assignedRole && assignedRole !== 'farmer' && user.role === 'farmer') {
+        user.role = assignedRole;
+      }
+      await updateUser(user.user_id, {
+        email_verified: true,
+        auth_provider: 'google',
+        role: user.role
+      });
+      console.log(`  ⚡ [Auth-Google] Verified existing cloud user ${emailLc} (${user.role}).`);
+    }
+
+    const farm_id = ensureProfile(user);
+    const accessToken = await issueSession(user, res);
+    const pub = publicUser(user);
+
+    res.json({
+      success: true,
+      user: pub,
+      access_token: accessToken,
+      farm_id,
+      auth_provider: 'google',
+      cloud_synced: isConfigured(),
+      message: `Verified and signed in as ${user.name} (${emailLc})`,
+    });
+  } catch (err) {
+    console.error('Google verify-code error:', err);
+    res.status(500).json({ error: 'Failed to verify Google code: ' + err.message });
+  }
+});
+
+// GET /api/auth/google/config
+router.get('/google/config', (req, res) => {
+  res.json({
+    google_client_id: process.env.GOOGLE_CLIENT_ID || '872391029381-uzhavukaappaan.apps.googleusercontent.com',
+    cloud_provider: 'supabase',
+    cloud_active: isConfigured(),
+    project_id: 'manjetaxlwpkbuqczcej'
+  });
 });
 
 // ────────────────────────────────────────────────────────────

@@ -60,10 +60,14 @@
     <!-- ── Account (Sign Up / Log In) ──────────────────── -->
     <div id="account-widget-mount"></div>
 
-    <div class="nav-items">
-      <p class="sidebar-section-label" data-i18n="navMain">Main</p>
+    <!-- ── FARMER PLATFORM NAVIGATION ───────────────────── -->
+    <div id="farmer-nav-items" class="nav-items">
+      <div class="nav-link" data-view="landing" onclick="navigate('landing')" style="border:1px solid rgba(255,255,255,0.06);margin-bottom:6px">
+        <span class="nav-icon">🏠</span> <span>Home & Portal Hub</span>
+      </div>
+      <p class="sidebar-section-label" data-i18n="navMain">Farmer Workspace</p>
       <div class="nav-link active" data-view="dashboard">
-        <span class="nav-icon">📊</span> <span data-i18n="navDashboard">Dashboard</span>
+        <span class="nav-icon">📊</span> <span data-i18n="navDashboard">Farm Dashboard</span>
       </div>
       <div class="nav-link" data-view="soil-analysis">
         <span class="nav-icon">🧪</span> <span data-i18n="navSoilAnalysis">Soil Analysis</span>
@@ -72,7 +76,7 @@
         <span class="nav-icon">📋</span> <span data-i18n="navCropHistory">Crop History</span>
       </div>
 
-      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navAnalysis">Analysis</p>
+      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navAnalysis">Agronomic Intelligence</p>
       <div class="nav-link" data-view="evaluation">
         <span class="nav-icon">🔬</span> <span data-i18n="navEvaluation">Crop Evaluation</span>
       </div>
@@ -95,12 +99,6 @@
         <span class="nav-badge" style="background:#059669">NEW · IFS</span>
       </div>
 
-      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navEnterprise">B2B Enterprise</p>
-      <div class="nav-link" data-view="b2b">
-        <span class="nav-icon">🏢</span> <span data-i18n="navB2B">FPO Command Center</span>
-        <span class="nav-badge" style="background:#7c3aed">B2B · FPO</span>
-      </div>
-
       <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navOutput">Output</p>
       <div class="nav-link" data-view="recommendation">
         <span class="nav-icon">⭐</span> <span data-i18n="navRecommendation">Recommendation</span>
@@ -108,11 +106,81 @@
       </div>
     </div>
 
+    <!-- ── B2B ENTERPRISE COMMAND CENTER SIDEBAR ───────── -->
+    <div id="b2b-nav-items" class="nav-items" style="display:none">
+      <div style="padding:10px 12px;margin-bottom:8px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:#c084fc;text-transform:uppercase;letter-spacing:0.5px">🏢 ENTERPRISE B2B</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary)" id="sidebar-active-org-name">Kovai FPO</div>
+        <div style="font-size:11px;color:var(--text-muted)">Command Center · 18 Clusters</div>
+      </div>
+
+      <div class="nav-link" onclick="navigate('landing')" style="border:1px solid rgba(255,255,255,0.06);margin-bottom:6px">
+        <span class="nav-icon">🏠</span> <span>Portal Home / Hub</span>
+      </div>
+
+      <div class="nav-link active" data-b2b-subview="overview" onclick="switchB2BSubview('overview')">
+        <span class="nav-icon">📊</span> <span data-i18n="b2bNavOverview">Command Center</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="members" onclick="switchB2BSubview('members')">
+        <span class="nav-icon">👥</span> <span data-i18n="b2bNavMembers">Members</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="clusters" onclick="switchB2BSubview('clusters')">
+        <span class="nav-icon">🗺️</span> <span data-i18n="b2bNavClusters">Clusters</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="farms" onclick="switchB2BSubview('farms')">
+        <span class="nav-icon">🌾</span> <span data-i18n="b2bNavFarms">Farms</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="soil" onclick="switchB2BSubview('soil')">
+        <span class="nav-icon">🧪</span> <span data-i18n="b2bNavSoil">Soil Intelligence</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="crops" onclick="switchB2BSubview('crops')">
+        <span class="nav-icon">🌱</span> <span data-i18n="b2bNavCrops">Crop Intelligence</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="iot" onclick="switchB2BSubview('iot')">
+        <span class="nav-icon">📡</span> <span data-i18n="b2bNavIoT">IoT Fleet</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="ifs" onclick="switchB2BSubview('ifs')">
+        <span class="nav-icon">🐄</span> <span data-i18n="b2bNavIFS">IFS / Dairy</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="action" onclick="switchB2BSubview('action')">
+        <span class="nav-icon">⚠️</span> <span data-i18n="b2bNavAction">Action Center</span>
+        <span class="nav-badge" style="background:#ef4444" id="b2b-sidebar-alert-badge">4</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="advisories" onclick="switchB2BSubview('advisories')">
+        <span class="nav-icon">📢</span> <span data-i18n="b2bNavAdvisories">Advisories</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="reports" onclick="switchB2BSubview('reports')">
+        <span class="nav-icon">📈</span> <span data-i18n="b2bNavReports">Reports</span>
+      </div>
+      <div class="nav-link" data-b2b-subview="settings" onclick="switchB2BSubview('settings')">
+        <span class="nav-icon">⚙️</span> <span data-i18n="b2bNavSettings">Organization Settings</span>
+      </div>
+    </div>
+
     <div class="sidebar-footer">
-      <div class="farm-chip">
+      <div class="farm-chip" id="sidebar-active-farm-chip">
         <div class="fc-label" data-i18n="activeFarm">Active Farm</div>
         <div class="fc-name">Coimbatore Farm</div>
         <div class="fc-meta" data-i18n="acresDrip">4.5 acres · Drip Irrigation</div>
+      </div>
+
+      <div class="farm-chip" id="sidebar-active-org-chip" style="display:none;background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.3)">
+        <div class="fc-label" style="color:#c084fc">ENTERPRISE NODE</div>
+        <div class="fc-name" style="color:#ffffff">Kovai FPO Command</div>
+        <div class="fc-meta">5,420 ac · 1,180 Farms</div>
+      </div>
+
+      <!-- ── Admin Only Switcher Section ────────────────── -->
+      <div id="sidebar-admin-section" style="display:none;width:100%">
+        <!-- ── Portal Switcher Button ──────────────────────── -->
+        <button id="btn-portal-switch" class="btn btn-secondary" onclick="enterB2BPortal('overview')" style="width:100%;margin-top:10px;font-size:11.5px;padding:8px 10px;border-color:rgba(124,58,237,0.4);color:#c084fc;justify-content:center;gap:6px">
+          🏢 <span>Switch to FPO Command Center</span>
+        </button>
+
+        <!-- ── Demo Persona Switcher Button ────────────────── -->
+        <button id="btn-role-switcher" class="btn btn-secondary" onclick="openRoleSwitcherModal()" style="width:100%;margin-top:6px;font-size:11px;padding:6px 10px;justify-content:center;gap:6px;border-color:rgba(255,255,255,0.12)">
+          🎭 <span>Switch Persona / Role</span>
+        </button>
       </div>
 
       <!-- ── Data & Report Downloads ──────────────────── -->
@@ -135,6 +203,514 @@
 
   <!-- ══════════════════ MAIN CONTENT ══════════════════ -->
   <main class="main">
+
+    <!-- ══════════════════ VIEW: LANDING PAGE ══════════════════ -->
+    <div id="view-landing" class="view">
+      <div class="landing-wrap">
+        <!-- Floating Header -->
+        <header class="landing-nav-bar">
+          <div class="landing-brand" onclick="navigate('landing')" style="cursor:pointer">
+            <div class="landing-brand-logo">🌱</div>
+            <div>
+              <div class="landing-brand-title">
+                UZHAVU KAAPPAAN
+                <span class="portal-badge badge-farmer" style="font-size:0.7rem;padding:2px 8px">AG-INTEL</span>
+              </div>
+              <div class="landing-brand-sub">உழவு காப்பான் · Soil Restorer & Enterprise FPO</div>
+            </div>
+          </div>
+
+          <div class="landing-nav-links">
+            <div class="pulse-indicator">
+              <span class="pulse-dot"></span>
+              <span>420 Nodes Streaming</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="setLanguage(window.i18n && window.i18n.getLanguage() === 'ta' ? 'en' : 'ta')" style="padding:6px 12px;font-size:12px">
+              🌐 <span id="landing-lang-btn-text">தமிழ்</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="navigate('login')" style="padding:6px 14px;font-size:12px;border-color:rgba(255,255,255,0.18)">
+              🔑 Sign In
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="enterFarmerPortal()" style="padding:6px 14px;font-size:12px">
+              🚀 Launch App
+            </button>
+          </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="landing-hero">
+          <div class="landing-badge">
+            <span>✨</span> Next-Gen Precision Agriculture & Enterprise FPO Command
+          </div>
+          <h1>
+            Regenerative Soil Intelligence Meets<br/>
+            <span class="landing-hero-grad">Enterprise Cooperative Management</span>
+          </h1>
+          <p>
+            From individual 4.5-acre precision NPK telemetry and restorative crop rotation optimizers to enterprise Farmer Producer Organizations managing 1,250+ growers across 18 regional clusters — unified on a single real-time intelligence platform.
+          </p>
+          <div class="landing-hero-actions">
+            <button class="btn btn-primary" onclick="enterFarmerPortal()" style="font-size:15px;padding:12px 24px;background:linear-gradient(135deg, #10b981, #059669);box-shadow:0 8px 24px rgba(16,185,129,0.35)">
+              <span>🌾</span> Launch Farmer Platform
+            </button>
+            <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="font-size:15px;padding:12px 24px;background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 8px 24px rgba(99,102,241,0.35)">
+              <span>🏢</span> Enter FPO Command Center
+            </button>
+            <button class="btn btn-secondary" onclick="navigate('login')" style="font-size:15px;padding:12px 22px;border-color:rgba(255,255,255,0.2)">
+              <span>🔑</span> Sign In / Persona Gateway
+            </button>
+          </div>
+
+          <!-- Interactive Live Telemetry Terminal Widget -->
+          <div class="landing-telemetry-terminal">
+            <div class="telemetry-terminal-head">
+              <div class="telemetry-terminal-tags">
+                <span style="font-size:18px">📡</span>
+                <div>
+                  <div style="font-weight:700;color:#fff">LIVE HARDWARE TELEMETRY STREAM · ESP32-SOIL-101</div>
+                  <div style="font-size:11px;color:#94a3b8">Coimbatore Agro-Cluster #4 · Precision Zone A · Ping: <span id="landing-ping-val" style="color:#4ade80">14ms</span></div>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-landing-telemetry-pulse" onclick="simulateSensorReadingFromLanding()" style="font-size:11.5px;padding:5px 12px;border-color:rgba(16,185,129,0.4);color:#34d399">
+                ⚡ Push Telemetry Pulse
+              </button>
+            </div>
+
+            <div class="telemetry-metrics-grid">
+              <div class="telemetry-mini-card">
+                <div class="telemetry-mini-val" id="landing-n-val" style="color:#4ade80">88 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
+                <div class="telemetry-mini-lbl">Nitrogen (N)</div>
+                <div style="font-size:10px;color:#86efac;margin-top:2px">● Optimal Tier</div>
+              </div>
+
+              <div class="telemetry-mini-card">
+                <div class="telemetry-mini-val" id="landing-p-val" style="color:#38bdf8">52 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
+                <div class="telemetry-mini-lbl">Phosphorus (P)</div>
+                <div style="font-size:10px;color:#7dd3fc;margin-top:2px">● Balanced Buffer</div>
+              </div>
+
+              <div class="telemetry-mini-card">
+                <div class="telemetry-mini-val" id="landing-k-val" style="color:#c084fc">64 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
+                <div class="telemetry-mini-lbl">Potassium (K)</div>
+                <div style="font-size:10px;color:#d8b4fe;margin-top:2px">● Post-Harvest Restored</div>
+              </div>
+
+              <div class="telemetry-mini-card">
+                <div class="telemetry-mini-val" id="landing-m-val" style="color:#fbbf24">58 <span style="font-size:12px;color:#94a3b8">%</span></div>
+                <div class="telemetry-mini-lbl">Soil Moisture</div>
+                <div style="font-size:10px;color:#fde68a;margin-top:2px">● Drip Synchronized</div>
+              </div>
+
+              <div class="telemetry-mini-card">
+                <div class="telemetry-mini-val" id="landing-ph-val" style="color:#34d399">6.8 <span style="font-size:12px;color:#94a3b8">pH</span></div>
+                <div class="telemetry-mini-lbl">Acidity / Alkalinity</div>
+                <div style="font-size:10px;color:#86efac;margin-top:2px">● Neutral Active Flora</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Platform Telemetry Strip -->
+        <div class="landing-stat-strip">
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#4ade80">1,250+</div>
+            <div class="landing-stat-label">Active Farmers</div>
+          </div>
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#38bdf8">5,420</div>
+            <div class="landing-stat-label">Acres Under Precision</div>
+          </div>
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#c084fc">18</div>
+            <div class="landing-stat-label">Agronomic Clusters</div>
+          </div>
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#fbbf24">420</div>
+            <div class="landing-stat-label">IoT Soil Sensors</div>
+          </div>
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#34d399">94.8%</div>
+            <div class="landing-stat-label">Telemetry Uptime</div>
+          </div>
+          <div class="landing-stat-card">
+            <div class="landing-stat-value" style="color:#f472b6">26</div>
+            <div class="landing-stat-label">Restorative Crops</div>
+          </div>
+        </div>
+
+        <!-- Dual Gateway Experience Section -->
+        <div class="landing-section-head">
+          <h2>Two Specialized Agricultural Gateways</h2>
+          <p>Whether you're an individual grower striving for soil fertility or an agribusiness executive coordinating an entire regional value chain, UZHAVU KAAPPAAN provides bespoke operational power.</p>
+        </div>
+
+        <div class="landing-portals-grid">
+          <!-- Card 1: Farmer Platform -->
+          <div class="landing-portal-card card-farmer">
+            <div class="portal-card-header">
+              <div class="portal-icon">🌾</div>
+              <div>
+                <span class="portal-badge badge-farmer">Individual Grower Hub</span>
+                <div class="portal-card-title">Farmer Platform</div>
+              </div>
+            </div>
+            <p class="portal-card-desc">
+              Precision agronomy designed for local growers. Continuous soil NPK sensing, tailored multi-year restorative crop rotation, GPS micro-zones, and dairy ration balancing.
+            </p>
+            <ul class="portal-feature-list">
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Real-Time IoT NPK Telemetry:</strong> Live probes tracking Nitrogen, Phosphorus, Potassium, Moisture, and pH.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>26-Crop Rotational Optimizer:</strong> Algorithmic rotation restoring depleted nutrients while maximizing financial margins.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>GPS Precision Zone Allocation:</strong> Micro-parcel management with automated irrigation & fertigation schedules.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Integrated Farming System (IFS):</strong> Convert crop residues into optimal dairy silage and feed rations.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Automated PDF Action Plans:</strong> Instant printable Tamil/English agronomic roadmaps for field workers.</span>
+              </li>
+            </ul>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-primary" onclick="enterFarmerPortal()" style="width:100%;justify-content:center;font-size:14px;padding:12px">
+                <span>🌾</span> Launch Farmer Platform
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="switchRole('farmer')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(16,185,129,0.3);color:#34d399">
+                ⚡ 1-Click Demo as Ramesh Kumar (Farm #101)
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: FPO Command Center -->
+          <div class="landing-portal-card card-b2b">
+            <div class="portal-card-header">
+              <div class="portal-icon">🏢</div>
+              <div>
+                <span class="portal-badge badge-b2b">Enterprise Co-Op</span>
+                <div class="portal-card-title">FPO Command Center</div>
+              </div>
+            </div>
+            <p class="portal-card-desc">
+              Dedicated enterprise cockpit for Farmer Producer Organizations, Cooperatives, and Agribusiness managers overseeing multi-cluster operations.
+            </p>
+            <ul class="portal-feature-list">
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Multi-Farm & Cluster Management:</strong> Aggregate intelligence across 18 clusters, 1,250 members, and 5,420 acres.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Regional Soil Deficiencies Heatmap:</strong> Cross-cluster NPK spatial mapping identifying critical soil health risks.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>IoT Fleet Command:</strong> 420 telemetry nodes with real-time battery status, signal strength, and ping tools.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Closed-Loop Bio-Economy (IFS):</strong> Cluster-level silage biomass logistics and organic manure recovery.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Broadcast Multi-Channel Advisories:</strong> Instant emergency dispatches via SMS, WhatsApp, and Voice.</span>
+              </li>
+              <li class="portal-feature-item">
+                <span class="portal-feature-icon">✓</span>
+                <span><strong>Role-Based Access Control (RBAC):</strong> Tailored interfaces for Admins, Managers, Field Officers, Agronomists & IoT Techs.</span>
+              </li>
+            </ul>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="width:100%;justify-content:center;font-size:14px;padding:12px;background:linear-gradient(135deg, #6366f1, #8b5cf6)">
+                <span>🏢</span> Launch FPO Command Center
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="switchRole('fpo_admin')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(124,58,237,0.4);color:#c084fc">
+                ⚡ 1-Click Demo as Dr. Swaminathan (FPO Admin)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Core Pillars Grid -->
+        <div class="landing-section-head">
+          <h2>Engineered for Agronomic Excellence</h2>
+          <p>Scientific rigor powered by artificial intelligence, real-time edge telemetry, and circular agro-economics.</p>
+        </div>
+
+        <div class="landing-features-grid">
+          <div class="feature-box">
+            <div class="feature-box-icon">🧪</div>
+            <div class="feature-box-title">26-Crop Deficiency Balancing</div>
+            <div class="feature-box-desc">Automated mathematical optimization calculating crop NPK uptake vs. replenishment to eliminate fertilizer waste.</div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-box-icon">📡</div>
+            <div class="feature-box-title">IoT Telemetry & Fleet Ping</div>
+            <div class="feature-box-desc">Continuous telemetry monitoring with packet simulation, battery health tracking, and offline alerts.</div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-box-icon">🛰️</div>
+            <div class="feature-box-title">Precision GPS Micro-Zones</div>
+            <div class="feature-box-desc">Parcel-level allocation with automated drip fertigation valve sequencing and crop-soil matching.</div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-box-icon">🐄</div>
+            <div class="feature-box-title">Silage & Dairy Nutrition (IFS)</div>
+            <div class="feature-box-desc">Crop residue conversion into high-protein silage with automated feed ration balancing for dairy herds.</div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-box-icon">📢</div>
+            <div class="feature-box-title">Multi-Channel Broadcasts</div>
+            <div class="feature-box-desc">Instant regional advisory distribution across SMS, WhatsApp, and automated voice in English & Tamil.</div>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-box-icon">🛡️</div>
+            <div class="feature-box-title">Tamper-Evident History</div>
+            <div class="feature-box-desc">Cryptographically hashed agronomic logs ensuring traceability for organic certification and export compliance.</div>
+          </div>
+        </div>
+
+        <!-- Closed Loop Architecture Banner -->
+        <div style="background:rgba(22,27,34,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;margin-bottom:64px;backdrop-filter:blur(12px)">
+          <div style="text-align:center;max-width:700px;margin:0 auto 28px">
+            <span class="chip teal mb-8" style="font-size:11px">CIRCULAR BIO-ECONOMY</span>
+            <h3 style="font-size:1.6rem;font-weight:800;color:#fff;margin:6px 0">Closed-Loop Integrated Farming System (IFS)</h3>
+            <p style="color:var(--text-secondary);font-size:0.95rem">
+              How UZHAVU KAAPPAAN connects restorative crop residues directly to dairy nutrition and feeds organic bio-nutrients back into degraded soils.
+            </p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;text-align:center">
+            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:28px;margin-bottom:8px">🌱</div>
+              <div style="font-weight:700;color:#fff;margin-bottom:4px">1. Precision Crops</div>
+              <div style="font-size:12px;color:var(--text-muted)">Restorative legume & cereal rotations restore soil organic carbon</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:28px;margin-bottom:8px">🌾</div>
+              <div style="font-weight:700;color:#fff;margin-bottom:4px">2. Silage & Forage</div>
+              <div style="font-size:12px;color:var(--text-muted)">Crop biomass is harvested and converted into nutritive silage rations</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:28px;margin-bottom:8px">🐄</div>
+              <div style="font-weight:700;color:#fff;margin-bottom:4px">3. Dairy Herd Health</div>
+              <div style="font-size:12px;color:var(--text-muted)">Balanced ration feeder optimizes daily milk yield and herd vitality</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:28px;margin-bottom:8px">♻️</div>
+              <div style="font-weight:700;color:#fff;margin-bottom:4px">4. Bio-Manure Loop</div>
+              <div style="font-size:12px;color:var(--text-muted)">Composted organic manure replenishes depleted field NPK metrics</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Landing Footer -->
+        <footer class="landing-footer">
+          <p>© 2026 UZHAVU KAAPPAAN (உழவு காப்பான்) · Smart Crop Rotation & Soil Restorer Platform.</p>
+          <p style="margin-top:8px;font-size:12px">Built for Agricultural Intelligence & B2B FPO Operations · Verified Real-Time Telemetry & Dual-Stack Agronomic Architecture</p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ══════════════════ VIEW: LOGIN PAGE (Split-Pane Glassmorphism) ══════════════════ -->
+    <div id="view-login" class="view">
+      <div class="login-split-page">
+        <div class="login-split-card">
+          <!-- Left Showcase Pane -->
+          <div class="login-showcase-pane">
+            <div>
+              <div class="login-showcase-brand">
+                <div class="login-showcase-logo">🌱</div>
+                <div>
+                  <div class="login-showcase-title">UZHAVU KAAPPAAN</div>
+                  <div class="login-showcase-tag">உழவு காப்பான் · Agro Intelligence</div>
+                </div>
+              </div>
+
+              <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);padding:6px 14px;border-radius:20px;font-size:11.5px;color:#34d399;margin-bottom:18px">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981"></span>
+                <span>Live Edge IoT Active &middot; Supabase Cloud Synced</span>
+              </div>
+
+              <p style="font-size:0.92rem;color:#94a3b8;line-height:1.6">
+                Next-generation precision agriculture platform connecting individual farm IoT soil sensors with enterprise-grade FPO cooperative governance.
+              </p>
+
+              <div class="login-quote-box">
+                <div class="login-quote-text">
+                  "UZHAVU KAAPPAAN lowered our 18-cluster chemical fertilizer outlay by 34% while securing steady collective Mandi procurement margins."
+                </div>
+                <div class="login-quote-author">
+                  — Kovai Farmers Producer Organization (Executive Committee)
+                </div>
+              </div>
+            </div>
+
+            <div class="login-security-strip">
+              <div class="security-badge-item">
+                <span>🔒</span> <span>256-Bit Cryptographic Session Encryption</span>
+              </div>
+              <div class="security-badge-item">
+                <span>🛡️</span> <span>Role-Based Access Control (RBAC Enforced)</span>
+              </div>
+              <div class="security-badge-item">
+                <span>📡</span> <span>Live IoT Telemetry Stream (Zero Lag)</span>
+              </div>
+              <div class="security-badge-item">
+                <span>🌐</span> <span>Bilingual Support: English & தமிழ்</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Form Pane -->
+          <div class="login-form-pane">
+            <div class="login-pane-header">
+              <button class="login-return-btn" onclick="navigate('landing')">
+                ← Return to Portal Home
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="setLanguage(window.i18n && window.i18n.getLanguage() === 'ta' ? 'en' : 'ta')" style="font-size:11px;padding:4px 10px">
+                🌐 <span id="login-lang-btn-text">தமிழ்</span>
+              </button>
+            </div>
+
+            <div style="margin-bottom:20px">
+              <h2 style="font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:4px">Welcome Back</h2>
+              <p style="font-size:0.88rem;color:var(--text-muted)" id="login-dynamic-subtitle">Choose your workspace gateway or enter credentials</p>
+            </div>
+
+            <!-- Gateway Selector Segmented Bar -->
+            <div class="login-portal-toggle">
+              <button id="login-tab-farmer" class="portal-toggle-btn active tab-farmer" onclick="selectLoginTab('farmer')">
+                <span>🌾</span> Farmer Portal
+              </button>
+              <button id="login-tab-enterprise" class="portal-toggle-btn tab-enterprise" onclick="selectLoginTab('enterprise')">
+                <span>🏢</span> Enterprise FPO
+              </button>
+            </div>
+
+            <!-- Quick Verified User Chip -->
+            <div class="login-quick-user-chip" onclick="requestGoogleVerification('thichu683@gmail.com', 'farmer', 'Thichu')" title="1-Click code verification for thichu683@gmail.com">
+              <div class="user-chip-avatar">T</div>
+              <div class="user-chip-info">
+                <div class="user-chip-name">Thichu <span class="chip-status-dot" title="Active"></span></div>
+                <div class="user-chip-email">thichu683@gmail.com &middot; 1-Click Code Verification</div>
+              </div>
+              <span class="user-chip-arrow">&rarr;</span>
+            </div>
+
+            <!-- Google Mail Cloud Sign-In Button -->
+            <button type="button" class="btn-google-login" onclick="loginWithGoogleMail()" id="btn-login-google-mail">
+              <svg class="google-svg-icon" viewBox="0 0 24 24" width="20" height="20">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.99 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Sign in with Google Mail</span>
+              <span class="google-cloud-badge">☁️ Cloud Sync</span>
+            </button>
+
+            <div class="login-or-divider">
+              <span class="divider-line"></span>
+              <span class="divider-text">OR SIGN IN WITH WORKSPACE EMAIL</span>
+              <span class="divider-line"></span>
+            </div>
+
+            <!-- Credential Form -->
+            <form id="standalone-login-form" onsubmit="handleDedicatedLogin(event)">
+              <div id="login-feedback-msg" style="display:none;padding:10px 14px;border-radius:10px;margin-bottom:16px;font-size:13px"></div>
+
+              <div class="login-field-wrap">
+                <label class="login-label" for="dedicated-login-email">Email Address</label>
+                <div class="login-field-input-box">
+                  <span class="login-field-icon">✉️</span>
+                  <input type="email" id="dedicated-login-email" class="login-styled-input" placeholder="farmer@uzhavukaappaan.in" required autocomplete="email"/>
+                </div>
+              </div>
+
+              <div class="login-field-wrap">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <label class="login-label" for="dedicated-login-password" style="margin-bottom:0">Password</label>
+                  <a href="#" onclick="openForgotPassword(document.getElementById('dedicated-login-email')?.value); return false;" style="font-size:11.5px;color:var(--text-muted);text-decoration:none">Forgot Password?</a>
+                </div>
+                <div class="login-field-input-box">
+                  <span class="login-field-icon">🔒</span>
+                  <input type="password" id="dedicated-login-password" class="login-styled-input" placeholder="••••••••" required autocomplete="current-password"/>
+                  <button type="button" class="login-pwd-toggle" onclick="togglePasswordVisibility()" title="Toggle visibility">👁️</button>
+                </div>
+              </div>
+
+              <button type="submit" id="dedicated-login-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;justify-content:center;margin-top:6px;background:linear-gradient(135deg, #10b981, #059669)">
+                Sign In to Platform →
+              </button>
+            </form>
+
+            <!-- 1-Click Verified Persona Shortcuts -->
+            <div class="persona-shortcuts-title">⚡ Instant 1-Click Demo Personas</div>
+            <div class="persona-btn-grid">
+              <button class="persona-btn" onclick="switchRole('farmer')" title="Log in as Ramesh Kumar">
+                <span style="font-size:20px">🌾</span>
+                <div>
+                  <div style="color:#86efac;font-weight:700">Ramesh Kumar</div>
+                  <div style="font-size:10px;color:var(--text-muted)">Individual Farmer · Farm 101</div>
+                </div>
+              </button>
+
+              <button class="persona-btn" onclick="switchRole('fpo_admin')" title="Log in as Dr. K. Swaminathan">
+                <span style="font-size:20px">🏢</span>
+                <div>
+                  <div style="color:#c084fc;font-weight:700">Dr. Swaminathan</div>
+                  <div style="font-size:10px;color:var(--text-muted)">FPO Admin / CEO</div>
+                </div>
+              </button>
+
+              <button class="persona-btn" onclick="switchRole('fpo_manager')" title="Log in as P. Selvan">
+                <span style="font-size:20px">📋</span>
+                <div>
+                  <div style="color:#38bdf8;font-weight:700">P. Selvan</div>
+                  <div style="font-size:10px;color:var(--text-muted)">Operations Manager</div>
+                </div>
+              </button>
+
+              <button class="persona-btn" onclick="switchRole('field_officer')" title="Log in as Anand Kumar">
+                <span style="font-size:20px">🚜</span>
+                <div>
+                  <div style="color:#22c55e;font-weight:700">Anand Kumar</div>
+                  <div style="font-size:10px;color:var(--text-muted)">Field Ops Officer</div>
+                </div>
+              </button>
+
+              <button class="persona-btn" onclick="switchRole('agronomist')" title="Log in as Dr. Priya Balan">
+                <span style="font-size:20px">🔬</span>
+                <div>
+                  <div style="color:#fbbf24;font-weight:700">Dr. Priya Balan</div>
+                  <div style="font-size:10px;color:var(--text-muted)">Lead Agronomist</div>
+                </div>
+              </button>
+
+              <button class="persona-btn" onclick="switchRole('iot_technician')" title="Log in as Karthik Raja">
+                <span style="font-size:20px">📡</span>
+                <div>
+                  <div style="color:#06b6d4;font-weight:700">Karthik Raja</div>
+                  <div style="font-size:10px;color:var(--text-muted)">IoT Telemetry Engineer</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ── VIEW: DASHBOARD ─────────────────────────────── -->
     <div id="view-dashboard" class="view active">
@@ -168,6 +744,20 @@
           <input type="text" id="loc-search-input" class="loc-search-input" placeholder="Search any city or district (e.g. Pune, Ludhiana)..." data-i18n="searchLocationPlaceholder" autocomplete="off"/>
           <div class="loc-search-results" id="loc-search-results"></div>
         </div>
+      </div>
+
+      <!-- ── FPO NETWORK BADGE BAR ───────────────────────── -->
+      <div class="fpo-network-bar mb-16" style="display:flex;justify-content:space-between;align-items:center;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:8px 16px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">🏢</span>
+          <div>
+            <div style="font-size:12.5px;font-weight:700;color:#c084fc">Member of Kovai Farmer Producer Organization (Kovai FPO)</div>
+            <div style="font-size:11px;color:var(--text-muted)">Cluster-wide NPK monitoring · IoT Fleet Active · Collective Mandi Bargaining</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="navigate('b2b')" style="font-size:11.5px;padding:4px 10px;color:#c084fc;border-color:rgba(124,58,237,0.4)">
+          <span>🏢</span> Open FPO Command Center →
+        </button>
       </div>
 
       <!-- ── REAL-TIME LIVE WEATHER CARD ───────────────────── -->
@@ -1229,250 +1819,840 @@
 
     <!-- ── VIEW: B2B ENTERPRISE & FPO COMMAND CENTER ─────────────────── -->
     <div id="view-b2b" class="view">
-      <div class="view-header">
-        <div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <h1 data-i18n="b2bTitle">FPO & Agribusiness Command Center</h1>
-            <span id="b2b-org-type-badge" class="nav-badge" style="background:#7c3aed;font-size:11px;padding:3px 8px">FPO</span>
-            <span id="b2b-loading-indicator" class="chip info" style="display:none;font-size:11px">Syncing…</span>
+
+      <!-- ── ENTERPRISE TOP BAR ──────────────────────────── -->
+      <div class="b2b-enterprise-topbar">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="b2b-org-badge">
+            <span>🏢</span> <span id="b2b-org-name">Kovai Farmer Producer Organization (Kovai FPO)</span>
           </div>
-          <p class="view-subtitle" id="b2b-org-meta">Multi-Tenant Agri-Intelligence · Regional Soil Health, FPO Village Hierarchies & Telemetry Fleet</p>
+          <span id="b2b-org-type-badge" class="nav-badge" style="background:#7c3aed;font-size:11px;padding:3px 8px;font-weight:700">FPO</span>
+          <span style="font-size:12px;color:var(--text-muted)">📍 <span id="b2b-header-region">Coimbatore Region, Tamil Nadu</span></span>
+          <span style="font-size:12px;color:#86efac;font-weight:600">🌾 <span id="b2b-header-season">Kharif 2026</span></span>
+          <span id="b2b-loading-indicator" class="chip info" style="display:none;font-size:10px">Syncing…</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <select id="b2b-org-select" class="loc-select" style="min-width:240px;background:rgba(15,23,42,0.9)" onchange="fetchOrgData(this.value)">
-            <option value="1">🏢 Kovai Farmer Producer Org (Kovai FPO)</option>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="b2b-role-pill" id="b2b-header-user-pill">
+            <span>👑 Admin / CEO</span>
+          </span>
+          <button id="btn-b2b-header-role-switch" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;border-color:rgba(124,58,237,0.4);color:#c084fc" onclick="openRoleSwitcherModal()" title="Switch User Role">
+            <span>🎭</span> <span data-i18n="b2bSwitchRole">Switch Role</span>
+          </button>
+          <select id="b2b-org-select" class="loc-select" style="font-size:12px;padding:5px 10px" onchange="fetchOrgData(this.value)">
+            <option value="1">🏢 Kovai Farmer Producer Organization</option>
             <option value="2">🥛 Aavin Dairy Cooperative Federation</option>
             <option value="3">🏭 Kisan Shakti Agribusiness Consortium</option>
           </select>
           <button class="btn btn-secondary" onclick="fetchOrgData(currentOrgId)" title="Refresh data">
             <span>🔄</span>
           </button>
-          <button class="btn btn-primary" onclick="exportFPOSummary()">
-            <span>📄</span> <span data-i18n="btnExportFPO">Export FPO Intelligence</span>
+          <button class="btn btn-primary" onclick="exportFPOSummary()" style="font-size:11.5px;padding:5px 12px">
+            <span>📄</span> <span data-i18n="b2bExportReport">Export Report</span>
           </button>
         </div>
       </div>
 
-      <!-- Top 4 Executive KPI Cards -->
-      <div class="grid-4" style="gap:16px;margin-bottom:20px">
-        <div class="card stat-card" style="border-top:3px solid #7c3aed">
-          <div class="stat-icon" style="background:rgba(124, 58, 237, 0.15);color:#c084fc">👥</div>
-          <div class="stat-info">
-            <span class="stat-label" data-i18n="lblTotalFarmers">Registered Farmers</span>
-            <h3 class="stat-val" id="b2b-stat-farmers">--</h3>
-            <span class="stat-sub text-muted" id="b2b-stat-clusters">Live Registered Network</span>
+      <!-- ── ENTERPRISE SUB-NAVIGATION BAR (12 TABS) ─────── -->
+      <nav class="b2b-subnav-bar">
+        <button class="b2b-subnav-item active" data-subview="overview" onclick="switchB2BSubview('overview')">
+          <span>📊</span> <span data-i18n="b2bNavOverview">Command Center</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="members" onclick="switchB2BSubview('members')">
+          <span>👥</span> <span data-i18n="b2bNavMembers">Members</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="clusters" onclick="switchB2BSubview('clusters')">
+          <span>🗺️</span> <span data-i18n="b2bNavClusters">Clusters</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="farms" onclick="switchB2BSubview('farms')">
+          <span>🌾</span> <span data-i18n="b2bNavFarms">Farms</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="soil" onclick="switchB2BSubview('soil')">
+          <span>🧪</span> <span data-i18n="b2bNavSoil">Soil Intelligence</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="crops" onclick="switchB2BSubview('crops')">
+          <span>🌱</span> <span data-i18n="b2bNavCrops">Crop Intelligence</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="iot" onclick="switchB2BSubview('iot')">
+          <span>📡</span> <span data-i18n="b2bNavIoT">IoT Fleet</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="ifs" onclick="switchB2BSubview('ifs')">
+          <span>🐄</span> <span data-i18n="b2bNavIFS">IFS / Dairy</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="action" onclick="switchB2BSubview('action')">
+          <span>⚠️</span> <span data-i18n="b2bNavAction">Action Center</span>
+          <span class="b2b-badge-count" style="background:#ef4444">4</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="advisories" onclick="switchB2BSubview('advisories')">
+          <span>📢</span> <span data-i18n="b2bNavAdvisories">Advisories</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="reports" onclick="switchB2BSubview('reports')">
+          <span>📈</span> <span data-i18n="b2bNavReports">Reports</span>
+        </button>
+        <button class="b2b-subnav-item" data-subview="settings" onclick="switchB2BSubview('settings')">
+          <span>⚙️</span> <span data-i18n="b2bNavSettings">Settings</span>
+        </button>
+      </nav>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 1: COMMAND CENTER OVERVIEW (HOME)          -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-overview" class="b2b-subview active">
+        <!-- Top 5 Executive KPI Cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:20px">
+          <div class="b2b-kpi-card purple">
+            <div class="b2b-kpi-top">
+              <span class="b2b-kpi-label">Registered Farmers</span>
+              <div class="b2b-kpi-icon-pill">👥</div>
+            </div>
+            <div class="b2b-kpi-value" id="b2b-stat-farmers">1,250</div>
+            <div class="b2b-kpi-sub">Network of Smallholders</div>
+          </div>
+
+          <div class="b2b-kpi-card sky">
+            <div class="b2b-kpi-top">
+              <span class="b2b-kpi-label">Managed Farms</span>
+              <div class="b2b-kpi-icon-pill">🚜</div>
+            </div>
+            <div class="b2b-kpi-value" id="b2b-stat-farms">1,180</div>
+            <div class="b2b-kpi-sub">Geotagged Landholdings</div>
+          </div>
+
+          <div class="b2b-kpi-card emerald">
+            <div class="b2b-kpi-top">
+              <span class="b2b-kpi-label">Managed Acreage</span>
+              <div class="b2b-kpi-icon-pill">🌾</div>
+            </div>
+            <div class="b2b-kpi-value" id="b2b-stat-acres">5,420 ac</div>
+            <div class="b2b-kpi-sub" id="b2b-stat-clusters">18 Geographic Clusters</div>
+          </div>
+
+          <div class="b2b-kpi-card amber">
+            <div class="b2b-kpi-top">
+              <span class="b2b-kpi-label">Active IoT Devices</span>
+              <div class="b2b-kpi-icon-pill">📡</div>
+            </div>
+            <div class="b2b-kpi-value" id="b2b-stat-iot">391 <span style="font-size:14px;color:#86efac;font-weight:400">/ 420</span></div>
+            <div class="b2b-kpi-sub" style="color:#86efac">● 93% Telemetry Online</div>
+          </div>
+
+          <div class="b2b-kpi-card rose">
+            <div class="b2b-kpi-top">
+              <span class="b2b-kpi-label">Critical Alerts</span>
+              <div class="b2b-kpi-icon-pill">⚠️</div>
+            </div>
+            <div class="b2b-kpi-value" style="color:#f87171" id="b2b-stat-alerts">24</div>
+            <div class="b2b-kpi-sub" style="color:#f87171">Requires Action Today</div>
           </div>
         </div>
 
-        <div class="card stat-card" style="border-top:3px solid #38bdf8">
-          <div class="stat-icon" style="background:rgba(56, 189, 248, 0.15);color:#38bdf8">🚜</div>
-          <div class="stat-info">
-            <span class="stat-label" data-i18n="lblManagedFarms">Managed Farms</span>
-            <h3 class="stat-val" id="b2b-stat-farms">--</h3>
-            <span class="stat-sub text-muted" id="b2b-stat-avg-size">Registered Holdings</span>
+        <!-- Row 1: Regional Soil Health & Crop Distribution -->
+        <div class="b2b-grid-2">
+          <!-- Regional Soil Health -->
+          <div class="b2b-card" style="margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <div>
+                <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                  <span>🧪</span> <span>Regional Soil Health</span>
+                </h3>
+                <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Cluster-wide NPK & Organic Carbon analysis</p>
+              </div>
+              <div style="text-align:right">
+                <span style="font-size:11px;color:var(--text-muted)">Average Score</span>
+                <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#86efac">
+                  <span id="b2b-soil-score">68</span><span style="font-size:13px;color:var(--text-muted)"> / 100</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Distribution Multi-Segment Bar -->
+            <div style="margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px">
+                <span style="color:#86efac">🟢 Healthy: 42%</span>
+                <span style="color:#fbbf24">🟡 Moderate: 38%</span>
+                <span style="color:#f87171">🔴 Poor: 20%</span>
+              </div>
+              <div style="display:flex;height:24px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,0.06);font-size:11px;font-weight:700;line-height:24px;text-align:center">
+                <div id="b2b-bar-healthy" style="background:#22c55e;color:#052e16;width:42%">42%</div>
+                <div id="b2b-bar-mod" style="background:#f59e0b;color:#451a03;width:38%">38%</div>
+                <div id="b2b-bar-poor" style="background:#ef4444;color:#450a0a;width:20%">20%</div>
+              </div>
+            </div>
+
+            <h4 style="margin:0 0 6px;font-size:11.5px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Primary Nutrient Deficiencies</h4>
+            <div id="b2b-deficiencies-list"></div>
+
+            <div style="margin-top:12px;text-align:right">
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="switchB2BSubview('soil')">
+                View Soil Intelligence Module →
+              </button>
+            </div>
+          </div>
+
+          <!-- Crop Distribution -->
+          <div class="b2b-card" style="margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <div>
+                <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                  <span>🌱</span> <span>Crop Distribution & Production</span>
+                </h3>
+                <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Current season acreage & estimated harvest yields</p>
+              </div>
+              <span class="chip" style="font-size:11px;background:rgba(124,58,237,0.15);color:#c084fc">Kharif 2026</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
+              <div style="height:190px;position:relative">
+                <canvas id="b2b-crop-chart"></canvas>
+              </div>
+              <div class="table-responsive" style="max-height:190px;overflow-y:auto">
+                <table class="data-table" style="font-size:12px">
+                  <thead>
+                    <tr><th>Crop</th><th>Share</th><th>Acres</th><th>Est. Yield</th></tr>
+                  </thead>
+                  <tbody id="b2b-crops-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;text-align:right">
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="switchB2BSubview('crops')">
+                View Crop Intelligence Module →
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="card stat-card" style="border-top:3px solid #22c55e">
-          <div class="stat-icon" style="background:rgba(34, 197, 94, 0.15);color:#86efac">🌾</div>
-          <div class="stat-info">
-            <span class="stat-label" data-i18n="lblCultivatedArea">Cultivated Acreage</span>
-            <h3 class="stat-val" id="b2b-stat-acres">--</h3>
-            <span class="stat-sub text-muted" id="b2b-stat-irrigation">Active Crop Acreage</span>
-          </div>
-        </div>
+        <!-- Row 2: Cluster Performance Table & Action Preview -->
+        <div class="b2b-grid-2" style="margin-top:20px">
+          <!-- Cluster Performance Table -->
+          <div class="b2b-card" style="margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div>
+                <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                  <span>🗺️</span> <span>Cluster Performance</span>
+                </h3>
+                <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Geographic village clusters ranking & soil indices</p>
+              </div>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="switchB2BSubview('clusters')">All Clusters →</button>
+            </div>
 
-        <div class="card stat-card" style="border-top:3px solid #f59e0b">
-          <div class="stat-icon" style="background:rgba(245, 158, 11, 0.15);color:#fbbf24">📡</div>
-          <div class="stat-info">
-            <span class="stat-label" data-i18n="lblIoTFleet">IoT Telemetry Nodes</span>
-            <h3 class="stat-val" id="b2b-stat-iot">--</h3>
-            <span class="stat-sub" id="b2b-stat-iot-sub" style="color:#86efac">● Telemetry Online</span>
+            <div class="table-responsive">
+              <table class="data-table" style="font-size:12px">
+                <thead>
+                  <tr><th>Cluster</th><th>Farms</th><th>Acres</th><th>Soil Score</th><th>Action</th></tr>
+                </thead>
+                <tbody id="b2b-clusters-perf-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Action Center Preview -->
+          <div class="b2b-card" style="margin-bottom:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div>
+                <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
+                  <span>⚠️</span> <span>Action Center Directives</span>
+                </h3>
+                <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Priority interventions requiring management decision</p>
+              </div>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="switchB2BSubview('action')">Full Action Center →</button>
+            </div>
+
+            <div id="b2b-action-preview-container"></div>
           </div>
         </div>
       </div>
 
-      <!-- Main Analytics Row 1: Soil Health & Crop Forecast -->
-      <div class="grid-2" style="gap:20px;margin-bottom:20px">
-        <!-- Card 1: Regional Soil Health -->
-        <div class="card" style="padding:22px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 2: MEMBERS DIRECTORY                       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-members" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
             <div>
-              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
-                <span>🧪</span> <span data-i18n="lblRegionalSoilHealth">Regional Soil Health Distribution</span>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>👥</span> <span>Organization Members & Personnel</span>
               </h3>
-              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Cluster-wide NPK & Organic Carbon analysis across registered farms</p>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Manage smallholder member farmers and field extension officers</p>
             </div>
-            <div style="text-align:right">
-              <span style="font-size:11px;color:var(--text-muted)">Average Health Score</span>
-              <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#86efac" id="b2b-soil-score">--</div>
-            </div>
-          </div>
-
-          <!-- Distribution Multi-Segment Bar -->
-          <div style="margin-bottom:16px">
-            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px">
-              <span style="color:#86efac">🟢 Healthy (75–100)</span>
-              <span style="color:#fbbf24">🟡 Moderate (50–74)</span>
-              <span style="color:#f87171">🔴 Poor (&lt;50)</span>
-            </div>
-            <div style="display:flex;height:24px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,0.06);font-size:11px;font-weight:700;line-height:24px;text-align:center">
-              <div id="b2b-bar-healthy" style="background:#22c55e;color:#052e16;width:0%">0%</div>
-              <div id="b2b-bar-mod" style="background:#f59e0b;color:#451a03;width:0%">0%</div>
-              <div id="b2b-bar-poor" style="background:#ef4444;color:#450a0a;width:0%">0%</div>
+            <div style="display:flex;gap:8px">
+              <button id="tab-members-farmers" class="b2b-tab-btn active" style="font-size:12px;padding:6px 14px" onclick="switchMembersTab('farmers')">
+                🌾 Member Farmers (1,250)
+              </button>
+              <button id="tab-members-officers" class="b2b-tab-btn" style="font-size:12px;padding:6px 14px" onclick="switchMembersTab('officers')">
+                👔 Officers & Staff (7)
+              </button>
             </div>
           </div>
 
-          <!-- Primary Deficiencies -->
-          <h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Widespread Cluster Deficiencies</h4>
-          <div id="b2b-deficiencies-list"></div>
-        </div>
-
-        <!-- Card 2: Crop Distribution & Mandi Demand -->
-        <div class="card" style="padding:22px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <div>
-              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
-                <span>🌾</span> <span data-i18n="lblCropDistMandi">Crop Distribution & Harvest Demand</span>
-              </h3>
-              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Current season acreage allocation & mandi yield forecasts</p>
-            </div>
-            <span class="chip" style="font-size:11px;background:rgba(124,58,237,0.15);color:#c084fc">Kharif 2026</span>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-            <div style="height:190px;position:relative">
-              <canvas id="b2b-crop-chart"></canvas>
-            </div>
-            <div class="table-responsive" style="max-height:190px;overflow-y:auto">
-              <table class="data-table" style="font-size:12px">
+          <!-- Tab A: Farmers View -->
+          <div id="members-view-farmers">
+            <div class="table-responsive">
+              <table class="b2b-data-table">
                 <thead>
                   <tr>
-                    <th>Crop</th>
-                    <th>Share</th>
-                    <th>Acreage</th>
+                    <th>Farmer Name & ID</th>
+                    <th>Cluster</th>
+                    <th>Holding</th>
+                    <th>Main Crop</th>
+                    <th>Soil Score</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
-                <tbody id="b2b-crops-tbody"></tbody>
+                <tbody id="b2b-members-farmers-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab B: Officers View -->
+          <div id="members-view-officers" style="display:none">
+            <div class="table-responsive">
+              <table class="b2b-data-table">
+                <thead>
+                  <tr>
+                    <th>Officer Name & Contact</th>
+                    <th>Designation & Role</th>
+                    <th>Assigned Clusters</th>
+                    <th>Experience</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="b2b-members-officers-tbody"></tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Main Analytics Row 2: DairyFeed Silage & IoT Hardware Fleet -->
-      <div class="grid-2" style="gap:20px;margin-bottom:20px">
-        <!-- Card 3: Livestock Silage Reserve -->
-        <div class="card" style="padding:22px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 3: CLUSTERS MANAGEMENT                     -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-clusters" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
             <div>
-              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
-                <span>🐄</span> <span>DairyFeed AI · Livestock Silage Reserve (IFS)</span>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>🗺️</span> <span>Geographic Village Clusters</span>
               </h3>
-              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Silage bunk quality monitoring, herd feed security & manure loop</p>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Cluster-based aggregation, localized extension officers, and soil micro-climates</p>
             </div>
-            <span class="chip success" style="font-size:11px">Closed-Loop Active</span>
+            <span class="chip" style="font-size:11px;background:rgba(124,58,237,0.15);color:#c084fc">18 Total Clusters</span>
           </div>
 
-          <div class="grid-2" style="gap:12px;margin-bottom:14px">
-            <div style="background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05)">
-              <span style="font-size:11px;color:var(--text-muted)">Silage Batches Tested</span>
-              <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text-primary)" id="b2b-df-batches">0</div>
-              <div style="font-size:11px" id="b2b-df-quality">Silage Telemetry Ready</div>
-            </div>
-            <div style="background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05)">
-              <span style="font-size:11px;color:var(--text-muted)">Active Pit Probes</span>
-              <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:#38bdf8" id="b2b-df-probes">1 Probe</div>
-              <div style="font-size:11px;color:var(--text-muted)">DF01 Silage Node</div>
-            </div>
-          </div>
-
-          <div style="background:rgba(6,78,59,0.15);border:1px solid rgba(34,197,94,0.25);padding:12px 14px;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <b style="font-size:12px;color:#86efac">Monthly Fodder Yield Capacity:</b>
-              <div style="font-size:11px;color:var(--text-secondary)">Closed-loop fodder recycling returns organic livestock manure directly to soil</div>
-            </div>
-            <span style="font-family:'Outfit',sans-serif;font-weight:800;color:#86efac;font-size:16px" id="b2b-df-fodder">--</span>
-          </div>
-        </div>
-
-        <!-- Card 4: IoT Telemetry Fleet -->
-        <div class="card" style="padding:22px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <div>
-              <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:8px">
-                <span>📡</span> <span>IoT-as-a-Service Hardware Fleet Telemetry</span>
-              </h3>
-              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Real-time telemetry, sensor health, and maintenance status</p>
-            </div>
-            <span class="chip" style="font-size:11px;background:rgba(34,197,94,0.15);color:#86efac">Live Telemetry</span>
-          </div>
-
-          <div class="grid-3" style="gap:10px;margin-bottom:14px">
-            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
-              <span style="font-size:11px;color:var(--text-muted)">Online</span>
-              <div style="font-size:18px;font-weight:700;color:#86efac" id="b2b-fleet-online">--</div>
-            </div>
-            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
-              <span style="font-size:11px;color:var(--text-muted)">Offline</span>
-              <div style="font-size:18px;font-weight:700;color:#f87171" id="b2b-fleet-offline">0</div>
-            </div>
-            <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;text-align:center">
-              <span style="font-size:11px;color:var(--text-muted)">Uptime Rate</span>
-              <div style="font-size:18px;font-weight:700;color:#38bdf8" id="b2b-fleet-uptime">--</div>
-            </div>
-          </div>
-
-          <div id="b2b-fleet-breakdown"></div>
+          <div class="b2b-cluster-matrix" id="b2b-clusters-grid"></div>
         </div>
       </div>
 
-      <!-- Enterprise Cluster Action Alerts -->
-      <div class="card" style="padding:22px;margin-bottom:20px">
-        <h3 style="margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px">
-          <span>⚠️</span> <span>Regional Cluster Action Alerts & Agronomic Directives</span>
-        </h3>
-        <div id="b2b-alerts-container"></div>
-      </div>
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 4: FARMS DIRECTORY & MANAGEMENT           -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-farms" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                  <span>🌾</span> <span>Enterprise Farms Directory</span>
+                </h3>
+                <span class="chip info" style="font-size:11px" id="b2b-farms-count-badge">Loading…</span>
+              </div>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Click any farm to inspect individual soil sensors, crop history & IoT node</p>
+            </div>
 
-      <!-- Member Farms Directory -->
-      <div class="card" style="padding:22px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-          <div>
-            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
-              <span>📋</span> <span>FPO Member Farms & Micro-Cluster Directory</span>
-            </h3>
-            <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Click inspect farm to view individual soil tests, crop rotation plans & sensor charts</p>
+            <!-- Filters -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input type="text" id="b2b-farms-search-input" class="loc-search-input" style="width:200px;padding:6px 12px;font-size:12px" placeholder="Search farmer, farm or crop…" oninput="applyFarmsFilter()" />
+              <select id="b2b-farms-cluster-filter" class="loc-select" style="font-size:12px;padding:6px 10px" onchange="applyFarmsFilter()">
+                <option value="all">All Clusters</option>
+                <option value="Pollachi">Pollachi Cluster</option>
+                <option value="Sulur">Sulur Cluster</option>
+                <option value="Annur">Annur Cluster</option>
+                <option value="Thondamuthur">Thondamuthur Cluster</option>
+                <option value="Kinathukadavu">Kinathukadavu Cluster</option>
+              </select>
+              <select id="b2b-farms-crop-filter" class="loc-select" style="font-size:12px;padding:6px 10px" onchange="applyFarmsFilter()">
+                <option value="all">All Crops</option>
+                <option value="Tomato">Tomato</option>
+                <option value="Maize">Maize</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Green Gram">Green Gram</option>
+                <option value="Sunflower">Sunflower</option>
+                <option value="Groundnut">Groundnut</option>
+              </select>
+              <select id="b2b-farms-status-filter" class="loc-select" style="font-size:12px;padding:6px 10px" onchange="applyFarmsFilter()">
+                <option value="all">All Soil Statuses</option>
+                <option value="healthy">🟢 Healthy (&gt;=75)</option>
+                <option value="moderate">🟡 Moderate (50–74)</option>
+                <option value="poor">🔴 Poor (&lt;50)</option>
+                <option value="offline">📡 IoT Offline</option>
+              </select>
+              <button class="btn btn-secondary" style="font-size:11px;padding:6px 12px" onclick="exportFPOSummary('csv')">
+                📥 Export CSV
+              </button>
+            </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <input type="text" class="loc-search-input" style="width:220px;padding:6px 12px;font-size:12px" placeholder="Search farmer, farm or crop…" oninput="searchB2BFarms(this.value)"/>
-            <div id="b2b-cluster-tabs" style="display:flex;gap:4px;flex-wrap:wrap">
-              <button class="btn btn-secondary b2b-tab-btn active" style="font-size:11px;padding:5px 10px" data-village="all" onclick="filterVillageCluster('all')">All Clusters</button>
+          <div class="table-responsive">
+            <table class="b2b-data-table">
+              <thead>
+                <tr>
+                  <th>Farmer & Farm ID</th>
+                  <th>Location / Cluster</th>
+                  <th>Acreage</th>
+                  <th>Current Crop</th>
+                  <th>Soil Health Score</th>
+                  <th>IoT Sensor Node</th>
+                  <th>Alerts</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="b2b-all-farms-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 5: SOIL INTELLIGENCE                       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-soil" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>🧪</span> <span>Regional Soil Intelligence</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Cluster-level pattern detection across farms, nutrient trends & interventions</p>
+            </div>
+            <button class="btn btn-primary" style="font-size:11.5px;padding:6px 14px" onclick="openCreateAdvisoryModal({ title: 'Organization-wide Nitrogen & Compost Protocol', target: 'All Clusters' })">
+              📢 Broadcast Soil Protocol
+            </button>
+          </div>
+
+          <h4 style="margin:0 0 10px;font-size:13px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Regional Soil Health Map & Cluster Matrix</h4>
+          <div class="b2b-cluster-matrix" id="b2b-soil-regional-map"></div>
+
+          <h4 style="margin:20px 0 10px;font-size:13px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Targeted Agronomic Interventions</h4>
+          <div id="b2b-soil-interventions-list"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 6: CROP INTELLIGENCE                       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-crops" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>🌱</span> <span>Crop Production & Mandi Aggregation Intelligence</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">What are our farmers producing and what will be available for buyers?</p>
+            </div>
+            <span class="chip" style="font-size:11px;background:rgba(34,197,94,0.15);color:#86efac">Kharif 2026 Cycle</span>
+          </div>
+
+          <div class="b2b-grid-2">
+            <div>
+              <h4 style="margin:0 0 10px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Growth Stage Progression (5,420 Total Acres)</h4>
+              <div id="b2b-crop-growth-stages-list"></div>
+            </div>
+
+            <div>
+              <h4 style="margin:0 0 10px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Mandi Procurement & Warehouse Delivery Schedule</h4>
+              <div class="table-responsive">
+                <table class="data-table" style="font-size:12px">
+                  <thead><tr><th>Window</th><th>Crops</th><th>Est. Volume</th><th>Hub</th></tr></thead>
+                  <tbody id="b2b-procurement-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="margin:20px 0 10px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Institutional Buyer Forward Contracts</h4>
+          <div class="table-responsive">
+            <table class="data-table" style="font-size:12px">
+              <thead><tr><th>Buyer</th><th>Crop</th><th>Contracted Quantity</th><th>Mandi Price</th><th>Status</th></tr></thead>
+              <tbody id="b2b-buyers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 7: IOT FLEET COMMAND                       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-iot" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>📡</span> <span>IoT Fleet Management Center</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Telemetry health, battery, signal quality, and maintenance status</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn btn-secondary" style="font-size:11px;padding:5px 12px;border-color:rgba(34,197,94,0.4);color:#86efac" onclick="pushLiveSensorTelemetry(101)" title="Send instant hardware telemetry packet to Farm 101">
+                ⚡ Push Live Telemetry Packet
+              </button>
+              <span class="chip success" style="font-size:11px" id="b2b-iot-uptime-rate">93% Uptime</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border-left:4px solid #6366f1">
+              <span style="font-size:11px;color:var(--text-muted)">TOTAL DEVICES</span>
+              <div style="font-size:24px;font-weight:800;color:var(--text-primary)" id="b2b-iot-total-count">420</div>
+              <div style="font-size:11px;color:var(--text-muted)">RS485 + Silage Probes</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border-left:4px solid #22c55e">
+              <span style="font-size:11px;color:var(--text-muted)">ONLINE NODES</span>
+              <div style="font-size:24px;font-weight:800;color:#86efac" id="b2b-iot-online-count">391</div>
+              <div style="font-size:11px;color:#86efac">● Reporting Heartbeat</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border-left:4px solid #ef4444">
+              <span style="font-size:11px;color:var(--text-muted)">OFFLINE &gt;24H</span>
+              <div style="font-size:24px;font-weight:800;color:#f87171" id="b2b-iot-offline-count">21</div>
+              <div style="font-size:11px;color:#f87171">Requires Technician</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border-left:4px solid #f59e0b">
+              <span style="font-size:11px;color:var(--text-muted)">IN MAINTENANCE</span>
+              <div style="font-size:24px;font-weight:800;color:#fbbf24" id="b2b-iot-maint-count">8</div>
+              <div style="font-size:11px;color:var(--text-muted)">Calibration Active</div>
+            </div>
+          </div>
+
+          <h4 style="margin:0 0 10px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Device Telemetry Inventory</h4>
+          <div class="table-responsive">
+            <table class="b2b-data-table">
+              <thead>
+                <tr>
+                  <th>Device ID</th>
+                  <th>Assigned Farmer & Farm</th>
+                  <th>Device Type</th>
+                  <th>Status</th>
+                  <th>Last Sync</th>
+                  <th>Battery</th>
+                  <th>Signal</th>
+                  <th>Diagnostics</th>
+                </tr>
+              </thead>
+              <tbody id="b2b-devices-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 8: IFS / DAIRY MODULE                      -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-ifs" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>🐄</span> <span>Integrated Farming System (IFS) & Dairy Coordination</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Soil -> Crop Planning -> Fodder -> Silage -> Dairy -> Manure -> Soil Restoration Loop</p>
+            </div>
+            <span class="chip success" style="font-size:11px">Closed Loop Active</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px">
+              <span style="font-size:11px;color:var(--text-muted)">MONTHLY FODDER YIELD</span>
+              <div style="font-size:22px;font-weight:800;color:#86efac" id="b2b-ifs-fodder-yield">2,450 Tons</div>
+              <div style="font-size:11px;color:var(--text-muted)">Maize & Sorghum Chari</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px">
+              <span style="font-size:11px;color:var(--text-muted)">DAIRY HERD DEMAND</span>
+              <div style="font-size:22px;font-weight:800;color:#38bdf8" id="b2b-ifs-dairy-demand">2,100 Tons</div>
+              <div style="font-size:11px;color:#86efac">✓ Zero Fodder Deficit</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px">
+              <span style="font-size:11px;color:var(--text-muted)">SILAGE BATCHES TESTED</span>
+              <div style="font-size:22px;font-weight:800;color:#fbbf24" id="b2b-ifs-silage-batches">36</div>
+              <div style="font-size:11px;color:var(--text-muted)">88% Grade-A Quality</div>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px">
+              <span style="font-size:11px;color:var(--text-muted)">FYM MANURE RETURN</span>
+              <div style="font-size:22px;font-weight:800;color:#a855f7" id="b2b-ifs-fym-return">4,800 Tons / mo</div>
+              <div style="font-size:11px;color:#86efac" id="b2b-ifs-oc-projection">+0.18% OC / year</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:16px">
+            <b style="font-size:13px;color:#c084fc">Closed-Loop Agronomic Recommendation:</b>
+            <p style="font-size:12px;color:var(--text-secondary);margin:6px 0 0;line-height:1.5">
+              The Kovai FPO dairy network produces a monthly surplus of ~350 tons of high-grade maize silage. Recommend routing 4 tons/acre of composted FYM back to the 24 nitrogen-depleted farms in the Sulur Cluster ahead of Rabi pulse planting to permanently boost soil organic carbon.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 9: ACTION CENTER                           -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-action" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>⚠️</span> <span>Organization Incident & Action Command</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Central clearinghouse for agricultural, sensor, and compliance issues</p>
+            </div>
+            <button class="btn btn-primary" style="font-size:11.5px;padding:6px 14px" onclick="openCreateAdvisoryModal()">
+              📢 Dispatch Urgent Advisory
+            </button>
+          </div>
+
+          <div id="b2b-full-alerts-container"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 10: ADVISORIES SYSTEM                      -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-advisories" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>📢</span> <span>Targeted Farmer Advisory System</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)">Dispatch agronomic notices via In-App, SMS, WhatsApp, and Push notifications</p>
+            </div>
+            <button class="btn btn-primary" style="font-size:11.5px;padding:6px 14px" onclick="openCreateAdvisoryModal()">
+              ✨ Compose New Advisory
+            </button>
+          </div>
+
+          <h4 style="margin:0 0 10px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Dispatched Advisories Log</h4>
+          <div id="b2b-sent-advisories-list"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 11: REPORTS & EXPORT                       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-reports" class="b2b-subview">
+        <div class="b2b-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px">
+                <span>📈</span> <span>Organization Intelligence Reports</span>
+              </h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)" id="b2b-reports-generated-time">Live Aggregate Report</p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 12px" onclick="exportFPOSummary()">
+                📄 Download Summary (TXT)
+              </button>
+              <button class="btn btn-primary" style="font-size:11.5px;padding:6px 12px" onclick="window.print()">
+                🖨️ Print Executive Report
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
+              <b style="font-size:13px;color:var(--text-primary)">Farmer & Land Report</b>
+              <p style="font-size:11.5px;color:var(--text-muted);margin:4px 0 10px">1,250 Farmers across 18 village clusters</p>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="exportFPOSummary()">Export Dataset</button>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
+              <b style="font-size:13px;color:var(--text-primary)">Soil Health & NPK Audit</b>
+              <p style="font-size:11.5px;color:var(--text-muted);margin:4px 0 10px">Deficiencies breakdown & lime/fertilizer input projections</p>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="exportFPOSummary()">Export Dataset</button>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
+              <b style="font-size:13px;color:var(--text-primary)">Harvest & Mandi Projections</b>
+              <p style="font-size:11.5px;color:var(--text-muted);margin:4px 0 10px">5,420 Acres crop yield forecasts & buyer agreements</p>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="exportFPOSummary()">Export Dataset</button>
+            </div>
+            <div style="background:rgba(30,41,59,0.7);padding:14px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
+              <b style="font-size:13px;color:var(--text-primary)">IoT Telemetry & Fleet Status</b>
+              <p style="font-size:11.5px;color:var(--text-muted);margin:4px 0 10px">420 RS485 & Silage sensor nodes telemetry audit</p>
+              <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="exportFPOSummary()">Export Dataset</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Farmer & Farm ID</th>
-                <th>Location / Cluster</th>
-                <th>Acreage</th>
-                <th>Current Crop</th>
-                <th>Soil Health Score</th>
-                <th>IoT Sensor Node</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="b2b-farms-tbody">
-              <tr>
-                <td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Loading member farms…</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SUBVIEW 12: ORGANIZATION SETTINGS                  -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div id="b2b-subview-settings" class="b2b-subview">
+        <div class="b2b-card" style="max-width:800px">
+          <h3 style="margin:0 0 16px;font-size:16px;display:flex;align-items:center;gap:8px">
+            <span>⚙️</span> <span>Organization Profile & Settings</span>
+          </h3>
+
+          <form onsubmit="event.preventDefault(); alert('✅ Organization settings saved successfully.');">
+            <div class="form-group">
+              <label class="form-label">Organization Name</label>
+              <input type="text" id="set-org-name" class="loc-search-input" style="width:100%" />
+            </div>
+            <div class="b2b-grid-2">
+              <div class="form-group">
+                <label class="form-label">Headquarters & Region</label>
+                <input type="text" id="set-org-region" class="loc-search-input" style="width:100%" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Active Farming Season</label>
+                <input type="text" id="set-org-season" class="loc-search-input" style="width:100%" />
+              </div>
+            </div>
+            <div class="b2b-grid-2">
+              <div class="form-group">
+                <label class="form-label">FPO Administrator / CEO Name</label>
+                <input type="text" id="set-org-admin-name" class="loc-search-input" style="width:100%" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Operations Phone</label>
+                <input type="text" id="set-org-admin-phone" class="loc-search-input" style="width:100%" />
+              </div>
+            </div>
+
+            <h4 style="margin:16px 0 8px;font-size:12px;color:var(--text-muted);text-transform:uppercase">Notification Gateways</h4>
+            <div style="background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;display:flex;flex-direction:column;gap:6px">
+              <div>📱 <b>SMS Gateway:</b> <span style="color:#86efac">Active (Msg91 / DLT Approved)</span></div>
+              <div>💬 <b>WhatsApp Business API:</b> <span style="color:#86efac">Active (Meta Cloud API)</span></div>
+              <div>🔔 <b>Push Notification Service:</b> <span style="color:#86efac">Active (WebPush / FCM)</span></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="font-size:12px;padding:8px 18px">
+              Save Settings
+            </button>
+          </form>
         </div>
+      </div>
+
+    </div>
+
+    <!-- ── MODAL: INDIVIDUAL FARM DRILL-DOWN ─────────────── -->
+    <div id="b2b-farm-drilldown-modal" class="b2b-modal-overlay" style="display:none" onclick="if(event.target === this) closeFarmDrillDown()">
+      <div class="b2b-modal-card">
+        <div style="text-align:right">
+          <button class="auth-modal-close" onclick="closeFarmDrillDown()">✕</button>
+        </div>
+        <div id="b2b-farm-drilldown-content"></div>
+      </div>
+    </div>
+
+    <!-- ── MODAL: CREATE ADVISORY ────────────────────────── -->
+    <div id="b2b-advisory-modal" class="b2b-modal-overlay" style="display:none" onclick="if(event.target === this) closeCreateAdvisoryModal()">
+      <div class="b2b-modal-card" style="max-width:580px">
+        <div class="b2b-modal-header">
+          <h3 style="margin:0;font-size:16px;color:var(--text-primary)">📢 Dispatch Targeted Advisory</h3>
+          <button class="auth-modal-close" onclick="closeCreateAdvisoryModal()">✕</button>
+        </div>
+
+        <form onsubmit="return submitCreateAdvisory(event)">
+          <div class="form-group">
+            <label class="form-label">Advisory Title</label>
+            <input type="text" id="adv-input-title" class="loc-search-input" style="width:100%" placeholder="e.g. Critical Nitrogen Depletion Alert" required />
+          </div>
+          <div class="b2b-grid-2">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="adv-input-category" class="loc-select" style="width:100%">
+                <option value="Nutrient Deficiency">Nutrient Deficiency</option>
+                <option value="Harvest & Mandi">Harvest & Mandi</option>
+                <option value="Livestock & Silage">Livestock & Silage</option>
+                <option value="Pest & Disease">Pest & Disease Alert</option>
+                <option value="Weather Warning">Weather Warning</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Audience</label>
+              <select id="adv-input-target-type" class="loc-select" style="width:100%">
+                <option value="Cluster">Geographic Cluster</option>
+                <option value="Crop Group">Crop Specific Group</option>
+                <option value="Selected Farms">Selected Farms with Deficiency</option>
+                <option value="All Farmers">All 1,250 Farmers</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Target Cluster / Group Name</label>
+            <input type="text" id="adv-input-target-name" class="loc-search-input" style="width:100%" value="Sulur Cluster" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Advisory Message & Agronomic Protocol</label>
+            <textarea id="adv-input-message" class="loc-search-input" style="width:100%;height:90px;padding:8px" placeholder="Enter actionable directive for member farmers..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Channels</label>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary)">
+              <label><input type="checkbox" id="adv-ch-inapp" checked /> In-App</label>
+              <label><input type="checkbox" id="adv-ch-sms" checked /> SMS</label>
+              <label><input type="checkbox" id="adv-ch-wa" checked /> WhatsApp</label>
+              <label><input type="checkbox" id="adv-ch-push" checked /> Push Alert</label>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+            <button type="button" class="btn btn-secondary" onclick="closeCreateAdvisoryModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Dispatch Advisory Now</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── MODAL: ASSIGN FIELD TASK ──────────────────────── -->
+    <div id="b2b-task-modal" class="b2b-modal-overlay" style="display:none" onclick="if(event.target === this) closeCreateTaskModal()">
+      <div class="b2b-modal-card" style="max-width:540px">
+        <div class="b2b-modal-header">
+          <h3 style="margin:0;font-size:16px;color:var(--text-primary)">📋 Assign Field Task / Inspection</h3>
+          <button class="auth-modal-close" onclick="closeCreateTaskModal()">✕</button>
+        </div>
+
+        <form onsubmit="return submitCreateTask(event)">
+          <input type="hidden" id="task-input-farm-id" value="101" />
+          <input type="hidden" id="task-input-cluster" value="Sulur Cluster" />
+          <div class="form-group">
+            <label class="form-label">Task Title</label>
+            <input type="text" id="task-input-title" class="loc-search-input" style="width:100%" placeholder="e.g. Inspect Low Nitrogen on Farm #104" required />
+          </div>
+          <div class="b2b-grid-2">
+            <div class="form-group">
+              <label class="form-label">Assign To Officer</label>
+              <select id="task-input-officer" class="loc-select" style="width:100%">
+                <option value="Anand Kumar">Anand Kumar (Senior Field Officer)</option>
+                <option value="Revathi Natarajan">Revathi Natarajan (Field Officer)</option>
+                <option value="V. Sundaram">V. Sundaram (Field Officer)</option>
+                <option value="Dr. Priya Balan">Dr. Priya Balan (Agronomist)</option>
+                <option value="Karthik Raja">Karthik Raja (IoT Technician)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Task Type</label>
+              <select id="task-input-type" class="loc-select" style="width:100%">
+                <option value="Field Inspection">Field Inspection</option>
+                <option value="Soil Sampling">Soil Sampling & Verification</option>
+                <option value="IoT Maintenance">IoT Maintenance</option>
+                <option value="Farmer Consultation">Farmer Consultation</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" id="task-input-due-date" class="loc-search-input" style="width:100%" value="2026-10-06" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Field Notes & Instructions</label>
+            <textarea id="task-input-notes" class="loc-search-input" style="width:100%;height:70px;padding:8px" placeholder="Add specific guidance for the officer..."></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+            <button type="button" class="btn btn-secondary" onclick="closeCreateTaskModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Assign Task</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1498,9 +2678,9 @@
       <span class="mb-icon">🧪</span>
       <span class="mb-label" data-i18n="navSoilAnalysis">Soil</span>
     </button>
-    <button class="mb-nav-item" data-view="gps-zones" onclick="navigate('gps-zones')">
-      <span class="mb-icon">🛰️</span>
-      <span class="mb-label" data-i18n="navGpsZonesShort">GPS Zones</span>
+    <button class="mb-nav-item" data-view="b2b" id="mb-nav-b2b" onclick="navigate('b2b')" style="display:none">
+      <span class="mb-icon">🏢</span>
+      <span class="mb-label" data-i18n="navB2B">FPO</span>
     </button>
     <button class="mb-nav-item" data-view="dairyfeed" onclick="navigate('dairyfeed')">
       <span class="mb-icon">🐄</span>

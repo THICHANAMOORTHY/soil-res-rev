@@ -162,11 +162,58 @@ If you did not request this, please ignore this email.`;
   return sendMailMessage({ to, subject, text, html });
 }
 
+async function sendGoogleAuthOtpEmail({ to, name, otp }) {
+  const safeName = escapeHtml(name || 'Farmer');
+  const subject = `Google Mail Verification Code: ${otp} — UZHAVU KAAPPAAN`;
+
+  const text =
+`Hello ${name || 'there'},
+
+Your 6-digit Google Mail verification code for UZHAVU KAAPPAAN Cloud is:
+
+${otp}
+
+This code is valid for 10 minutes.
+உங்கள் Google மின்னஞ்சல் சரிபார்ப்பு குறியீடு: ${otp} (10 நிமிடங்களுக்கு மட்டுமே செல்லுபடியாகும்).
+
+If you did not request this, please ignore this email.`;
+
+  const html = `
+<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#ffffff;border-radius:14px;color:#1f2937;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.06)">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;border-bottom:1px solid #f1f5f9;padding-bottom:14px">
+    <div style="font-size:24px">🌱</div>
+    <div>
+      <h3 style="color:#15803d;margin:0;font-size:17px">UZHAVU KAAPPAAN</h3>
+      <span style="font-size:12px;color:#64748b">Google Mail & Cloud Verification (உழவு காப்பான்)</span>
+    </div>
+  </div>
+  <p style="font-size:14px;color:#334155">Hello <strong>${safeName}</strong>,</p>
+  <p style="font-size:13.5px;color:#475569;line-height:1.5">
+    We received a request to sign in with your Google Mail account (<strong>${escapeHtml(to)}</strong>).
+    Please use the following 6-digit verification code to complete your sign-in:
+  </p>
+  <div style="text-align:center;margin:24px 0">
+    <div style="display:inline-block;letter-spacing:10px;font-size:34px;font-weight:800;color:#1e293b;background:#f8fafc;padding:14px 28px;border-radius:10px;border:2px solid #cbd5e1">
+      ${escapeHtml(otp)}
+    </div>
+  </div>
+  <p style="font-size:13px;color:#16a34a;text-align:center;font-weight:600">
+    ✓ இந்த குறியீடு 10 நிமிடங்களுக்கு மட்டுமே செல்லுபடியாகும்.
+  </p>
+  <p style="font-size:12px;color:#94a3b8;margin-top:20px;border-top:1px solid #f1f5f9;padding-top:12px">
+    Security notice: If you did not attempt to sign in, no action is needed. Never share this code with anyone.
+  </p>
+</div>`;
+
+  return sendMailMessage({ to, subject, text, html });
+}
+
 module.exports = {
   isMailConfigured,
   getTransport,
   sendMailMessage,
   sendVerificationEmail,
   sendOtpEmail,
+  sendGoogleAuthOtpEmail,
   buildVerificationLink,
 };

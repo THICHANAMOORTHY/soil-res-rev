@@ -3,6 +3,10 @@
 -- ============================================================
 
 -- 0. Clean Slate: Drop old tables if re-initializing
+DROP TABLE IF EXISTS b2b_advisories CASCADE;
+DROP TABLE IF EXISTS org_sensors CASCADE;
+DROP TABLE IF EXISTS org_clusters CASCADE;
+DROP TABLE IF EXISTS organizations CASCADE;
 DROP TABLE IF EXISTS silage_samples CASCADE;
 DROP TABLE IF EXISTS silage_devices CASCADE;
 DROP TABLE IF EXISTS recommendations CASCADE;
@@ -36,6 +40,8 @@ CREATE TABLE IF NOT EXISTS farmers (
 CREATE TABLE IF NOT EXISTS farms (
     farm_id         SERIAL PRIMARY KEY,
     farmer_id       INT REFERENCES farmers(farmer_id) ON DELETE CASCADE,
+    org_id          INT,
+    cluster_id      INT,
     location_name   VARCHAR(150),
     latitude        DECIMAL(9,6),
     longitude       DECIMAL(9,6),
@@ -357,3 +363,131 @@ CREATE POLICY "Public access on silage_samples" ON silage_samples FOR ALL USING 
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('silage-images', 'silage-images', false)
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- 15. B2B Enterprise & FPO Multi-Tenant Architecture
+-- ============================================================
+
+-- A. Organizations (FPOs, Cooperatives, Agribusinesses)
+CREATE TABLE IF NOT EXISTS organizations (
+    org_id              SERIAL PRIMARY KEY,
+    name                VARCHAR(200) NOT NULL,
+    org_type            VARCHAR(50) NOT NULL CHECK (org_type IN ('FPO', 'Dairy Cooperative', 'Agribusiness', 'Institution')),
+    region              VARCHAR(150) NOT NULL,
+    admin_name          VARCHAR(120),
+    admin_email         VARCHAR(150),
+    admin_phone         VARCHAR(20),
+    license_tier        VARCHAR(50) DEFAULT 'Enterprise',
+    is_active           BOOLEAN DEFAULT TRUE,
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- B. Regional Village Micro-Clusters
+CREATE TABLE IF NOT EXISTS org_clusters (
+    cluster_id          SERIAL PRIMARY KEY,
+    org_id              INT REFERENCES organizations(org_id) ON DELETE CASCADE,
+    cluster_code        VARCHAR(30),
+    name                VARCHAR(120) NOT NULL,
+    district            VARCHAR(100),
+    state               VARCHAR(100) DEFAULT 'Tamil Nadu',
+    target_crops        JSONB DEFAULT '["Tomato", "Maize", "Groundnut", "Sorghum"]'::jsonb,
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Foreign Key Constraints for farms linking to B2B Orgs and Clusters
+ALTER TABLE farms 
+    ADD CONSTRAINT fk_farms_org FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE SET NULL,
+    ADD CONSTRAINT fk_farms_cluster FOREIGN KEY (cluster_id) REFERENCES org_clusters(cluster_id) ON DELETE SET NULL;
+
+-- C. IoT Telemetry Fleet Nodes (7-in-1 RS485 & Silage Probes)
+CREATE TABLE IF NOT EXISTS org_sensors (
+    sensor_id           VARCHAR(50) PRIMARY KEY,
+    org_id              INT REFERENCES organizations(org_id) ON DELETE CASCADE,
+    farm_id             INT REFERENCES farms(farm_id) ON DELETE SET NULL,
+    cluster_id          INT REFERENCES org_clusters(cluster_id) ON DELETE SET NULL,
+    sensor_type         VARCHAR(60) NOT NULL,   -- 'Soil Scout 7-in-1', 'DairyFeed Dual-Node Silage', 'Weather Station'
+    hardware_model      VARCHAR(60) DEFAULT 'ESP32-RS485-MAX485',
+    battery_pct         INT DEFAULT 95 CHECK (battery_pct BETWEEN 0 AND 100),
+    status              VARCHAR(20) DEFAULT 'online' CHECK (status IN ('online', 'offline', 'maintenance')),
+    last_reading_val    JSONB,
+    last_heartbeat      TIMESTAMPTZ DEFAULT NOW(),
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- D. Regional Agronomic Directives & Action Alerts
+CREATE TABLE IF NOT EXISTS b2b_advisories (
+    advisory_id         SERIAL PRIMARY KEY,
+    org_id              INT REFERENCES organizations(org_id) ON DELETE CASCADE,
+    cluster_id          INT REFERENCES org_clusters(cluster_id) ON DELETE SET NULL,
+    title               VARCHAR(200) NOT NULL,
+    level               VARCHAR(20) DEFAULT 'WARNING' CHECK (level IN ('INFO', 'WARNING', 'DANGER')),
+    recommended_action  TEXT NOT NULL,
+    affected_farms_count INT DEFAULT 1,
+    broadcast_sms       BOOLEAN DEFAULT FALSE,
+    broadcast_whatsapp  BOOLEAN DEFAULT FALSE,
+    dispatched_at       TIMESTAMPTZ,
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes & RLS for B2B Tables
+CREATE INDEX IF NOT EXISTS idx_clusters_org ON org_clusters(org_id);
+CREATE INDEX IF NOT EXISTS idx_sensors_org ON org_sensors(org_id);
+CREATE INDEX IF NOT EXISTS idx_advisories_org ON b2b_advisories(org_id);
+
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE org_clusters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE org_sensors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE b2b_advisories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public access on organizations" ON organizations;
+CREATE POLICY "Public access on organizations" ON organizations FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public access on org_clusters" ON org_clusters;
+CREATE POLICY "Public access on org_clusters" ON org_clusters FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public access on org_sensors" ON org_sensors;
+CREATE POLICY "Public access on org_sensors" ON org_sensors FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public access on b2b_advisories" ON b2b_advisories;
+CREATE POLICY "Public access on b2b_advisories" ON b2b_advisories FOR ALL USING (true) WITH CHECK (true);
+
+-- Seed B2B Default Organizations
+INSERT INTO organizations (org_id, name, org_type, region, admin_name, admin_email, admin_phone, license_tier)
+VALUES
+(1, 'Kovai Farmer Producer Organization (Kovai FPO)', 'FPO', 'Coimbatore & Tiruppur, TN', 'Dr. K. Swaminathan', 'admin@kovaifpo.org', '+91 94431 82910', 'Enterprise Tier'),
+(2, 'Aavin Dairy Cooperative Federation', 'Dairy Cooperative', 'Western Tamil Nadu Milk Shed', 'S. Rajendran', 'coop@aavin-dairy.org', '+91 98422 10928', 'Cooperative Tier'),
+(3, 'Kisan Shakti Agribusiness Consortium', 'Agribusiness', 'All-India Contract Agri Network', 'Meera Iyer', 'partner@kisanshakticonsortium.in', '+91 97110 54321', 'Corporate Tier')
+ON CONFLICT (org_id) DO UPDATE SET
+    name = EXCLUDED.name,
+    org_type = EXCLUDED.org_type,
+    region = EXCLUDED.region;
+
+-- Seed FPO Clusters for Kovai FPO
+INSERT INTO org_clusters (cluster_id, org_id, cluster_code, name, district, state)
+VALUES
+(1, 1, 'CLUSTER-01', 'Pollachi North Cluster', 'Coimbatore', 'Tamil Nadu'),
+(2, 1, 'CLUSTER-02', 'Sulur Belt Cluster', 'Coimbatore', 'Tamil Nadu'),
+(3, 1, 'CLUSTER-03', 'Thondamuthur Foothills', 'Coimbatore', 'Tamil Nadu'),
+(4, 1, 'CLUSTER-04', 'Kinathukadavu Red Soil Cluster', 'Coimbatore', 'Tamil Nadu'),
+(5, 1, 'CLUSTER-05', 'Annur Semi-Arid Cluster', 'Tiruppur', 'Tamil Nadu')
+ON CONFLICT (cluster_id) DO NOTHING;
+
+-- Seed Initial IoT Sensor Hardware Nodes
+INSERT INTO org_sensors (sensor_id, org_id, sensor_type, hardware_model, battery_pct, status)
+VALUES
+('SS-NODE-01', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 96, 'online'),
+('SS-NODE-02', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 88, 'online'),
+('SS-NODE-03', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 92, 'online'),
+('DF-PROBE-01', 1, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 95, 'online'),
+('DF-PROBE-02', 2, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 91, 'online')
+ON CONFLICT (sensor_id) DO NOTHING;
+
+-- Seed Sample Agronomic Action Alerts
+INSERT INTO b2b_advisories (advisory_id, org_id, cluster_id, title, level, recommended_action, affected_farms_count)
+VALUES
+(1, 1, 2, 'Nitrogen Depletion across Sulur Cluster', 'WARNING', 'Trigger pulse rotation (Cowpea / Green Gram) to restore 40–60 kg/ha atmospheric nitrogen', 6),
+(2, 1, 1, 'Monoculture Risk on Solanaceous Vegetables', 'DANGER', 'Rotate out of Tomato to prevent bacterial wilt build-up; sow Maize or Fodder Sorghum', 3),
+(3, 1, 4, 'Soil Acidification Detected (pH < 5.8)', 'WARNING', 'Apply 200 kg/acre agricultural lime prior to Kharif sowing', 4)
+ON CONFLICT (advisory_id) DO NOTHING;
+
+

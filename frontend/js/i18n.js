@@ -24,6 +24,27 @@ const TRANSLATIONS = {
     navB2B: "FPO Command Center",
     b2bTitle: "FPO & Agribusiness Command Center",
     btnExportFPO: "Export FPO Intelligence",
+    b2bNavOverview: "Command Center",
+    b2bNavMembers: "Members",
+    b2bNavClusters: "Clusters",
+    b2bNavFarms: "Farms",
+    b2bNavSoil: "Soil Intelligence",
+    b2bNavCrops: "Crop Intelligence",
+    b2bNavIoT: "IoT Fleet",
+    b2bNavIFS: "IFS / Dairy",
+    b2bNavAction: "Action Center",
+    b2bNavAdvisories: "Advisories",
+    b2bNavReports: "Reports",
+    b2bNavSettings: "Organization Settings",
+    b2bSwitchToFPO: "Switch to FPO Command Center",
+    b2bSwitchToFarmer: "Switch to Farmer Platform",
+    b2bSwitchRole: "Switch Role",
+    b2bExportReport: "Export Report",
+    b2bPushTelemetry: "Push Live Telemetry Packet",
+    b2bInspectFarm: "Inspect Farm & Soil Sensors →",
+    b2bAssignTask: "Assign Field Task",
+    b2bDispatchAdvisory: "Send Direct Advisory",
+    b2bLiveSyncActive: "● Live Stream Active",
     lblTotalFarmers: "Registered Farmers",
     lblManagedFarms: "Managed Farms",
     lblCultivatedArea: "Cultivated Acreage",
@@ -206,6 +227,27 @@ const TRANSLATIONS = {
     navB2B: "FPO கட்டுப்பாட்டு மையம்",
     b2bTitle: "FPO மற்றும் வேளாண் வணிக கட்டுப்பாட்டு மையம்",
     btnExportFPO: "FPO அறிக்கை பதிவிறக்கு",
+    b2bNavOverview: "கட்டளை மையம்",
+    b2bNavMembers: "உறுப்பினர்கள்",
+    b2bNavClusters: "கிளஸ்டர்கள்",
+    b2bNavFarms: "பண்ணைகள்",
+    b2bNavSoil: "மண் நுண்ணறிவு",
+    b2bNavCrops: "பயிர் நுண்ணறிவு",
+    b2bNavIoT: "IoT சென்சார்கள்",
+    b2bNavIFS: "IFS / பால்வளம்",
+    b2bNavAction: "செயல் மையம்",
+    b2bNavAdvisories: "அறிவுரைகள்",
+    b2bNavReports: "அறிக்கைகள்",
+    b2bNavSettings: "நிறுவன அமைப்புகள்",
+    b2bSwitchToFPO: "FPO கட்டளை மையத்திற்கு மாறு",
+    b2bSwitchToFarmer: "விவசாயி தளத்திற்கு திரும்பு",
+    b2bSwitchRole: "பங்கை மாற்று",
+    b2bExportReport: "அறிக்கை பதிவிறக்கு",
+    b2bPushTelemetry: "நேரடி சென்சார் தரவு அனுப்பு",
+    b2bInspectFarm: "பண்ணை & சென்சார் ஆய்வு →",
+    b2bAssignTask: "களப் பணியை ஒதுக்கு",
+    b2bDispatchAdvisory: "நேரடி அறிவுரை அனுப்பு",
+    b2bLiveSyncActive: "● நேரடி ஸ்ட்ரீம் செயலில் உள்ளது",
     lblTotalFarmers: "பதிவுசெய்த விவசாயிகள்",
     lblManagedFarms: "நிர்வகிக்கப்படும் பண்ணைகள்",
     lblCultivatedArea: "சாகுபடி பரப்பு",
@@ -725,6 +767,17 @@ function updateLanguageUI() {
       fcName.textContent = 'கோயம்புத்தூர் பண்ணை';
     } else {
       fcName.textContent = 'Coimbatore Farm';
+    }
+  }
+
+  // Portal switcher button in sidebar footer
+  const portalBtn = document.getElementById('btn-portal-switch');
+  if (portalBtn) {
+    const isB2B = document.body.classList.contains('portal-b2b');
+    if (isB2B) {
+      portalBtn.innerHTML = `🌾 <span>${t('b2bSwitchToFarmer')}</span>`;
+    } else {
+      portalBtn.innerHTML = `🏢 <span>${t('b2bSwitchToFPO')}</span>`;
     }
   }
 

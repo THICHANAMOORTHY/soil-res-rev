@@ -1,271 +1,335 @@
-# UZHAVU KAAPPAAN — Agri-Intelligence & Integrated Farming B2B Enterprise Platform
+# UZHAVU KAAPPAAN — B2B & FPO Enterprise Platform
+## Master Product, Architectural & Business Specification
 
 [![B2B Platform](https://img.shields.io/badge/Platform-B2B%20Agri--Intelligence-purple.svg?style=flat-square)](#)
-[![Multi-Tenant](https://img.shields.io/badge/Architecture-Multi--Tenant%20RBAC-blue.svg?style=flat-square)](#8--multi-tenant-architecture)
-[![IFS Loop](https://img.shields.io/badge/Differentiator-Closed--Loop%20IFS-success.svg?style=flat-square)](#7--the-core-b2b-differentiator-the-closed-loop)
-[![API](https://img.shields.io/badge/API-REST%20%2Fapi%2Forgs-orange.svg?style=flat-square)](#9--b2b-api-suite)
-
-> **Strategic Vision:** UZHAVU KAAPPAAN transcends single-farmer advisory by providing an enterprise-grade **Agri-Intelligence & Integrated Farming System (IFS) Command Platform** for Farmer Producer Organizations (FPOs), Agribusinesses, Dairy Cooperatives, and Government Institutions.
-
-```
-                         UZHAVU KAAPPAAN
-                                │
-              ┌─────────────────┼─────────────────┐
-              │                 │                 │
-           FARMERS        B2B PARTNERS       INSTITUTIONS
-              │                 │                 │
-         Individual         Agribusinesses       FPOs
-         Farmers            Agri Companies      Cooperatives
-                             Dairy Companies    NGOs
-                             Food Companies     Govt Programs
-                             Input Companies
-```
+[![Multi-Tenant](https://img.shields.io/badge/Architecture-Multi--Tenant%20RBAC-blue.svg?style=flat-square)](#3-organizational-hierarchy)
+[![IFS Loop](https://img.shields.io/badge/Differentiator-Closed--Loop%20IFS-success.svg?style=flat-square)](#9-module-5--integrated-farming-system-ifs-intelligence)
+[![API Suite](https://img.shields.io/badge/API-REST%20%2Fapi%2Forgs-orange.svg?style=flat-square)](#14-backend-api-structure)
 
 ---
 
-## Contents
+## 1. 🌐 Platform Overview
 
-1. [B2B Customer Model](#1-b2b-customer-model)
-2. [Agribusiness B2B Integration](#2-agribusiness-b2b-integration)
-3. [Dairy Industry & Cooperative B2B](#3-dairy-industry--cooperative-b2b)
-4. [IoT-as-a-Service (IoTaaS)](#4-iot-as-a-service-iotaas)
-5. [B2B Command Dashboard](#5-b2b-command-dashboard)
-6. [B2B Revenue Model & Unit Economics](#6-b2b-revenue-model--unit-economics)
-7. [The Core B2B Differentiator (The Closed Loop)](#7-the-core-b2b-differentiator-the-closed-loop)
-8. [Multi-Tenant Data Architecture](#8-multi-tenant-data-architecture)
-9. [B2B API Suite (`/api/orgs`)](#9-b2b-api-suite)
-10. [B2B MVP Roadmap: FPO Intelligence Platform](#10-b2b-mvp-roadmap-fpo-intelligence-platform)
+**UZHAVU KAAPPAAN (உழவு காப்பான்) B2B** is an enterprise agricultural intelligence platform engineered for Farmer Producer Organizations (FPOs), Dairy Cooperatives, Agribusiness Corporates, and Government Agricultural Missions to manage thousands of farmers, farms, village clusters, soil parameters, livestock feed resources, and IoT sensor fleets from a centralized command center.
+
+Instead of managing each farm in isolation, the platform enforces an end-to-end multi-tenant hierarchy:
+
+$$\text{Organization} \longrightarrow \text{Cluster} \longrightarrow \text{Farm} \longrightarrow \text{Farmer} \longrightarrow \text{Field Data} \longrightarrow \text{IoT Telemetry}$$
+
+The platform provides dual-altitude intelligence:
+1. **Macro-Level Executive Intelligence**: Cluster-wide soil degradation trends, harvest volume projections, fleet uptimes, and collective mandi bargaining power.
+2. **Micro-Level Field Drill-Down**: 1-click drill-down to any individual farmer's parcel, live sensor graph, soil analysis, and multi-season crop plan.
 
 ---
 
-## 1. 🏢 B2B Customer Model
-
-### A. FPO (Farmer Producer Organization) Segment
-Instead of the consumer model where $1\text{ farmer} \rightarrow 1\text{ account}$, the enterprise model deploys **hierarchical multi-tenancy**:
-$$\text{FPO Organization} \longrightarrow \text{Regional Clusters / Villages} \longrightarrow \text{Registered Farms} \longrightarrow \text{Individual Farmers}$$
+## 2. 👥 Who Uses the Platform? (Primary Customer Segments)
 
 ```
-ABC Farmer Producer Organization (FPO)
+                          UZHAVU KAAPPAAN B2B
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         │                         │                         │
+      A. FPO              B. DAIRY COOPERATIVE       C. AGRIBUSINESS
+   FPO Leadership            Dairy Union Board        Corporate Agronomy
+   Field Officers            Veterinary Team          Procurement Heads
+```
+
+### A. Farmer Producer Organizations (FPOs)
+* **Key Users**: FPO CEO, General Manager, Board of Directors, Field Extension Officers, Certified Agronomists.
+* **Core Purpose**:
+  * Member registry and landholding verification.
+  * Geospatial soil health monitoring across village clusters.
+  * Collective crop rotation planning to break monoculture and reduce synthetic fertilizer costs.
+  * Production aggregation for direct bulk mandi and institutional sales.
+  * Coordinated bulk procurement of certified seeds, bio-fertilizers, and microbial amendments.
+  * Instant broadcast advisories (SMS & WhatsApp) for weather shocks and pest outbreaks.
+
+### B. Dairy Cooperatives & Milk Federations (e.g., Aavin, Amul Model)
+* **Key Users**: Dairy Cooperative Manager, Veterinary Officers, Cattle Feed Nutritionists, Milk Collection Center Supervisors.
+* **Core Purpose**:
+  * Link crop rotation fodder acreage (Maize, Napier Grass, Sorghum, Cowpea) with daily herd feed demand.
+  * Rapid IoT screening of silage fermentation pits (pH, core temp rise $\Delta T$, optical color) to prevent mould and spoilage.
+  * Elimination of herd acidosis and lactation drops (preventing 15%–30% milk yield crashes).
+  * Quantification of Farmyard Manure (FYM) recycled back to member soils for Organic Carbon restoration.
+
+### C. Agribusinesses & Food Processors
+* **Key Users**: Procurement Managers, Contract Farming Directors, Field Agronomists, Export Quality Officers.
+* **Core Purpose**:
+  * Outgrower farm network monitoring and field protocol compliance.
+  * Forward production forecasting and weekly harvest volume estimates.
+  * Pre-Harvest Interval (PHI) and Minimum Residue Limit (MRL) traceability for export compliance.
+  * Transparent, non-biased agronomic recommendations (platform preserves strict algorithmic neutrality).
+
+---
+
+## 3. 🏢 Organizational Hierarchy
+
+The multi-tenant backbone powers scalable multi-level operations:
+
+```
+ORGANIZATION (e.g. Kovai FPO / Aavin Dairy / Kisan Shakti)
 │
-├── Organization Admin (FPO Board & Chief Executive Officer)
+├── Village Cluster 1 (e.g. Pollachi North — 420 Farmers, 1,850 Acres)
+│   ├── Farm 001 (4.5 ac · Drip · Tomato / Maize · Soil Score: 78)
+│   │   └── Farmer (Ramesh Kumar)
+│   ├── Farm 002 (6.0 ac · Drip · Maize Silage · Soil Score: 81)
+│   │   └── Farmer (Murugan P.)
+│   └── Farm 003 (3.8 ac · Rainfed · Groundnut · Soil Score: 85)
+│       └── Farmer (Selvi S.)
 │
-├── Village Cluster 1 (e.g., Pollachi North — 420 Farmers, 1,850 Acres)
-│    ├── Farmer 001 (Farm 101 — 4.5 Acres, Tomato / Maize, Soil Score: 78)
-│    ├── Farmer 002 (Farm 104 — 5.2 Acres, Cotton / Chili, Soil Score: 64)
-│    └── Farmer 003 (Farm 107 — 3.8 Acres, Groundnut, Soil Score: 82)
+├── Village Cluster 2 (e.g. Sulur Belt — 380 Farmers, 1,640 Acres)
+│   ├── Farm 004 (5.2 ac · Canal · Cotton · Soil Score: 52)
+│   │   └── Farmer (V. Sundaram)
+│   └── Farm 005 (4.0 ac · Drip · Black Gram · Soil Score: 68)
+│       └── Farmer (Anitha K.)
 │
-├── Village Cluster 2 (e.g., Sulur Belt — 380 Farmers, 1,640 Acres)
-│    ├── Farmer 004 (Farm 102 — 6.0 Acres, Soybean / Gram, Soil Score: 58)
-│    └── Farmer 005 (Farm 105 — 4.0 Acres, Maize / Cowpea, Soil Score: 72)
-│
-└── FPO Command Center Analytics Dashboard
+└── Village Cluster 3 (e.g. Thondamuthur Foothills — 450 Farmers, 1,930 Acres)
+    └── Member Farms & Farmers
 ```
 
-#### What the FPO Administrator Sees
-- **Total Cultivated Footprint:** Member farmer headcount, active acreage, irrigation asset map.
-- **Regional Soil Health Index:** Geospatial N, P, K, pH, and Organic Carbon heatmaps with cluster-level deficiency alerts.
-- **Aggregated Crop Pipeline:** Live season distribution (Kharif, Rabi, Zaid) with projected yield tonnages for collective bulk bargaining in mandi markets.
-- **Recommended Crop Rotations:** Macro-level legume transition plans to decrease collective synthetic fertilizer expenditure.
-- **Hardware Telemetry Fleet:** Real-time online/offline status of deployed 7-in-1 RS485 soil sensors and DairyFeed silage probes.
-- **Dairy & Fodder Reserves:** Total ensiled fodder stocks and silage quality distribution across livestock clusters.
+### Every Farm Entity Contains
+* **Location & Geofencing**: Latitude, longitude, survey number, micro-cluster ID.
+* **Acreage & Irrigation**: Total area, arable area, irrigation type (Drip, Canal, Rainfed).
+* **Soil Data**: N-P-K (kg/ha), pH, Organic Carbon (%), EC, and soil texture.
+* **Crop Data & History**: Current crop, historical rotations, multi-season yield, and profit.
+* **IoT Sensor Nodes**: Paired 7-in-1 RS485 soil nodes and DairyFeed silage probes.
+* **Farm Activities & Advisories**: Scheduled fertigation, field sprays, and broadcast directives.
 
 ---
 
-## 2. 🏭 Agribusiness B2B Integration
+## 4. 📊 B2B Command Center Dashboard
 
-Corporate agricultural enterprises manage extensive contract-farming networks, seed-supply channels, and food-processing supply chains:
-
-```
-Agri Enterprise (Food Processor / Seed / Input Firm)
-      │
-      ▼
-UZHAVU KAAPPAAN B2B Enterprise Engine
-      │
-      ├── 2,500+ Registered Farms
-      ├── 8,400+ Acres under management
-      ├── Regional Soil Health Indices & Nitrogen Degradation Trends
-      ├── Crop Variety Distribution & Harvest Timing Windows
-      ├── Mandi Market Demand & Forward Production Forecasts
-      └── Farm-Level Hyperlocal Agronomic Directives
-```
-
-### Potential Enterprise Clients
-- **Seed Companies:** Anticipate seasonal seed demand by tracking restorative rotation adoptions before sowing seasons begin.
-- **Fertilizer & Soil Amendment Firms:** Plan customized micronutrient blends based on aggregated regional deficiencies (e.g., zinc/phosphorus fixation trends).
-- **Food Processors & Exporters:** Gain forward visibility into harvest timing, yield volume, and organic carbon compliance for sustainable sourcing.
-- **Contract Farming Operators:** Monitor field protocol adherence, irrigation telemetry, and soil recovery trends across outgrower schemes.
-
-> [!IMPORTANT]
-> **Strict Agronomic Neutrality:** To preserve trust and credibility, recommendations generated by the 7-dimension scoring algorithm remain 100% transparent and objective. The platform never biases crop rankings toward an agribusiness sponsor's commercial products.
-
----
-
-## 3. 🥛 Dairy Industry & Cooperative B2B
-
-Dairy cooperatives (such as Amul, Aavin, Nandini, and private dairies) represent an ideal B2B market for **DairyFeed AI + Integrated Farming System (IFS)**:
-
-```
-Dairy Cooperative Federation
-      │
-      ├── Member Farmer & Cattle Herd Network (3,000+ Dairy Farmers)
-      │
-      ├── Cattle Nutrition & Daily Silage Rations (15–20 kg/cow/day)
-      │
-      ├── IoT Rapid Silage Quality Screening (Bunk / Pit Telemetry)
-      │
-      ├── Spoilage & Mycotoxin Risk Prevention (Preservation Alerts)
-      │
-      └── Manure & Farmyard Organic Carbon Closed Loop (Soil Replenishment)
-```
-
-### Cooperative Value Proposition
-1. **Milk Yield Protection:** Acidosis and feed rejection from spoiled silage cause 15%–30% drops in daily milk collection. Rapid on-farm testing prevents bad silage from ever reaching the bunk.
-2. **Fodder Production Planning:** Connects crop rotation acreage (Maize, Sorghum, Cowpea) with cooperative herd feed requirements across lactation cycles.
-3. **Quality Verification at Procurement:** Field extension officers test silage batches at farm collection centers using portable dual-node probes before accepting bulk silage deliveries.
-
----
-
-## 4. 📡 IoT-as-a-Service (IoTaaS)
-
-Rather than selling one-off hardware units with no recurring revenue, UZHAVU KAAPPAAN deploys a complete **IoT-as-a-Service** model:
-
-```
-ESP32 Multi-Sensor Hardware (7-in-1 RS485 / DairyFeed Dual-Node)
-      ↓ (MQTT / HTTP POST with X-Device-Key)
-UZHAVU KAAPPAAN Cloud Ingestion Pipeline
-      ↓
-Autonomous Soil & Silage Telemetry Analysis
-      ↓
-B2B Command Center Dashboard
-      ↓
-Automated SMS / WhatsApp Alerts, Yield Forecasts & Agronomic Action Plans
-```
-
-### Commercial Package Includes
-- **Hardware Deployment:** Calibrated sensors (ADS1115 ADC, stainless-steel NPK electrodes, optical sensors).
-- **Field Installation & Annual Probe Calibration:** Sensor maintenance and seasonal replacement buffer kits.
-- **Cloud Telemetry & Predictive Analytics:** Continuous telemetry storage, automated degradation warnings, and weather risk advisories.
-- **Recurring Enterprise SLA:** 99.5% uptime, proactive battery and sensor health monitoring.
-
----
-
-## 5. 📊 B2B Command Dashboard
-
-The B2B Command Center gives administrators macro visibility across their entire organization:
+The primary executive interface for organization leadership:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   UZHAVU KAAPPAAN — B2B COMMAND CENTER                 │
+│                   KOVAI FPO — B2B COMMAND CENTER                       │
 ├────────────────────────────────────────────────────────────────────────┤
-│  Organization: Kovai Farmer Producer Org (Kovai FPO)                   │
-│  Region: Coimbatore & Tiruppur, TN       Admin: Dr. K. Swaminathan     │
-├────────────────────────────────────────────────────────────────────────┤
+│  FARMERS           FARMS             ACREAGE          AVG FARM SIZE    │
+│   1,250            1,180           5,420 Acres          4.59 Acres     │
 │                                                                        │
-│  REGISTERED FARMERS        ACTIVE FARMS          MANAGED ACREAGE       │
-│        1,240                   860                 5,420.5 Acres       │
-│                                                                        │
-├────────────────────────────────────────────────────────────────────────┤
-│  REGIONAL SOIL HEALTH DISTRIBUTION                                     │
-│  Healthy (Score 75–100):   42%  [████████████████████]                 │
-│  Moderate (Score 50–74):   38%  [██████████████████]                   │
-│  Poor (Score < 50):        20%  [██████████]                           │
-│  Mean Score: 68.4/100 · Critical Deficiencies: Nitrogen (64%), OC (58%)│
-├────────────────────────────────────────────────────────────────────────┤
-│  CROP DISTRIBUTION & MANDI HARVEST PROJECTIONS                         │
-│  Paddy / Rice:       28% (1,517.7 Acres · 6,820 Tons Expected)         │
-│  Maize (Fodder):     18% (  975.6 Acres · 4,870 Tons Expected)         │
-│  Vegetables:         21% (1,138.3 Acres · 13,650 Tons Expected)        │
-│  Groundnut/Pulses:   15% (  813.0 Acres · 1,620 Tons Expected)         │
-│  Cotton / Millets:   18% (  975.6 Acres · 2,430 Tons Expected)         │
-├────────────────────────────────────────────────────────────────────────┤
-│  IOT SENSOR FLEET & TELEMETRY                                          │
-│  Total Deployed:     205 Devices                                       │
-│  Online & Reporting: 184 (90%) 🟢                                      │
-│  Offline / Signal:    21 (10%) 🟡                                      │
-│  Silage Quality:     71% Good · 22% Moderate · 7% Poor                 │
-├────────────────────────────────────────────────────────────────────────┤
-│  ACTIVE CLUSTER ALERTS & REMEDIATION                                   │
-│  ⚠️ Sulur Cluster: Widespread N-Depletion (142 farms) → Pulse rotation  │
-│  🚨 Ludhiana Granary: Heavy Feeder Monoculture (68 farms) → Plan B     │
-│  📢 Regional Heat Wave Warning → Broadcast drip irrigation alert       │
+│  VILLAGE CLUSTERS  IOT NODES ACTIVE  FLEET UPTIME     CRITICAL ALERTS  │
+│        18            391 / 420         93.1% 🟢             27 ⚠️      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## 6. 💰 B2B Revenue Model & Unit Economics
-
-### Revenue Stream 1: Tiered SaaS Subscription
-- **Starter Tier (Small FPOs / NGOs):** Up to 250 farmers, 1,000 acres, basic aggregation dashboard, weather advisories.
-- **Professional Tier (Mid-Sized FPOs / Cooperatives):** Up to 1,500 farmers, 7,500 acres, full B2B command center, rotation optimizer, crop history auditing.
-- **Enterprise Tier (State Federations / Large Agribusinesses):** Unlimited farmers, custom multi-cluster hierarchies, ERP data connector, custom white-label reports.
-
-### Revenue Stream 2: Per-Farm / Per-Acre Licensing
-- Simple, transparent model: **₹15 – ₹30 per active acre per season**.
-- Makes adoption frictionless for FPOs because pricing scales directly with member acreage under management.
-
-### Revenue Stream 3: IoT-as-a-Service Hardware + Cloud Bundle
-- Annual lease bundle per sensor kit: Includes 7-in-1 RS485 or DairyFeed probe + field gateway + cloud ingest license + replacement guarantee.
+The Command Center is divided into **6 Dedicated Intelligence Modules**.
 
 ---
 
-## 7. 🧠 The Core B2B Differentiator: The Closed Loop
+## 5. 🚜 Module 1 — Farmer & Farm Management
 
-Competitor platforms focus on isolated silos: either crop recommendation only, or IoT hardware only, or milk recording only.
+Enables the organization to administer its agricultural footprint:
+* **Member Registry**: KYC verification, land record numbers, mobile contacts.
+* **Farm Holdings**: Boundary mapping, soil baseline records, irrigation infrastructure.
+* **Cluster Management**: Grouping farms into contiguous village zones for logistics and aggregation.
 
-**UZHAVU KAAPPAAN's unique differentiator is the biological closed loop:**
+### Member Farm Directory
+| Farm ID | Farmer Name | Village Cluster | Acres | Current Crop | Soil Score | IoT Status | Action |
+|---|---|---|---|---|---|---|---|
+| **F001** | Ramesh Kumar | Pollachi North | 4.5 | Tomato | 58 🟡 | Online 🟢 | `[Inspect Farm →]` |
+| **F002** | Murugan P. | Pollachi North | 6.0 | Maize Silage | 78 🟢 | Online 🟢 | `[Inspect Farm →]` |
+| **F003** | Selvi S. | Pollachi North | 3.8 | Groundnut | 82 🟢 | Online 🟢 | `[Inspect Farm →]` |
+| **F004** | V. Sundaram | Sulur Belt | 5.2 | Cotton | 52 🔴 | Online 🟢 | `[Inspect Farm →]` |
+| **F005** | Anitha K. | Sulur Belt | 4.0 | Black Gram | 68 🟡 | Online 🟢 | `[Inspect Farm →]` |
+| **F006** | K. Chinnasamy | Thondamuthur | 7.5 | Sugarcane | 48 🔴 | Offline 🔴 | `[Inspect Farm →]` |
 
+*Clicking **Inspect Farm** instantly switches context to the single-farm dashboard, loading full NPK history, rotation curves, and sensor logs.*
+
+---
+
+## 6. 🧪 Module 2 — Soil Intelligence
+
+A centralized, cluster-wide soil health telemetry and laboratory aggregation system.
+
+### Organization-Level Soil Health Distribution
 ```
-                      SOIL (N-P-K & pH Scoring)
-                                 │
-                                 ▼
-                     CROP ROTATION OPTIMIZER
-                                 │
-                                 ▼
-                     FODDER CROPS (Maize / Cowpea)
-                                 │
-                                 ▼
-                     SILAGE RAPID SCREENING (DairyFeed AI)
-                                 │
-                                 ▼
-                     DAIRY CATTLE HERD NUTRITION
-                                 │
-                                 ▼
-                     FARMYARD MANURE (FYM) RETURN
-                                 │
-                                 ▼
-                     SOIL ORGANIC CARBON RESTORATION
-                                 │
-                                 └───────────────► [Loop Repeats]
+Healthy (Score 75–100)    █████████████ 42% (2,276 Acres)
+Moderate (Score 50–74)    ███████████   38% (2,060 Acres)
+Poor (Score < 50)         ██████        20% (1,084 Acres)
 ```
 
-This integrated model directly aligns with government soil health missions, cooperative sustainability targets, and global ESG regenerative agriculture mandates.
+### Cluster Breakdown
+* **Pollachi North**: **Healthy (81/100)** — Adequate Organic Carbon (1.15%), optimal pH (6.8).
+* **Sulur Belt**: **Moderate (60/100)** — Widespread Nitrogen depletion (48 kg/ha avg).
+* **Annur Semi-Arid**: **Healthy (74/100)** — Balanced N-P-K reserves.
+* **Thondamuthur Foothills**: **Poor (48/100)** — Soil acidification (pH 5.2–5.6) from continuous monoculture.
+
+### Agronomic Decision Flow
+$$\text{Where is the soil problem?} \longrightarrow \text{Which farms are affected?} \longrightarrow \text{What corrective action is required?}$$
 
 ---
 
-## 8. 🔐 Multi-Tenant Architecture
+## 7. 🌾 Module 3 — Crop & Production Intelligence
 
-To support enterprise hierarchies securely, the data model transitions from single-user to multi-tenant organization scoping:
+Answers: *What crops are planted, in what quantities, and when will harvest reach the market?*
+
+### Seasonal Crop Acreage Allocation (Kharif 2026)
+```
+Maize (Fodder & Grain)  1,200 Acres (22.1%) 🌽
+Pulses (Restorative)      900 Acres (16.6%) 🫘
+Sugarcane                 850 Acres (15.7%) 🎋
+Tomato (Vegetables)       750 Acres (13.8%) 🍅
+Groundnut (Oilseed)       620 Acres (11.4%) 🥜
+Cotton / Other          1,100 Acres (20.3%) ☁️
+```
+
+### Production & Mandi Yield Forecast
+| Crop | Cultivated Area | Expected Yield / Acre | Total Harvest Forecast | Mandi Benchmark (₹/q) | Forward Value |
+|---|---|---|---|---|---|
+| **Maize (Grain/Fodder)** | 1,200 ac | 7,500 kg | **9,000 Tons** | ₹2,250 / q | ₹20.25 Cr |
+| **Tomato** | 750 ac | 8,000 kg | **6,000 Tons** | ₹1,800 / q | ₹10.80 Cr |
+| **Sugarcane** | 850 ac | 35,000 kg | **29,750 Tons** | ₹3,150 / ton | ₹9.37 Cr |
+| **Groundnut** | 620 ac | 1,600 kg | **992 Tons** | ₹6,800 / q | ₹6.74 Cr |
+| **Pulses (Black/Green Gram)** | 900 ac | 950 kg | **855 Tons** | ₹7,400 / q | ₹6.32 Cr |
+
+*Supports collective buyer contracting, cold storage reservations, processing agreements, and logistics pooling.*
+
+---
+
+## 8. 📡 Module 4 — IoT Fleet Management
+
+A dedicated **IoT Command Center** monitoring deployed field hardware:
+
+```
+ESP32 Cloud Ingestion Pipeline
+  │
+  ├── RS485 Modbus Soil Probes (NPK, pH, Moisture, EC, Temp)
+  ├── Dual-Node Silage Probes (DS18B20 Temp + Optical TCS3200 RGB + pH)
+  └── Field Micro-Weather Stations (Rain, Wind, Solar Lux, Humidity)
+```
+
+### Fleet Status
+* **Total Deployed Nodes**: 420
+* **Online & Reporting**: 391 🟢 (93.1%)
+* **Offline / Weak Signal**: 21 🔴 (5.0%)
+* **Maintenance / Calibration Due**: 8 🟡 (1.9%)
+
+### Monitored Device Telemetry
+* Device ID (e.g. `SS-NODE-104`, `DF-PROBE-02`)
+* Linked Farm & Farmer
+* Hardware Model & Firmware Version (`v1.4.2`)
+* Battery Level (%) & Solar Charging Voltage
+* Signal Strength (RSSI in dBm)
+* Sensor Drift & Annual Calibration Expiry Date
+
+---
+
+## 9. 🐄 Module 5 — Integrated Farming System (IFS) Intelligence
+
+The **core differentiator** that sets UZHAVU KAAPPAAN apart from standard farm management software:
+
+```
+                       SOIL (N-P-K & pH Scoring)
+                                  │
+                                  ▼
+                      CROP ROTATION OPTIMIZER
+                   (Evaluates 60 empirical crops)
+                                  │
+                                  ▼
+                      FODDER HARVEST BIOMASS
+                      (Maize, Sorghum, Cowpea)
+                                  │
+                                  ▼
+                      RAPID SILAGE FERMENTATION
+                   (Tested via Dual-Node IoT Probes)
+                                  │
+                                  ▼
+                      DAIRY HERD MILK BOOST
+                    (+1.5 to 2.5 L/cow/day gain)
+                                  │
+                                  ▼
+                      FARMYARD MANURE (FYM)
+                     (Enriched cattle dung & urine)
+                                  │
+                                  ▼
+                      SOIL CARBON RESTORATION
+                   (+0.2% to +0.4% Organic Carbon)
+                                  │
+                                  └───────────────► [Repeats next season]
+```
+
+* **Silage Screening**: Monitors pH (ideal 3.8–4.4), core temperature rise $\Delta T$ (< 3.0°C), and olive-green optical RGB spectrum to prevent cattle mycotoxicosis.
+* **Manure Nutrient Recycler**: Tracks FYM tonnage generated by member herds and calculates Nitrogen/Organic Carbon returned to fields.
+
+---
+
+## 10. ⚠️ Module 6 — Alerts & Action Center
+
+A centralized triage center that categorizes agronomic and technical events:
+
+* 🔴 **Critical Severity**: *Sulur Cluster — Low Nitrogen detected across 24 farms.*
+* 🟠 **Warning Severity**: *Pollachi Cluster — Tomato harvest volume peaking in 10 days (620 tons expected).*
+* 🟡 **Maintenance Alert**: *7 soil probes in Thondamuthur have not reported heartbeats for > 24 hours.*
+* 🟢 **Agronomic Recommendation**: *18 member farms in Annur ready for restorative pulse rotation (Cowpea / Green Gram).*
+
+### Action Center Workflow
+$$\text{View Affected Farms} \longrightarrow \text{Generate Directive} \longrightarrow \text{Broadcast to Farmers}$$
+
+---
+
+## 11. 📲 Farmer Communication System
+
+Connects the organization leadership directly with member farmers via multiple notification channels:
+
+```
+FPO ADMIN / AGRONOMIST
+    │
+    ├── Emergency Weather Shock Alerts (Heatwaves, Frost, Unseasonal Rain)
+    ├── Crop Rotation Recommendations (Legume Transition Directives)
+    ├── Silage Quality Directives (Pit Compaction, Inoculant Application)
+    ├── Mandi Batch Delivery Schedules (Pickup Windows)
+    └── Government Subsidy & Input Announcements
+             │
+             ▼
+        DISPATCH CHANNELS
+        ├── In-App Real-Time Alerts
+        ├── SMS Broadcast (Regional Language / Tamil)
+        ├── WhatsApp Automated Alerts & PDF Action Plans
+        └── Automated Voice IVR
+             │
+             ▼
+        MEMBER FARMERS
+```
+
+---
+
+## 12. 🔍 Macro-to-Micro Farm Drill-Down
+
+The platform allows leadership to navigate seamlessly from regional trends down to localized sensor pins:
+
+$$\begin{aligned}
+&\text{Kovai FPO (Organization)} \\
+&\quad\longrightarrow\text{Sulur Cluster (Village Cluster)} \\
+&\qquad\longrightarrow\text{24 Nitrogen-Depleted Holdings (Cluster Filter)} \\
+&\quad\qquad\longrightarrow\text{Farm \#104 (Individual Farm)} \\
+&\quad\qquad\quad\longrightarrow\text{V. Sundaram (Farmer)} \\
+&\quad\qquad\quad\quad\longrightarrow\text{Field Parcel \#2 (4.0 ac)} \\
+&\quad\qquad\quad\quad\quad\longrightarrow\text{Soil Test: 38 kg/ha N, pH 7.2} \\
+&\quad\qquad\quad\quad\quad\quad\longrightarrow\text{IoT Sensor: SS-NODE-104 (Moisture 24\%)} \\
+&\quad\qquad\quad\quad\quad\quad\quad\longrightarrow\text{Action: Dispatched Green Gram Rotation Advisory}
+\end{aligned}$$
+
+---
+
+## 13. 🔐 Multi-Tenant Data Architecture
 
 ```
                     ┌───────────────────────────┐
                     │       organizations       │
                     ├───────────────────────────┤
                     │ org_id (PK)               │
-                    │ name                      │
-                    │ org_type (FPO/Dairy/Agri) │
-                    │ region                    │
-                    │ created_at                │
+                    │ name, org_type, region    │
+                    │ license_tier, created_at  │
                     └─────────────┬─────────────┘
                                   │ 1:N
                                   ▼
                     ┌───────────────────────────┐
-                    │           users           │
+                    │       org_clusters        │
                     ├───────────────────────────┤
-                    │ user_id (PK)              │
+                    │ cluster_id (PK)           │
                     │ org_id (FK)               │
-                    │ role (OrgAdmin/Mgr/Farmer)│
-                    │ email, phone, name        │
+                    │ cluster_code, name, state │
                     └─────────────┬─────────────┘
                                   │ 1:N
                                   ▼
@@ -273,49 +337,124 @@ To support enterprise hierarchies securely, the data model transitions from sing
                     │           farms           │
                     ├───────────────────────────┤
                     │ farm_id (PK)              │
-                    │ org_id (FK)               │
+                    │ org_id (FK), cluster_id   │
                     │ farmer_id (FK)            │
-                    │ village_cluster_id        │
                     │ area_acres, irrigation    │
                     └─────────────┬─────────────┘
                                   │
          ┌────────────────────────┼────────────────────────┐
          ▼                        ▼                        ▼
 ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│    soil_tests    │    │   crop_history   │    │  silage_samples  │
-│ (NPK, pH, OC)    │    │ (Rotation paths) │    │ (DairyFeed tests)│
+│    soil_data     │    │   crop_history   │    │   org_sensors    │
+│ (NPK, pH, OC)    │    │ (Rotation paths) │    │ (IoT Telemetry)  │
 └──────────────────┘    └──────────────────┘    └──────────────────┘
 ```
 
 ---
 
-## 9. 🧩 B2B API Suite
+## 14. 🔌 Backend API Structure (`/api/orgs/*`)
 
-The platform provides a dedicated REST API under `/api/orgs` (mounted in `backend/routes/orgs.js`):
+All enterprise endpoints are implemented in [`backend/routes/orgs.js`](file:///e:/HACK-2K26/backend/routes/orgs.js):
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/orgs` | Lists registered FPOs, dairy cooperatives, and agribusiness organizations |
-| `GET` | `/api/orgs/:id` | Organization profile, leadership, and village cluster hierarchy |
-| `GET` | `/api/orgs/:id/dashboard` | **B2B Command Center:** Total acreage, soil health distributions, crop split, IoT status, action alerts |
-| `GET` | `/api/orgs/:id/farms` | List of member farms, farmer details, acreage, and latest soil health scores |
-| `GET` | `/api/orgs/:id/soil-health` | Aggregated soil N-P-K, pH, and Organic Carbon averages across the organization |
-| `GET` | `/api/orgs/:id/crops` | Macro crop distribution, harvest tonnage projections, and Mandi price benchmarks |
-| `GET` | `/api/orgs/:id/sensors` | Fleet telemetry: online/offline sensor nodes, battery levels, calibration reminders |
+| `GET` | `/api/orgs` | Lists all registered organizations, active farmers, acreage, and fleet online rate. |
+| `GET` | `/api/orgs/:id` | Organization profile, executive admin contacts, and village cluster hierarchies. |
+| `GET` | `/api/orgs/:id/dashboard` | **Command Center Aggregator**: KPIs, soil health distribution, crop split, and action alerts. |
+| `GET` | `/api/orgs/:id/farms` | Directory of all member farms with farmer names, locations, acres, crops, and soil scores. |
+| `GET` | `/api/orgs/:id/soil-health` | Aggregated soil N-P-K, pH, and Organic Carbon averages across the organization. |
+| `GET` | `/api/orgs/:id/crops` | Macro crop distribution, harvest tonnage projections, and Mandi price benchmarks. |
+| `GET` | `/api/orgs/:id/sensors` | Hardware fleet status: online/offline nodes, probe breakdown, and telemetry latency. |
+| `POST` | `/api/orgs/:id/advisories` | Creates and queues a regional agronomic directive for broadcast dispatch. |
 
 ---
 
-## 10. 🎯 B2B MVP Roadmap: FPO Intelligence Platform
+## 15. 🛡️ User Roles & Role-Based Access Control (RBAC)
 
-### Phase 1: Core FPO Command MVP (Active)
-- Live multi-tenant organization API routes (`/api/orgs/*`).
-- Aggregation of member farms, soil scores, crop acreage, and IoT sensor counts.
-- Integrated Farming System (IFS) fodder-to-cattle nutrient linkage.
+```
+Organization Admin (FPO Board & CEO)
+        │
+        ├── FPO Manager (Operations, Inputs, Procurement)
+        │      ├── Field Extension Officers (Cluster Monitoring)
+        │      └── Certified Agronomist (Soil & Rotation Plans)
+        │
+        └── IoT Fleet Technician (Sensors, Hardware & Gateway)
 
-### Phase 2: Regional Agronomic Aggregation
-- Automated cluster-wide rotation plans (e.g., recommend 400 acres of legume rotation across Sulur Cluster).
-- SMS and WhatsApp broadcast advisories to member farmers based on weather and soil trends.
+Farmer ──► Individual Farm Dashboard (Restricted to own parcel)
+```
 
-### Phase 3: Commercial Mandi & Procurement Connectors
-- Aggregated harvest availability feed for corporate buyers and food processors.
-- Bulk input procurement discounts coordinated through FPO admin purchasing portals.
+| Role | Permissions & Scope |
+|---|---|
+| **Organization Admin** | Full read/write access to all clusters, financial metrics, user management, and exports. |
+| **FPO Manager** | Manages farmers, farms, input procurement, harvest aggregation, and commercial mandi sales. |
+| **Field Officer** | Assigned specific village clusters; conducts ground verifications and field visits. |
+| **Agronomist** | Reviews regional soil tests, approves crop rotation recommendations, and drafts advisories. |
+| **IoT Technician** | Monitors sensor battery levels, signal drop-offs, device firmware, and sensor calibrations. |
+| **Farmer** | Access restricted strictly to their own farm parcel, soil readings, and received advisories. |
+
+---
+
+## 16. 📈 Reports & Analytics Generator
+
+The platform generates audit-grade PDF, CSV, and JSON reports:
+* **FPO Monthly Executive Intelligence Report**: Member growth, aggregate soil recovery, expected harvest value.
+* **Cluster Soil Degradation Audit**: Taluk-level NPK depletion trends for government soil subsidy programs.
+* **Mandi Collective Tonnage Schedule**: Forward harvest volume calendar for corporate procurement negotiations.
+* **Silage & Feed Security Certificate**: Quality audit for cooperative milk collection centers.
+* **IoT Sensor Telemetry Log**: Device calibration proof and network uptime compliance.
+
+---
+
+## 17. 💼 Commercial Revenue Model
+
+*(Proposed pricing models for commercial validation)*
+
+```
+                      MONETIZATION MODEL
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       ▼                       ▼                       ▼
+TIERED SAAS             PER-ACRE / SEASON           IOT-AS-A-SERVICE
+SUBSCRIPTION               LICENSING                HARDWARE BUNDLE
+Starter Tier:           ₹15 – ₹30 / acre/season     Annual Hardware Lease:
+Up to 250 farmers       Frictionless scaling with   Sensors + Gateway +
+₹25,000 / year          active member acreage       Cloud Telemetry +
+Professional Tier:                                  Annual Calibration
+Up to 1,500 farmers
+₹75,000 / year
+Enterprise Tier:
+State Federations
+₹2,50,000+ / year
+```
+
+---
+
+## 18. 🏛️ Complete Platform Architecture
+
+```
+                    UZHAVU KAAPPAAN
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+        FARMER PLATFORM            B2B PLATFORM
+              │                         │
+        Individual Farm            Organization
+              │                         │
+        Farmer Dashboard          Command Center
+                                        │
+                    ┌───────────────────┼───────────────────┐
+                    │                   │                   │
+                 PEOPLE              FARMS              DATA
+                    │                   │                   │
+                Farmers             Clusters              Soil
+                Officers            Farms                 Crops
+                Managers            Fields                IoT Telemetry
+                                                          Production
+                    │                   │                   │
+                    └───────────────────┼───────────────────┘
+                                        │
+                              INTELLIGENCE ENGINE
+                     (7-Dimension Rotation Optimizer,
+                   Kaggle Empirical Agronomy Models,
+                    DairyFeed AI & Closed-Loop IFS)
+```

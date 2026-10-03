@@ -28,6 +28,40 @@ function getAccessToken()  { return ACCESS_TOKEN; }
 window.setAccessToken = setAccessToken;
 window.getAccessToken = getAccessToken;
 
+// ── Admin Check & Visibility Control ─────────────────────────
+function isAdminUser(user = window.authUser) {
+  if (!user) return false;
+  const role = String(user.role || '').toLowerCase();
+  return role === 'fpo_admin' || role === 'admin' || role === 'superadmin' || role.includes('admin') || user.is_admin === true;
+}
+window.isAdminUser = isAdminUser;
+
+function updateAdminVisibility() {
+  const isAdmin = isAdminUser();
+  const adminSection = document.getElementById('sidebar-admin-section');
+  const portalBtn = document.getElementById('btn-portal-switch');
+  const roleBtn = document.getElementById('btn-role-switcher');
+  const mbB2B = document.getElementById('mb-nav-b2b');
+  const b2bHeaderRoleBtn = document.getElementById('btn-b2b-header-role-switch');
+
+  if (adminSection) {
+    adminSection.style.display = isAdmin ? 'block' : 'none';
+  }
+  if (portalBtn) {
+    portalBtn.style.display = isAdmin ? 'flex' : 'none';
+  }
+  if (roleBtn) {
+    roleBtn.style.display = isAdmin ? 'flex' : 'none';
+  }
+  if (mbB2B) {
+    mbB2B.style.display = isAdmin ? 'flex' : 'none';
+  }
+  if (b2bHeaderRoleBtn) {
+    b2bHeaderRoleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+}
+window.updateAdminVisibility = updateAdminVisibility;
+
 function authHeaders() {
   return ACCESS_TOKEN ? { 'Authorization': `Bearer ${ACCESS_TOKEN}` } : {};
 }
@@ -200,11 +234,69 @@ window.nutrientChip = nutrientChip;
 const VIEW_LOADERS = {};
 
 function navigate(viewId) {
-  if (viewId === 'login' || viewId === 'signup') {
-    if (window.openAuthModal) window.openAuthModal(viewId);
+  if (viewId === 'signup') {
+    if (window.openAuthModal) window.openAuthModal('signup');
     return;
   }
+
+  // Guard B2B view for admin only
+  if (viewId === 'b2b' && !isAdminUser()) {
+    if (typeof showToast === 'function') {
+      showToast('Access to FPO Command Center is restricted to administrators', 'error');
+    } else {
+      alert('Access to FPO Command Center is restricted to administrators');
+    }
+    navigate('dashboard');
+    return;
+  }
+
   state.activeView = viewId;
+
+  // Full-Screen mode toggle for Landing and Login portals
+  if (viewId === 'landing' || viewId === 'login') {
+    document.body.classList.add('mode-fullscreen');
+  } else {
+    document.body.classList.remove('mode-fullscreen');
+  }
+
+  // Sync B2B vs Farmer Portal layout
+  const farmerNav = document.getElementById('farmer-nav-items');
+  const b2bNav = document.getElementById('b2b-nav-items');
+  const portalBtn = document.getElementById('btn-portal-switch');
+  const sidebarChip = document.getElementById('sidebar-active-farm-chip');
+  const sidebarOrgChip = document.getElementById('sidebar-active-org-chip');
+
+  if (viewId === 'b2b') {
+    if (farmerNav) farmerNav.style.display = 'none';
+    if (b2bNav) b2bNav.style.display = 'block';
+    if (portalBtn) {
+      portalBtn.innerHTML = '🌾 <span>Switch to Farmer Platform</span>';
+      portalBtn.onclick = () => window.enterFarmerPortal && window.enterFarmerPortal();
+      portalBtn.style.color = '#86efac';
+      portalBtn.style.borderColor = 'rgba(34,197,94,0.4)';
+    }
+    if (sidebarChip) sidebarChip.style.display = 'none';
+    if (sidebarOrgChip) sidebarOrgChip.style.display = 'block';
+
+    document.body.classList.add('portal-b2b');
+    document.body.classList.remove('portal-farmer');
+  } else if (viewId !== 'landing' && viewId !== 'login') {
+    if (farmerNav) farmerNav.style.display = 'block';
+    if (b2bNav) b2bNav.style.display = 'none';
+    if (portalBtn) {
+      portalBtn.innerHTML = '🏢 <span>Switch to FPO Command Center</span>';
+      portalBtn.onclick = () => window.enterB2BPortal && window.enterB2BPortal('overview');
+      portalBtn.style.color = '#c084fc';
+      portalBtn.style.borderColor = 'rgba(124,58,237,0.4)';
+    }
+    if (sidebarChip) sidebarChip.style.display = 'block';
+    if (sidebarOrgChip) sidebarOrgChip.style.display = 'none';
+
+    document.body.classList.remove('portal-b2b');
+    document.body.classList.add('portal-farmer');
+  }
+
+  updateAdminVisibility();
 
   // Update active view
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -273,9 +365,180 @@ window.toggleMobileSidebar = toggleMobileSidebar;
 window.closeMobileSidebar = closeMobileSidebar;
 window.toggleLanguageMobile = toggleLanguageMobile;
 
+// ── Dedicated Login Form Handlers ────────────────────────────
+function selectLoginTab(type) {
+  const tabFarmer = document.getElementById('login-tab-farmer');
+  const tabEnt = document.getElementById('login-tab-enterprise');
+  const emailInput = document.getElementById('dedicated-login-email');
+  const subEl = document.getElementById('login-dynamic-subtitle');
+
+  if (type === 'farmer') {
+    if (tabFarmer) tabFarmer.className = 'portal-toggle-btn active tab-farmer';
+    if (tabEnt) tabEnt.className = 'portal-toggle-btn tab-enterprise';
+    if (emailInput && (!emailInput.value || emailInput.value === 'admin@kovaifpo.org')) {
+      emailInput.value = 'farmer@uzhavukaappaan.in';
+    }
+    if (subEl) subEl.textContent = 'Individual Farm Precision · Soil Sensing · Crop Rotation & Dairy Feeder';
+  } else {
+    if (tabFarmer) tabFarmer.className = 'portal-toggle-btn tab-farmer';
+    if (tabEnt) tabEnt.className = 'portal-toggle-btn active tab-enterprise';
+    if (emailInput && (!emailInput.value || emailInput.value === 'farmer@uzhavukaappaan.in')) {
+      emailInput.value = 'admin@kovaifpo.org';
+    }
+    if (subEl) subEl.textContent = 'Enterprise Co-Op Cockpit · 18 Clusters · 1,250 Members · IoT Fleet';
+  }
+}
+window.selectLoginTab = selectLoginTab;
+
+function togglePasswordVisibility() {
+  const input = document.getElementById('dedicated-login-password');
+  const btn = document.querySelector('.login-pwd-toggle');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btn) btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    if (btn) btn.textContent = '👁️';
+  }
+}
+window.togglePasswordVisibility = togglePasswordVisibility;
+
+// ── Interactive Landing Page Live Telemetry Push ─────────────
+async function simulateSensorReadingFromLanding() {
+  const btn = document.getElementById('btn-landing-telemetry-pulse');
+  const nEl = document.getElementById('landing-n-val');
+  const pEl = document.getElementById('landing-p-val');
+  const kEl = document.getElementById('landing-k-val');
+  const mEl = document.getElementById('landing-m-val');
+  const phEl = document.getElementById('landing-ph-val');
+  const pingEl = document.getElementById('landing-ping-val');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '📡 Transmitting Packet…';
+  }
+
+  // Generate realistic slight telemetry variations
+  const newN = Math.floor(86 + Math.random() * 8);
+  const newP = Math.floor(50 + Math.random() * 6);
+  const newK = Math.floor(63 + Math.random() * 7);
+  const newM = Math.floor(56 + Math.random() * 5);
+  const newPh = (6.7 + Math.random() * 0.25).toFixed(1);
+  const newPing = Math.floor(11 + Math.random() * 6);
+
+  try {
+    const payload = {
+      farm_id: 101,
+      device_id: 'ESP32-SOIL-101',
+      nitrogen: newN,
+      phosphorus: newP,
+      potassium: newK,
+      ph: parseFloat(newPh),
+      soil_moisture: newM,
+      organic_carbon: 0.88,
+      air_temperature: 28.5,
+      air_humidity: 64
+    };
+
+    await apiPost('/orgs/1/sensors/simulate-reading', payload);
+
+    if (nEl) { nEl.innerHTML = `${newN} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; nEl.style.transform = 'scale(1.1)'; setTimeout(() => nEl.style.transform = 'scale(1)', 300); }
+    if (pEl) { pEl.innerHTML = `${newP} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; pEl.style.transform = 'scale(1.1)'; setTimeout(() => pEl.style.transform = 'scale(1)', 300); }
+    if (kEl) { kEl.innerHTML = `${newK} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; kEl.style.transform = 'scale(1.1)'; setTimeout(() => kEl.style.transform = 'scale(1)', 300); }
+    if (mEl) { mEl.innerHTML = `${newM} <span style="font-size:12px;color:#94a3b8">%</span>`; mEl.style.transform = 'scale(1.1)'; setTimeout(() => mEl.style.transform = 'scale(1)', 300); }
+    if (phEl) { phEl.innerHTML = `${newPh} <span style="font-size:12px;color:#94a3b8">pH</span>`; phEl.style.transform = 'scale(1.1)'; setTimeout(() => phEl.style.transform = 'scale(1)', 300); }
+    if (pingEl) { pingEl.textContent = `${newPing}ms`; }
+
+  } catch (err) {
+    console.warn('Simulate pulse error:', err);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '✓ Pulse Ingested (Live)';
+      setTimeout(() => {
+        if (btn) btn.textContent = '⚡ Push Telemetry Pulse';
+      }, 2000);
+    }
+  }
+}
+window.simulateSensorReadingFromLanding = simulateSensorReadingFromLanding;
+
+async function handleDedicatedLogin(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const email = document.getElementById('dedicated-login-email')?.value.trim();
+  const password = document.getElementById('dedicated-login-password')?.value;
+  const msgEl = document.getElementById('login-feedback-msg');
+  const btn = document.getElementById('dedicated-login-submit-btn');
+
+  if (!email || !password) {
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(239, 68, 68, 0.15)';
+      msgEl.style.color = '#f87171';
+      msgEl.textContent = 'Please provide both email and password.';
+    }
+    return false;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Authenticating…';
+  }
+
+  try {
+    const res = await apiPost('/auth/login', { email, password });
+    window.setAccessToken(res.access_token);
+    window.authUser = res.user;
+
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(34, 197, 94, 0.15)';
+      msgEl.style.color = '#4ade80';
+      msgEl.textContent = `Welcome back, ${res.user.name}! Redirecting...`;
+    }
+
+    if (window.renderAccountWidget) window.renderAccountWidget();
+    if (window.updateAdminVisibility) window.updateAdminVisibility();
+
+    setTimeout(() => {
+      if (isAdminUser(res.user)) {
+        enterB2BPortal('overview');
+      } else {
+        enterFarmerPortal();
+      }
+    }, 450);
+  } catch (err) {
+    if (msgEl) {
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(239, 68, 68, 0.15)';
+      msgEl.style.color = '#f87171';
+      msgEl.textContent = err.message || 'Login failed. Please verify credentials.';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Platform';
+    }
+  }
+  return false;
+}
+window.handleDedicatedLogin = handleDedicatedLogin;
+
 function initAppAfterAuth() {
-  const hash = window.location.hash.replace('#', '') || 'dashboard';
-  navigate(hash);
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    navigate(hash);
+  } else if (window.authUser) {
+    if (isAdminUser(window.authUser)) {
+      navigate('b2b');
+    } else {
+      navigate('dashboard');
+    }
+  } else {
+    navigate('landing');
+  }
+  updateAdminVisibility();
 }
 window.initAppAfterAuth = initAppAfterAuth;
 
@@ -285,4 +548,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-link[data-view]').forEach(link => {
     link.addEventListener('click', () => navigate(link.dataset.view));
   });
+  updateAdminVisibility();
 });
+
