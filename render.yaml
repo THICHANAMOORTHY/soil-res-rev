@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: uzhavu-kaappaan-backend
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm --prefix backend install
+    startCommand: node backend/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
