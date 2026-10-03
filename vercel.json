@@ -4,15 +4,15 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://farm-rotation.onrender.com/api/:match*"
+      "destination": "https://uzhavu-kaappaan-backend.onrender.com/api/:match*"
     },
     {
       "source": "/download/:match*",
-      "destination": "https://farm-rotation.onrender.com/download/:match*"
+      "destination": "https://uzhavu-kaappaan-backend.onrender.com/download/:match*"
     },
     {
       "source": "/downloads/:match*",
-      "destination": "https://farm-rotation.onrender.com/downloads/:match*"
+      "destination": "https://uzhavu-kaappaan-backend.onrender.com/downloads/:match*"
     },
     {
       "source": "/((?!api|download|downloads).*)",

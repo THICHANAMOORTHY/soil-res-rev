@@ -2,9 +2,11 @@
 //  app.js — Router, API client, global state
 // ============================================================
 
-const API = (window.location.origin && window.location.origin !== 'null' && window.location.protocol.startsWith('http'))
-  ? `${window.location.origin}/api`
-  : 'http://localhost:3000/api';
+const API = window.BACKEND_API_URL || (
+  (window.location.origin && window.location.origin !== 'null' && window.location.protocol.startsWith('http'))
+    ? `${window.location.origin}/api`
+    : 'http://localhost:3000/api'
+);
 
 
 window.state = {
