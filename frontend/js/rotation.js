@@ -17,8 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function runOptimizer() {
   const btn = document.getElementById('optimize-btn');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   btn.disabled = true;
-  btn.textContent = '⏳ Optimizing…';
+  btn.textContent = isTa ? '⏳ உகந்ததாக்குகிறது…' : '⏳ Optimizing…';
   document.getElementById('rotation-loading').style.display = '';
 
   try {
@@ -31,10 +32,10 @@ async function runOptimizer() {
     renderPlans(result.plans);
   } catch(e) {
     document.getElementById('rotation-plans').innerHTML =
-      `<div class="alert-banner warning">⚠ ${e.message}</div>`;
+      `<div class="alert-banner warning">⚠️ ${e.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = '⚡ Optimize Rotation';
+    btn.textContent = isTa ? '⚡ பயிர் சுழற்சி உகந்ததாக்கு' : '⚡ Optimize Rotation';
     document.getElementById('rotation-loading').style.display = 'none';
   }
 }

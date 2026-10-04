@@ -7,12 +7,13 @@ let simTimeline = [];
 let simInterval = null;
 
 VIEW_LOADERS['simulation'] = async function loadSimulation() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   // Use selected plan or recommended plan
   const planId = state.selectedPlanId || getRecommendedPlanId();
   if (!planId) {
     document.getElementById('sim-content').innerHTML = `
       <div class="alert-banner warning">
-        ⚠ Please run the <b>Rotation Optimizer</b> first to generate plans, then run simulation.
+        ⚠️ ${isTa ? 'தயவுசெய்து முதலில் <b>பயிர் சுழற்சி உகந்ததாக்கலை</b> இயக்கி திட்டங்களை உருவாக்கி, பின்னர் உருவகப்படுத்துதலை இயக்கவும்.' : 'Please run the <b>Rotation Optimizer</b> first to generate plans, then run simulation.'}
       </div>`;
     return;
   }
@@ -28,8 +29,9 @@ function getRecommendedPlanId() {
 }
 
 async function fetchSimulation(planId) {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   document.getElementById('sim-content').innerHTML =
-    `<div class="loading-wrap"><div class="spinner"></div><p class="loading-text">Running simulation…</p></div>`;
+    `<div class="loading-wrap"><div class="spinner"></div><p class="loading-text">${isTa ? 'மண் வளம் உருவகப்படுத்துதல் இயங்குகிறது…' : 'Running simulation…'}</p></div>`;
 
   try {
     const result = await apiPost('/soil-simulation', { plan_id: planId });
@@ -39,7 +41,7 @@ async function fetchSimulation(planId) {
     renderSimSetup(result);
   } catch(e) {
     document.getElementById('sim-content').innerHTML =
-      `<div class="alert-banner warning">⚠ ${e.message}</div>`;
+      `<div class="alert-banner warning">⚠️ ${e.message}</div>`;
   }
 }
 
@@ -116,8 +118,9 @@ window.playSimulation = playSimulation;
 
 function resetSimulation() {
   if (simInterval) { clearInterval(simInterval); simInterval = null; }
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   const btn = document.getElementById('sim-play-btn');
-  if (btn) btn.textContent = '▶ Play Animation';
+  if (btn) btn.textContent = isTa ? '▶ இயக்குக (Animation)' : '▶ Play Animation';
   simStep = 0;
   resetCardVisibility();
   revealSimCard(0);

@@ -64,24 +64,33 @@ function startSensorPolling() {
 async function pollSensorOnce() {
   const dot = document.getElementById('sensor-live-dot');
   const text = document.getElementById('sensor-live-status-text');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   try {
     const data = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
     if (!data.ever_connected) {
       dot.className = 'sensor-live-dot error';
-      text.textContent = '⚠ No Soil Scout / ESP32 sensor has reported for this farm yet. Connect your device to push live readings.';
+      text.textContent = isTa
+        ? '⚠️ இந்த பண்ணைக்கு இதுவரை Soil Scout / ESP32 சென்சார் இணைக்கப்படவில்லை. நேரடி தரவுகளுக்கு உங்கள் சாதனத்தை இணைக்கவும்.'
+        : '⚠ No Soil Scout / ESP32 sensor has reported for this farm yet. Connect your device to push live readings.';
       return;
     }
     if (data.connected) {
       dot.className = 'sensor-live-dot connected';
-      text.textContent = `🟢 Live · device "${data.device_id}" · updated ${data.seconds_ago}s ago`;
+      text.textContent = isTa
+        ? `🟢 நேரடி இணைப்பு · சாதனம் "${data.device_id}" · ${data.seconds_ago} வினாடிகளுக்கு முன்`
+        : `🟢 Live · device "${data.device_id}" · updated ${data.seconds_ago}s ago`;
     } else {
       dot.className = 'sensor-live-dot stale';
-      text.textContent = `🟡 Signal standby · last reading from ${data.seconds_ago}s ago (device "${data.device_id}")`;
+      text.textContent = isTa
+        ? `🟡 சிக்னல் காத்திருப்பு · கடைசி அளவீடு ${data.seconds_ago} வினாடிகளுக்கு முன் (சாதனம் "${data.device_id}")`
+        : `🟡 Signal standby · last reading from ${data.seconds_ago}s ago (device "${data.device_id}")`;
     }
     if (data.reading) prefillSliders(data.reading);
   } catch (err) {
     dot.className = 'sensor-live-dot error';
-    text.textContent = `⚠ Could not reach sensor status endpoint: ${err.message}`;
+    text.textContent = isTa
+      ? `⚠️ சென்சார் நிலை முனைப்புள்ளியை அணுக முடியவில்லை: ${err.message}`
+      : `⚠ Could not reach sensor status endpoint: ${err.message}`;
   }
 }
 
@@ -122,17 +131,18 @@ function updateSensorExtraTiles(soil) {
   if (lightEl) lightEl.textContent = (soil.light !== undefined && soil.light !== null) ? `${soil.light.toFixed(0)} %` : '— %';
 
   // Reliability & Moisture check
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   const isReliable = soil.is_reliable !== undefined ? soil.is_reliable : (soil.soil_moisture > 5);
   if (reliableEl) {
     if (isReliable) {
-      reliableEl.textContent = '🟢 Reliable';
+      reliableEl.textContent = isTa ? '🟢 நம்பகமானது' : '🟢 Reliable';
       reliableEl.style.color = '#10b981';
-      if (reliableSub) reliableSub.textContent = 'Optimal probe moisture';
+      if (reliableSub) reliableSub.textContent = isTa ? 'உகந்த ஆய்வு ஈரப்பதம்' : 'Optimal probe moisture';
       if (dryWarning) dryWarning.style.display = 'none';
     } else {
-      reliableEl.textContent = '⚠️ Unreliable';
+      reliableEl.textContent = isTa ? '⚠️ நம்பகமற்றது' : '⚠️ Unreliable';
       reliableEl.style.color = '#f59e0b';
-      if (reliableSub) reliableSub.textContent = soil.reliability_note || 'Soil too dry for probe';
+      if (reliableSub) reliableSub.textContent = isTa ? 'மண் மிக வறண்டுள்ளது' : (soil.reliability_note || 'Soil too dry for probe');
       if (dryWarning) dryWarning.style.display = 'block';
     }
   }
@@ -147,23 +157,23 @@ function updateSensorExtraTiles(soil) {
       tdsEl.textContent = `${roundedTds} ppm`;
       if (tdsStatusEl) {
         if (roundedTds < 300) {
-          tdsStatusEl.textContent = '🟢 Low · ideal: 300–700 ppm';
+          tdsStatusEl.textContent = isTa ? '🟢 குறைவு · உகந்தது: 300–700 ppm' : '🟢 Low · ideal: 300–700 ppm';
           tdsStatusEl.style.color = 'var(--text-muted)';
         } else if (roundedTds <= 700) {
-          tdsStatusEl.textContent = '🟢 Optimal (300–700 ppm)';
+          tdsStatusEl.textContent = isTa ? '🟢 உகந்தது (300–700 ppm)' : '🟢 Optimal (300–700 ppm)';
           tdsStatusEl.style.color = '#10b981';
         } else if (roundedTds <= 1200) {
-          tdsStatusEl.textContent = '🟡 Moderate salinity';
+          tdsStatusEl.textContent = isTa ? '🟡 மிதமான உப்புத்தன்மை' : '🟡 Moderate salinity';
           tdsStatusEl.style.color = '#f59e0b';
         } else {
-          tdsStatusEl.textContent = '🔴 High salinity stress';
+          tdsStatusEl.textContent = isTa ? '🔴 அதிக உப்புத்தன்மை அழுத்தம்' : '🔴 High salinity stress';
           tdsStatusEl.style.color = '#ef4444';
         }
       }
     } else {
       tdsEl.textContent = '— ppm';
       if (tdsStatusEl) {
-        tdsStatusEl.textContent = 'ideal: 300–700 ppm';
+        tdsStatusEl.textContent = isTa ? 'உகந்தது: 300–700 ppm' : 'ideal: 300–700 ppm';
         tdsStatusEl.style.color = 'var(--text-muted)';
       }
     }
@@ -286,8 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function handleSoilSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('soil-submit-btn');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   btn.disabled = true;
-  btn.textContent = '⏳ Analysing…';
+  btn.textContent = isTa ? '⏳ பகுப்பாய்வு செய்கிறது…' : '⏳ Analysing…';
 
   const nitrogen       = parseFloat(document.getElementById('n-slider').value);
   const phosphorus     = parseFloat(document.getElementById('p-slider').value);
@@ -304,10 +315,10 @@ async function handleSoilSubmit(e) {
     renderSoilResult(result);
   } catch(err) {
     document.getElementById('soil-result').innerHTML =
-      `<div class="alert-banner warning">⚠ ${err.message}</div>`;
+      `<div class="alert-banner warning">⚠️ ${err.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = '🔬 Analyse Soil';
+    btn.textContent = isTa ? '🔬 மண் பகுப்பாய்வு செய்' : '🔬 Analyse Soil';
   }
 }
 

@@ -91,8 +91,9 @@ function addHistoryRow() {
 async function handleHistorySubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('history-submit-btn');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   btn.disabled = true;
-  btn.textContent = '⏳ Saving…';
+  btn.textContent = isTa ? '⏳ சேமிக்கிறது…' : '⏳ Saving…';
 
   const history = [];
   for (let i = 1; i <= historyRows; i++) {
@@ -107,7 +108,7 @@ async function handleHistorySubmit(e) {
 
   if (!history.length) {
     btn.disabled = false;
-    btn.textContent = '💾 Save History';
+    btn.textContent = isTa ? '💾 வரலாற்றைச் சேமி' : '💾 Save History';
     return;
   }
 
@@ -120,28 +121,44 @@ async function handleHistorySubmit(e) {
     renderHistoryTable(data.history);
   } catch(err) {
     document.getElementById('history-result').innerHTML =
-      `<div class="alert-banner warning">⚠ ${err.message}</div>`;
+      `<div class="alert-banner warning">⚠️ ${err.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = '💾 Save History';
+    btn.textContent = isTa ? '💾 வரலாற்றைச் சேமி' : '💾 Save History';
   }
 }
 
 function renderHistoryResult(result) {
   const el = document.getElementById('history-result');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   const issueColor = result.rotation_issue === 'Continuous cultivation' ? 'danger'
                    : result.rotation_issue === 'Repeated crop'          ? 'warning'
                    : 'success';
+
+  const issueText = isTa
+    ? (result.rotation_issue === 'Continuous cultivation' ? 'தொடர் பயிரிடுதல் கண்டறியப்பட்டது'
+      : result.rotation_issue === 'Repeated crop' ? 'ஒரே பயிர் மீண்டும் பயிரிடப்பட்டது'
+      : 'சுழற்சி சிக்கல் ஏதுமில்லை (நலம்)')
+    : result.rotation_issue;
+
+  const nutrientPressText = isTa
+    ? (result.nutrient_pressure === 'High' ? 'அதிகம்' : result.nutrient_pressure === 'Medium' ? 'மிதமானது' : 'குறைவு')
+    : result.nutrient_pressure;
+
+  const penCropText = isTa && window.tCrop ? tCrop(result.penalized_crop) : result.penalized_crop;
 
   el.innerHTML = `
     <div class="alert-banner ${issueColor} mt-24" style="margin-top:24px">
       <span>${issueColor === 'danger' ? '🚨' : issueColor === 'warning' ? '⚠' : '✓'}</span>
       <div>
-        <b>Rotation Issue: ${result.rotation_issue}</b><br>
-        Nutrient Pressure: <b>${result.nutrient_pressure}</b> — 
-        Penalized Crop: <b>${result.penalized_crop}</b><br>
+        <b>${isTa ? 'சுழற்சி நிலை' : 'Rotation Issue'}: ${issueText}</b><br>
+        ${isTa ? 'ஊட்டச்சத்து அழுத்தம்' : 'Nutrient Pressure'}: <b>${nutrientPressText}</b> — 
+        ${isTa ? 'தவிர்க்க வேண்டிய பயிர்' : 'Penalized Crop'}: <b>${penCropText}</b><br>
         <span style="margin-top:6px;display:block">
-          Recommended Families: ${result.suitable_crop_families.map(f => `<span class="chip info" style="margin:2px">${f}</span>`).join('')}
+          ${isTa ? 'பரிந்துரைக்கப்படும் பயிர் குடும்பங்கள்' : 'Recommended Families'}: ${result.suitable_crop_families.map(f => {
+            const famName = isTa && window.t ? t(f.toLowerCase(), f) : f;
+            return `<span class="chip info" style="margin:2px">${famName}</span>`;
+          }).join('')}
         </span>
       </div>
     </div>`;

@@ -243,10 +243,14 @@ function navigate(viewId) {
 
   // Guard B2B view for admin only
   if (viewId === 'b2b' && !isAdminUser()) {
+    const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+    const msg = isTa
+      ? 'FPO கட்டுப்பாட்டு மைய அணுகல் நிர்வாகிகளுக்கு மட்டுமே அனுமதிக்கப்பட்டுள்ளது'
+      : 'Access to FPO Command Center is restricted to administrators';
     if (typeof showToast === 'function') {
-      showToast('Access to FPO Command Center is restricted to administrators', 'error');
+      showToast(msg, 'error');
     } else {
-      alert('Access to FPO Command Center is restricted to administrators');
+      alert(msg);
     }
     navigate('dashboard');
     return;
@@ -267,12 +271,14 @@ function navigate(viewId) {
   const portalBtn = document.getElementById('btn-portal-switch');
   const sidebarChip = document.getElementById('sidebar-active-farm-chip');
   const sidebarOrgChip = document.getElementById('sidebar-active-org-chip');
+  const isTaNav = (window.i18n && window.i18n.getLanguage() === 'ta');
 
   if (viewId === 'b2b') {
     if (farmerNav) farmerNav.style.display = 'none';
     if (b2bNav) b2bNav.style.display = 'block';
     if (portalBtn) {
-      portalBtn.innerHTML = '🌾 <span>Switch to Farmer Platform</span>';
+      const switchFarmerText = isTaNav ? (window.t ? t('b2bSwitchToFarmer') : 'விவசாயி தளத்திற்கு மாறவும்') : 'Switch to Farmer Platform';
+      portalBtn.innerHTML = `🌾 <span>${switchFarmerText}</span>`;
       portalBtn.onclick = () => window.enterFarmerPortal && window.enterFarmerPortal();
       portalBtn.style.color = '#86efac';
       portalBtn.style.borderColor = 'rgba(34,197,94,0.4)';
@@ -286,7 +292,8 @@ function navigate(viewId) {
     if (farmerNav) farmerNav.style.display = 'block';
     if (b2bNav) b2bNav.style.display = 'none';
     if (portalBtn) {
-      portalBtn.innerHTML = '🏢 <span>Switch to FPO Command Center</span>';
+      const switchFpoText = isTaNav ? (window.t ? t('b2bSwitchToFPO') : 'FPO கட்டுப்பாட்டு மையத்திற்கு மாறவும்') : 'Switch to FPO Command Center';
+      portalBtn.innerHTML = `🏢 <span>${switchFpoText}</span>`;
       portalBtn.onclick = () => window.enterB2BPortal && window.enterB2BPortal('overview');
       portalBtn.style.color = '#c084fc';
       portalBtn.style.borderColor = 'rgba(124,58,237,0.4)';

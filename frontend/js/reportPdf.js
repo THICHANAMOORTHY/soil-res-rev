@@ -3,11 +3,12 @@
 // ============================================================
 
 async function exportFarmerReportPDF() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   const buttons = document.querySelectorAll('#btn-export-pdf, .btn-download-pdf, button[onclick="exportFarmerReportPDF()"]');
   buttons.forEach(b => {
     b.disabled = true;
     b.dataset.origText = b.innerHTML;
-    b.innerHTML = '⏳ Downloading PDF…';
+    b.innerHTML = isTa ? '⏳ PDF பதிவிறக்கம் செய்யப்படுகிறது…' : '⏳ Downloading PDF…';
   });
 
   try {
