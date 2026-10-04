@@ -31,12 +31,20 @@ async function loadFarmsDropdown() {
   if (!select) return;
 
   try {
+    const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
     const farms = await apiGet('/farms');
-    select.innerHTML = farms.map(f => `
+    select.innerHTML = farms.map(f => {
+      const locName = (isTa && (f.location_name || f.name).includes('Coimbatore'))
+        ? 'கோயம்புத்தூர், தமிழ்நாடு'
+        : (f.location_name || f.name);
+      const irrig = isTa
+        ? ((f.irrigation_type || f.irrigation || '').includes('Drip') ? 'சொட்டு நீர் பாசனம்' : (f.irrigation_type || f.irrigation))
+        : (f.irrigation_type || f.irrigation);
+      return `
       <option value="${f.farm_id}" data-lat="${f.latitude}" data-lon="${f.longitude}" data-name="${f.location_name || f.name}" ${f.farm_id === state.farm_id ? 'selected' : ''}>
-        📍 ${f.location_name || f.name} (${f.area_acres} ac · ${f.irrigation_type || f.irrigation})
+        📍 ${locName} (${f.area_acres} ${isTa ? 'ஏக்கர்' : 'ac'} · ${irrig})
       </option>
-    `).join('') + `<option value="custom">🔍 Custom Searched Location...</option>`;
+    `;}).join('') + `<option value="custom">${isTa ? '🔍 பிற இருப்பிடத்தைத் தேடுங்கள்...' : '🔍 Custom Searched Location...'}</option>`;
 
     select.addEventListener('change', handleFarmLocationChange);
   } catch (err) {

@@ -176,19 +176,20 @@ async function predictCropsFromSensor() {
   const out = document.getElementById('sensor-predictions-output');
   if (!btn || !out) return;
 
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   btn.disabled = true;
-  btn.textContent = '⏳ Calculating Suitability…';
+  btn.textContent = isTa ? '⏳ பொருத்தத்தைக் கணக்கிடுகிறது…' : '⏳ Calculating Suitability…';
   out.style.display = 'block';
-  out.innerHTML = `<div class="loading-wrap" style="padding:16px"><div class="spinner"></div><span style="font-size:13px;color:var(--text-secondary)">Predicting optimal crops from sensor parameters...</span></div>`;
+  out.innerHTML = `<div class="loading-wrap" style="padding:16px"><div class="spinner"></div><span style="font-size:13px;color:var(--text-secondary)">${isTa ? 'சென்சார் அளவீடுகளிலிருந்து உகந்த பயிர்களைக் கணிக்கிறது...' : 'Predicting optimal crops from sensor parameters...'}</span></div>`;
 
   try {
     const data = await apiGet(`/soil-sensor/predict?farm_id=${state.farm_id}`);
     const top = data.predictions?.[0];
 
-    const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
     const topName = top ? (window.tCrop ? tCrop(top.crop) : top.crop) : 'None';
     const topScore = top ? top.final_score : 0;
     const scoreColor = topScore >= 80 ? '#22c55e' : topScore >= 65 ? '#f59e0b' : '#ef4444';
+    const famDisplay = isTa ? (window.t ? t((top?.crop_family || 'Legume').toLowerCase(), top?.crop_family || 'Legume') : (top?.crop_family || 'Legume')) : (top?.crop_family || 'Legume');
 
     let html = `
       <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px">
@@ -196,31 +197,34 @@ async function predictCropsFromSensor() {
           <div class="flex items-center gap-12">
             <span style="font-size:32px">${cropIcon(top?.crop)}</span>
             <div>
-              <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--green-400)">🥇 #1 Recommended Crop from Sensor</div>
-              <div style="font-size:20px;font-weight:700;color:var(--text-primary)">${topName} (${top?.crop_family || 'Legume'})</div>
-              <div style="font-size:12px;color:var(--text-secondary)">Est. Yield: ${top?.predicted_yield || 0} kg/acre · Est. Profit: ₹${(top?.predicted_profit || 0).toLocaleString('en-IN')} / acre</div>
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--green-400)">${isTa ? '🥇 சென்சார் பரிந்துரைக்கும் முதன்மைப் பயிர்' : '🥇 #1 Recommended Crop from Sensor'}</div>
+              <div style="font-size:20px;font-weight:700;color:var(--text-primary)">${topName} (${famDisplay})</div>
+              <div style="font-size:12px;color:var(--text-secondary)">${isTa ? 'எதிர்பார்க்கப்படும் மகசூல்' : 'Est. Yield'}: ${top?.predicted_yield || 0} ${isTa ? 'கிலோ/ஏக்கர்' : 'kg/acre'} · ${isTa ? 'லாபம்' : 'Est. Profit'}: ₹${(top?.predicted_profit || 0).toLocaleString('en-IN')} / ${isTa ? 'ஏக்கர்' : 'acre'}</div>
             </div>
           </div>
           <div style="text-align:right">
             <div style="font-size:28px;font-weight:800;color:${scoreColor}">${topScore} <span style="font-size:14px;color:var(--text-muted)">/100</span></div>
-            <div style="font-size:11px;color:var(--text-muted)">Suitability Score</div>
+            <div style="font-size:11px;color:var(--text-muted)">${isTa ? 'பொருத்த மதிப்பெண்' : 'Suitability Score'}</div>
           </div>
         </div>
       </div>
 
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)">Top Alternative Crops Predicted for this Sensor Profile:</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)">${isTa ? 'இந்த சென்சார் நிலைக்கு ஏற்ற மாற்றுப் பயிர்கள்:' : 'Top Alternative Crops Predicted for this Sensor Profile:'}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px">
     `;
 
     data.predictions.slice(1, 5).forEach(c => {
       const cName = window.tCrop ? tCrop(c.crop) : c.crop;
+      const wText = isTa
+        ? (c.water_requirement === 'Low' ? 'குறைந்த நீர்' : c.water_requirement === 'Medium' ? 'மிதமான நீர்' : 'அதிக நீர்')
+        : `${c.water_requirement} Water`;
       html += `
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
           <div class="flex items-center gap-8">
             <span style="font-size:20px">${cropIcon(c.crop)}</span>
             <div>
               <div style="font-weight:600;font-size:13px">${cName}</div>
-              <div style="font-size:11px;color:var(--text-muted)">${c.water_requirement} Water</div>
+              <div style="font-size:11px;color:var(--text-muted)">${wText}</div>
             </div>
           </div>
           <span style="font-weight:700;color:var(--green-400);font-size:14px">${c.final_score}</span>
@@ -231,21 +235,21 @@ async function predictCropsFromSensor() {
     html += `
       </div>
       <div class="flex items-center gap-12" style="justify-content:flex-end">
-        <button type="button" class="btn btn-secondary" onclick="navigateTo('evaluation')" style="font-size:12px;padding:6px 14px">
-          View Full Evaluation Leaderboard →
+        <button type="button" class="btn btn-secondary" onclick="navigate('evaluation')" style="font-size:12px;padding:6px 14px">
+          ${isTa ? 'முழு பயிர் மதிப்பீட்டு பட்டியலைக் காண்க →' : 'View Full Evaluation Leaderboard →'}
         </button>
-        <button type="button" class="btn btn-primary" onclick="navigateTo('rotation')" style="font-size:12px;padding:6px 14px">
-          Generate Multi-Season Crop Rotation →
+        <button type="button" class="btn btn-primary" onclick="navigate('rotation')" style="font-size:12px;padding:6px 14px">
+          ${isTa ? 'பயிர் சுழற்சி திட்டத்தை உருவாக்கு →' : 'Generate Multi-Season Crop Rotation →'}
         </button>
       </div>
     `;
 
     out.innerHTML = html;
   } catch(err) {
-    out.innerHTML = `<div class="alert-banner warning">⚠ Failed to calculate sensor crop prediction: ${err.message}</div>`;
+    out.innerHTML = `<div class="alert-banner warning">⚠️ ${err.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>⚡</span> Refresh Sensor Prediction`;
+    btn.innerHTML = `<span>⚡</span> ${isTa ? 'சென்சார் கணிப்பை புதுப்பி' : 'Refresh Sensor Prediction'}`;
   }
 }
 window.predictCropsFromSensor = predictCropsFromSensor;

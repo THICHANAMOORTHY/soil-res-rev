@@ -82,19 +82,21 @@ function revealSimCard(index) {
   const card = document.getElementById(`sim-card-${index}`);
   if (card) card.classList.add('revealed');
   const info = document.getElementById('sim-step-info');
-  if (info) info.textContent = `Season: ${index} / ${simTimeline.length - 1}`;
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  if (info) info.textContent = `${isTa ? 'பருவம்' : 'Season'}: ${index} / ${simTimeline.length - 1}`;
 }
 
 function playSimulation() {
   const btn = document.getElementById('sim-play-btn');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   if (simInterval) {
     clearInterval(simInterval);
     simInterval = null;
-    btn.textContent = '▶ Play Animation';
+    btn.textContent = isTa ? '▶ இயக்குக' : '▶ Play Animation';
     return;
   }
 
-  btn.textContent = '⏸ Pause';
+  btn.textContent = isTa ? '⏸ இடைநிறுத்து' : '⏸ Pause';
   resetCardVisibility();
   revealSimCard(0);
   simStep = 1;
@@ -103,7 +105,7 @@ function playSimulation() {
     if (simStep >= simTimeline.length) {
       clearInterval(simInterval);
       simInterval = null;
-      btn.textContent = '▶ Replay';
+      btn.textContent = isTa ? '▶ மீண்டும் இயக்கு' : '▶ Replay';
       return;
     }
     revealSimCard(simStep);

@@ -40,7 +40,7 @@ function renderDashboard(d) {
   if (errBanner) errBanner.remove();  // Farm info
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   // Tamil text exists only for the demo farm/farmer; anyone else's real name is shown as-is.
-  document.getElementById('dash-farm-name').textContent   = (isTa && d.farm.name === 'Coimbatore, Tamil Nadu') ? 'கோயம்புத்தூர், தமிழ்நாடு' : d.farm.name;
+  document.getElementById('dash-farm-name').textContent   = (isTa && (d.farm.name.includes('Coimbatore') || d.farm.name.includes('Kovai'))) ? 'கோவை பண்ணை (தமிழ்நாடு)' : d.farm.name;
   document.getElementById('dash-farmer-name').textContent = (isTa && d.farm.farmer_name === 'Ramesh Kumar') ? 'ரமேஷ் குமார்' : d.farm.farmer_name;
   document.getElementById('dash-area').textContent        = isTa
     ? `${d.farm.area_acres} ஏக்கர் · ${d.farm.irrigation.includes('Drip') ? 'சொட்டு நீர் பாசனம்' : d.farm.irrigation}`
@@ -48,7 +48,7 @@ function renderDashboard(d) {
 
   // Update sidebar active farm chip
   const fcName = document.querySelector('.fc-name');
-  if (fcName) fcName.textContent = d.farm.name;
+  if (fcName) fcName.textContent = (isTa && (d.farm.name.includes('Coimbatore') || d.farm.name.includes('Kovai'))) ? 'கோவை பண்ணை' : d.farm.name;
   const fcMeta = document.querySelector('.fc-meta');
   if (fcMeta) fcMeta.textContent = isTa ? `${d.farm.area_acres} ஏக்கர் · ${d.farm.irrigation}` : `${d.farm.area_acres} acres · ${d.farm.irrigation}`;
 
@@ -99,13 +99,14 @@ function renderDashboard(d) {
     : (d.light !== undefined && d.light !== null ? d.light : (d.soil_data?.light ?? null));
 
   if (lightEl) {
+    const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
     if (sensorLight !== null && sensorLight !== undefined && !isNaN(Number(sensorLight))) {
       lightEl.textContent = `${Number(sensorLight).toFixed(0)}%`;
       lightEl.style.color = '#eab308';
-      if (lightSub) lightSub.textContent = `Live Probe (${d.sensor_data?.device_id || 'Soil Scout'})`;
+      if (lightSub) lightSub.textContent = `${isTa ? 'நேரடி சென்சார்' : 'Live Probe'} (${d.sensor_data?.device_id || 'Soil Scout'})`;
     } else {
       lightEl.textContent = '— %';
-      if (lightSub) lightSub.textContent = 'Awaiting sensor reading';
+      if (lightSub) lightSub.textContent = isTa ? 'சென்சார் அளவீட்டிற்காக காத்திருக்கிறது' : 'Awaiting sensor reading';
     }
   }
 

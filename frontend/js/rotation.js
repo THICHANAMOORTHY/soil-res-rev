@@ -128,12 +128,13 @@ function renderProfitChart(plans) {
   const COLORS = ['rgba(248,113,113,0.8)', 'rgba(34,197,94,0.8)', 'rgba(59,130,246,0.8)'];
   const BORDER = ['#f87171', '#22c55e', '#3b82f6'];
 
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   _profitChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: plans.map(p => `Plan ${p.plan_label}`),
+      labels: plans.map(p => isTa ? `திட்டம் ${p.plan_label}` : `Plan ${p.plan_label}`),
       datasets: [{
-        label: 'Total Profit (₹)',
+        label: isTa ? 'மொத்த லாபம் (₹)' : 'Total Profit (₹)',
         data: plans.map(p => p.total_projected_profit),
         backgroundColor: COLORS,
         borderColor: BORDER,

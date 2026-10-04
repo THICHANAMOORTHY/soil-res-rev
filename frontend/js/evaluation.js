@@ -101,14 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function runEvaluation() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   if (selectedCropIds.length < 2) {
-    alert('Please select at least 2 crops to evaluate.');
+    alert(isTa ? 'மதிப்பீடு செய்ய குறைந்தபட்சம் 2 பயிர்களைத் தேர்ந்தெடுக்கவும்.' : 'Please select at least 2 crops to evaluate.');
     return;
   }
 
   const btn = document.getElementById('run-eval-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ Evaluating…';
+  btn.textContent = isTa ? '⏳ மதிப்பீடு செய்கிறது…' : '⏳ Evaluating…';
 
   const season = document.getElementById('eval-season-sel')?.value || state.candidates?.season || 'Kharif';
 
@@ -127,7 +128,7 @@ async function runEvaluation() {
     document.getElementById('eval-results').style.display = '';
   } finally {
     btn.disabled = false;
-    btn.textContent = '🚀 Run Evaluation';
+    btn.textContent = isTa ? '🚀 மதிப்பீடு செய்' : '🚀 Run Evaluation';
   }
 }
 
@@ -238,11 +239,18 @@ function getWaterChip(name) {
   const c = findCrop(name);
   const w = c ? c.water_requirement : 'Medium';
   const cls = w === 'Low' ? 'success' : w === 'Medium' ? 'warning' : 'info';
-  return `<span class="chip ${cls}" style="font-size:10px">💧${w}</span>`;
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  const label = isTa
+    ? (w === 'Low' ? 'குறைந்த நீர்' : w === 'Medium' ? 'மிதமான நீர்' : 'அதிக நீர்')
+    : w;
+  return `<span class="chip ${cls}" style="font-size:10px">💧${label}</span>`;
 }
 
 function getNFixChip(name) {
   const c = findCrop(name);
   const fix = c ? c.is_nitrogen_fixer : false;
-  return fix ? `<span class="chip teal" style="font-size:10px">N-Fixer</span>` : '';
+  if (!fix) return '';
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  const label = isTa ? 'தழைச்சத்து நிலைநிறுத்தி' : 'N-Fixer';
+  return `<span class="chip teal" style="font-size:10px">${label}</span>`;
 }

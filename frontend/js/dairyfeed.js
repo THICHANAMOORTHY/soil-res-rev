@@ -47,34 +47,36 @@ function updateSilageSummaryCards(summary) {
   const qualityEl = document.getElementById('df-stat-quality');
   const riskEl = document.getElementById('df-stat-risk');
   const countEl = document.getElementById('df-stat-count');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
 
   if (!summary || !summary.total_samples) {
     if (scoreEl) scoreEl.textContent = '—';
-    if (countEl) countEl.textContent = '0 batches recorded';
-    if (qualityEl) qualityEl.innerHTML = '<span class="text-muted">Awaiting Test</span>';
-    if (riskEl) riskEl.innerHTML = '<span class="chip" style="font-size:12px;background:rgba(255,255,255,0.06)">No Test Data</span>';
+    if (countEl) countEl.textContent = isTa ? 'பதிவு செய்த தொகுதிகள் இல்லை' : '0 batches recorded';
+    if (qualityEl) qualityEl.innerHTML = `<span class="text-muted">${isTa ? 'பரிசோதனை நிலுவை' : 'Awaiting Test'}</span>`;
+    if (riskEl) riskEl.innerHTML = `<span class="chip" style="font-size:12px;background:rgba(255,255,255,0.06)">${isTa ? 'சோதனை தரவு இல்லை' : 'No Test Data'}</span>`;
     return;
   }
 
   if (scoreEl) scoreEl.textContent = summary.average_score || '0';
-  if (countEl) countEl.textContent = `${summary.total_samples} batch${summary.total_samples === 1 ? '' : 'es'}`;
+  if (countEl) countEl.textContent = isTa ? `${summary.total_samples} தொகுதிகள்` : `${summary.total_samples} batch${summary.total_samples === 1 ? '' : 'es'}`;
 
   if (qualityEl) {
     const goodPct = summary.quality_percentages?.Good || 0;
     const modPct = summary.quality_percentages?.Moderate || 0;
     let badgeClass = goodPct >= 60 ? 'text-green' : (goodPct + modPct) >= 50 ? 'text-amber' : 'text-red';
-    qualityEl.innerHTML = `<span class="${badgeClass}">${goodPct}% Good</span>`;
+    const qualityLabel = isTa ? 'சிறந்த தரம்' : 'Good';
+    qualityEl.innerHTML = `<span class="${badgeClass}">${goodPct}% ${qualityLabel}</span>`;
   }
 
   if (riskEl) {
     const poorPct = summary.quality_percentages?.Poor || 0;
     const modPct = summary.quality_percentages?.Moderate || 0;
     if (poorPct === 0 && modPct === 0) {
-      riskEl.innerHTML = `<span class="chip success" style="font-size:12px">Low Risk ✓</span>`;
+      riskEl.innerHTML = `<span class="chip success" style="font-size:12px">${isTa ? 'குறைந்த அபாயம் ✓' : 'Low Risk ✓'}</span>`;
     } else if (poorPct < 25) {
-      riskEl.innerHTML = `<span class="chip warning" style="font-size:12px">Medium Risk ◉</span>`;
+      riskEl.innerHTML = `<span class="chip warning" style="font-size:12px">${isTa ? 'மிதமான அபாயம் ◉' : 'Medium Risk ◉'}</span>`;
     } else {
-      riskEl.innerHTML = `<span class="chip danger" style="font-size:12px">High Risk ⚠</span>`;
+      riskEl.innerHTML = `<span class="chip danger" style="font-size:12px">${isTa ? 'அதிக அபாயம் ⚠' : 'High Risk ⚠'}</span>`;
     }
   }
 }
@@ -83,6 +85,8 @@ function updateSilageSummaryCards(summary) {
 function renderCattlePlan(plan) {
   if (!plan) return;
 
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
   // Silage Production from Rotation
   const sp = plan.silage_production || {};
   const hf = plan.herd_feeding || {};
@@ -90,22 +94,22 @@ function renderCattlePlan(plan) {
   const soil = plan.soil_restorer_loop || {};
 
   const biomassEl = document.getElementById('df-biomass-val');
-  if (biomassEl) biomassEl.textContent = `${sp.total_silage_tonnes || 0} Tonnes`;
+  if (biomassEl) biomassEl.textContent = `${sp.total_silage_tonnes || 0} ${isTa ? 'டன்கள்' : 'Tonnes'}`;
 
   const securityEl = document.getElementById('df-security-val');
-  if (securityEl) securityEl.textContent = `${sp.feed_security_months || 0} Months`;
+  if (securityEl) securityEl.textContent = `${sp.feed_security_months || 0} ${isTa ? 'மாதங்கள்' : 'Months'}`;
 
   const dailyFeedEl = document.getElementById('df-daily-feed-val');
-  if (dailyFeedEl) dailyFeedEl.textContent = `${hf.total_daily_kg || 0} kg/day`;
+  if (dailyFeedEl) dailyFeedEl.textContent = `${hf.total_daily_kg || 0} ${isTa ? 'கிலோ/நாள்' : 'kg/day'}`;
 
   const milkGainEl = document.getElementById('df-milk-gain-val');
-  if (milkGainEl) milkGainEl.textContent = `+${eco.daily_milk_gain_litres || 0} L/day`;
+  if (milkGainEl) milkGainEl.textContent = `+${eco.daily_milk_gain_litres || 0} ${isTa ? 'லிட்டர்/நாள்' : 'L/day'}`;
 
   const revenueGainEl = document.getElementById('df-revenue-gain-val');
-  if (revenueGainEl) revenueGainEl.textContent = `+₹${(eco.monthly_dairy_revenue_gain || 0).toLocaleString('en-IN')}/mo`;
+  if (revenueGainEl) revenueGainEl.textContent = `+₹${(eco.monthly_dairy_revenue_gain || 0).toLocaleString('en-IN')}/${isTa ? 'மாதம்' : 'mo'}`;
 
   const stepRevenueEl = document.getElementById('df-step-revenue-gain');
-  if (stepRevenueEl) stepRevenueEl.textContent = `+₹${(eco.monthly_dairy_revenue_gain || 0).toLocaleString('en-IN')}/mo`;
+  if (stepRevenueEl) stepRevenueEl.textContent = `+₹${(eco.monthly_dairy_revenue_gain || 0).toLocaleString('en-IN')}/${isTa ? 'மாதம்' : 'mo'}`;
 
   const fymEl = document.getElementById('df-fym-val');
   if (fymEl) fymEl.textContent = `${soil.seasonal_fym_tonnes || 0} Tonnes FYM`;
@@ -119,29 +123,31 @@ function renderCattlePlan(plan) {
 
 // ── Reset Cattle Plan to Empty State ─────────────────────────
 function resetCattlePlanPlaceholders() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
   const biomassEl = document.getElementById('df-biomass-val');
-  if (biomassEl) biomassEl.textContent = '-- Tonnes';
+  if (biomassEl) biomassEl.textContent = isTa ? '-- டன்கள்' : '-- Tonnes';
 
   const securityEl = document.getElementById('df-security-val');
-  if (securityEl) securityEl.textContent = '-- Months';
+  if (securityEl) securityEl.textContent = isTa ? '-- மாதங்கள்' : '-- Months';
 
   const dailyFeedEl = document.getElementById('df-daily-feed-val');
-  if (dailyFeedEl) dailyFeedEl.textContent = 'Enter herd details above';
+  if (dailyFeedEl) dailyFeedEl.textContent = isTa ? 'கால்நடை விவரங்களை உள்ளிடவும்' : 'Enter herd details above';
 
   const milkGainEl = document.getElementById('df-milk-gain-val');
   if (milkGainEl) milkGainEl.textContent = '—';
 
   const revenueGainEl = document.getElementById('df-revenue-gain-val');
-  if (revenueGainEl) revenueGainEl.textContent = 'Calculated from herd ration';
+  if (revenueGainEl) revenueGainEl.textContent = isTa ? 'கால்நடை தீவன விகிதத்திலிருந்து கணக்கிடப்படுகிறது' : 'Calculated from herd ration';
 
   const stepRevenueEl = document.getElementById('df-step-revenue-gain');
   if (stepRevenueEl) stepRevenueEl.textContent = '--';
 
   const npkRecycleEl = document.getElementById('df-npk-recycle-val');
-  if (npkRecycleEl) npkRecycleEl.textContent = 'Nutrients recycled to soil';
+  if (npkRecycleEl) npkRecycleEl.textContent = isTa ? 'மண்ணிற்கு மறுசுழற்சி செய்யப்படும் சத்துக்கள்' : 'Nutrients recycled to soil';
 
   const socBoostEl = document.getElementById('df-soc-boost-val');
-  if (socBoostEl) socBoostEl.textContent = '-- Carbon';
+  if (socBoostEl) socBoostEl.textContent = isTa ? '-- கரிம வளம்' : '-- Carbon';
 }
 window.resetCattlePlanPlaceholders = resetCattlePlanPlaceholders;
 
@@ -170,25 +176,43 @@ async function recalculateCattlePlan() {
 }
 window.recalculateCattlePlan = recalculateCattlePlan;
 
+// ── Pure Tamil Feed Type Names ──────────────────────────────
+const FEED_TRANSLATIONS_TA = {
+  maize_silage: 'மக்காச்சோளம் சைலேஜ்',
+  sorghum_silage: 'சோளம் சைலேஜ்',
+  napier_silage: 'நேப்பியர் புல் சைலேஜ்',
+  alfalfa_silage: 'குதிரை மசால் சைலேஜ்',
+  Maize: 'மக்காச்சோளம்',
+  Sorghum: 'சோளம்',
+  Napier: 'நேப்பியர் புல்',
+  'Green Gram': 'பாசிப்பயறு கழிவு'
+};
+
 // ── Render History Table ─────────────────────────────────────
 function renderSilageHistoryTable(items) {
   const tbody = document.getElementById('df-history-tbody');
   if (!tbody) return;
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
 
   if (!items || items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">No silage tests recorded yet. Run a test above!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text-muted)">${isTa ? 'சைலேஜ் பரிசோதனைகள் ஏதுமில்லை. மேலே புதிய சோதனை செய்யவும்!' : 'No silage tests recorded yet. Run a test above!'}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = items.map((item, idx) => {
     const p = item.prediction || {};
     const r = item.readings || {};
-    const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
     const tempRise = (r.sample_temp_c != null && r.ambient_temp_c != null) ? (r.sample_temp_c - r.ambient_temp_c).toFixed(1) : '—';
 
     let qualityClass = p.quality === 'Good' ? 'chip success' : p.quality === 'Moderate' ? 'chip warning' : 'chip danger';
-    let riskClass = p.spoilage_risk === 'Low' ? 'text-green' : p.spoilage_risk === 'Medium' ? 'text-amber' : 'text-red';
-    let feedName = (item.feed_type || 'Silage').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    let qualityLabel = isTa
+      ? (p.quality === 'Good' ? 'சிறந்த தரம்' : p.quality === 'Moderate' ? 'மிதமான தரம்' : 'தரம் குறைவு')
+      : (p.quality || 'Unknown');
+
+    let rawFeed = item.feed_type || 'Silage';
+    let feedName = isTa
+      ? (FEED_TRANSLATIONS_TA[rawFeed] || rawFeed.replace(/_/g, ' '))
+      : rawFeed.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
     return `
       <tr>
@@ -201,10 +225,10 @@ function renderSilageHistoryTable(items) {
         <td>
           <span style="font-weight:700;color:${p.score >= 75 ? 'var(--green-400)' : p.score >= 50 ? 'var(--amber-400)' : 'var(--red-400)'}">${p.score || 0}/100</span>
         </td>
-        <td><span class="${qualityClass}" style="font-size:11px">${p.quality || 'Unknown'}</span></td>
+        <td><span class="${qualityClass}" style="font-size:11px">${qualityLabel}</span></td>
         <td>
           <button class="btn btn-secondary" style="font-size:11px;padding:3px 8px" onclick="openSampleDetailModal('${item.sample_id}')">
-            🔍 Details
+            🔍 ${isTa ? 'விவரங்கள்' : 'Details'}
           </button>
         </td>
       </tr>
@@ -225,51 +249,63 @@ function openSampleDetailModal(sampleId) {
   const r = item.readings || {};
   const b = p.breakdown || {};
   const adv = item.advisory || {};
-  const lang = (window.i18n && window.i18n.getLanguage) ? window.i18n.getLanguage() : 'en';
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  const lang = isTa ? 'ta' : 'en';
+
+  const rawFeed = item.feed_type || 'Silage';
+  const feedDisplay = isTa
+    ? (FEED_TRANSLATIONS_TA[rawFeed] || rawFeed.replace(/_/g, ' ').toUpperCase())
+    : rawFeed.replace(/_/g, ' ').toUpperCase();
+
+  const qualityLabel = isTa
+    ? (p.quality === 'Good' ? 'சிறந்த தரம்' : p.quality === 'Moderate' ? 'மிதமான தரம்' : 'தரம் குறைவு')
+    : (p.quality || 'Moderate');
 
   content.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px;margin-bottom:16px">
       <div>
         <h3 style="margin:0;font-size:18px;display:flex;align-items:center;gap:8px">
-          <span>🌿</span> ${item.feed_type ? item.feed_type.replace(/_/g, ' ').toUpperCase() : 'SILAGE BATCH'}
+          <span>🌿</span> ${feedDisplay}
         </h3>
-        <p style="margin:4px 0 0;font-size:12px;color:var(--text-muted)">ID: ${item.sample_id} · Device: ${item.device_id || 'DF01'}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:var(--text-muted)">ID: ${item.sample_id} · ${isTa ? 'முனையம்' : 'Device'}: ${item.device_id || 'DF01'}</p>
       </div>
       <div style="text-align:right">
         <span class="chip ${p.quality === 'Good' ? 'success' : p.quality === 'Moderate' ? 'warning' : 'danger'}" style="font-size:13px">
-          ${p.quality || 'Moderate'} (${p.score || 0}/100)
+          ${qualityLabel} (${p.score || 0}/100)
         </span>
       </div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:12px;margin-bottom:16px">
       <div class="card" style="padding:10px;background:rgba(255,255,255,0.03);text-align:center">
-        <div style="font-size:11px;color:var(--text-muted)">Silage pH</div>
+        <div style="font-size:11px;color:var(--text-muted)">${isTa ? 'சைலேஜ் pH' : 'Silage pH'}</div>
         <div style="font-size:20px;font-weight:700;color:var(--green-400);margin:4px 0">${r.ph || '—'}</div>
-        <div style="font-size:10px;color:var(--text-muted)">Ideal: 3.8 – 4.4</div>
+        <div style="font-size:10px;color:var(--text-muted)">${isTa ? 'உகந்தது: 3.8 – 4.4' : 'Ideal: 3.8 – 4.4'}</div>
       </div>
       <div class="card" style="padding:10px;background:rgba(255,255,255,0.03);text-align:center">
-        <div style="font-size:11px;color:var(--text-muted)">Moisture</div>
+        <div style="font-size:11px;color:var(--text-muted)">${isTa ? 'ஈரப்பதம்' : 'Moisture'}</div>
         <div style="font-size:20px;font-weight:700;color:#38bdf8;margin:4px 0">${r.moisture_pct || '—'}%</div>
-        <div style="font-size:10px;color:var(--text-muted)">Ideal: 60% – 70%</div>
+        <div style="font-size:10px;color:var(--text-muted)">${isTa ? 'உகந்தது: 60% – 70%' : 'Ideal: 60% – 70%'}</div>
       </div>
       <div class="card" style="padding:10px;background:rgba(255,255,255,0.03);text-align:center">
-        <div style="font-size:11px;color:var(--text-muted)">Core vs Ambient</div>
+        <div style="font-size:11px;color:var(--text-muted)">${isTa ? 'மைய vs சுற்றுப்புறம்' : 'Core vs Ambient'}</div>
         <div style="font-size:20px;font-weight:700;color:#fbbf24;margin:4px 0">${r.sample_temp_c || 28}°C</div>
         <div style="font-size:10px;color:var(--text-muted)">ΔT: +${((r.sample_temp_c || 28) - (r.ambient_temp_c || 26)).toFixed(1)}°C</div>
       </div>
       <div class="card" style="padding:10px;background:rgba(255,255,255,0.03);text-align:center">
-        <div style="font-size:11px;color:var(--text-muted)">Spoilage / Mould</div>
-        <div style="font-size:14px;font-weight:700;color:${p.spoilage_risk === 'Low' ? 'var(--green-400)' : 'var(--red-400)'};margin:8px 0">${p.spoilage_risk || 'Low'} / ${p.mould_risk || 'Low'}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${isTa ? 'கெடுதல் / பூஞ்சை' : 'Spoilage / Mould'}</div>
+        <div style="font-size:14px;font-weight:700;color:${p.spoilage_risk === 'Low' ? 'var(--green-400)' : 'var(--red-400)'};margin:8px 0">
+          ${isTa ? (p.spoilage_risk === 'Low' ? 'குறைவு' : 'அபாயம்') : (p.spoilage_risk || 'Low')} / ${isTa ? (p.mould_risk === 'Low' ? 'இல்லை' : 'உள்ளது') : (p.mould_risk || 'Low')}
+        </div>
       </div>
     </div>
 
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;margin-bottom:16px">
-      <h4 style="font-size:13px;margin:0 0 8px;color:var(--text-secondary)">Component Score Breakdown</h4>
+      <h4 style="font-size:13px;margin:0 0 8px;color:var(--text-secondary)">${isTa ? 'மதிப்பெண் விவரப் பகுப்பாய்வு' : 'Component Score Breakdown'}</h4>
       <div style="display:flex;flex-direction:column;gap:8px">
         <div>
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-            <span>pH Lactic Acid Fermentation (Weight 40%)</span>
+            <span>${isTa ? 'pH லாக்டிக் அமில நொதித்தல் (எடை 40%)' : 'pH Lactic Acid Fermentation (Weight 40%)'}</span>
             <b>${b.ph != null ? b.ph : 35} / 40</b>
           </div>
           <div style="background:rgba(255,255,255,0.1);height:6px;border-radius:3px">
@@ -278,7 +314,7 @@ function openSampleDetailModal(sampleId) {
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-            <span>Moisture & Compaction (Weight 30%)</span>
+            <span>${isTa ? 'ஈரப்பதம் & அழுத்தம் (எடை 30%)' : 'Moisture & Compaction (Weight 30%)'}</span>
             <b>${b.moisture != null ? b.moisture : 25} / 30</b>
           </div>
           <div style="background:rgba(255,255,255,0.1);height:6px;border-radius:3px">
@@ -287,7 +323,7 @@ function openSampleDetailModal(sampleId) {
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-            <span>Aerobic Thermal Stability (Weight 30%)</span>
+            <span>${isTa ? 'வெப்பநிலை நிலைப்புத்தன்மை (எடை 30%)' : 'Aerobic Thermal Stability (Weight 30%)'}</span>
             <b>${b.temperature != null ? b.temperature : 25} / 30</b>
           </div>
           <div style="background:rgba(255,255,255,0.1);height:6px;border-radius:3px">
@@ -298,9 +334,9 @@ function openSampleDetailModal(sampleId) {
     </div>
 
     <div style="background:rgba(34, 197, 94, 0.08);border-left:4px solid var(--green-400);border-radius:6px;padding:12px;margin-bottom:12px">
-      <h4 style="margin:0 0 6px;font-size:13px;color:var(--green-300)">🌱 Precision Veterinary & Agronomic Advisory</h4>
+      <h4 style="margin:0 0 6px;font-size:13px;color:var(--green-300)">🌱 ${isTa ? 'துல்லிய கால்நடை & வேளாண்மை ஆலோசனை' : 'Precision Veterinary & Agronomic Advisory'}</h4>
       <p style="margin:0;font-size:13px;line-height:1.5;color:var(--text-primary)">
-        ${lang === 'ta' && adv.ta ? adv.ta : adv.en || 'Safe and nutritious for daily cattle feeding.'}
+        ${lang === 'ta' && adv.ta ? adv.ta : adv.en || (isTa ? 'தினசரி கால்நடை தீவனத்திற்கு பாதுகாப்பானது மற்றும் சத்தானது.' : 'Safe and nutritious for daily cattle feeding.')}
       </p>
       ${adv.ta && lang !== 'ta' ? `
         <p style="margin:8px 0 0;font-size:12px;line-height:1.4;color:var(--text-muted);border-top:1px dashed rgba(255,255,255,0.1);padding-top:6px">
@@ -669,7 +705,8 @@ function displayInstantSilageResult(res) {
 
   const p = res.prediction || {};
   const adv = res.advisory || {};
-  const lang = (window.i18n && window.i18n.getLanguage) ? window.i18n.getLanguage() : 'en';
+  const isTa = (window.i18n && window.i18n.getLanguage) ? (window.i18n.getLanguage() === 'ta') : false;
+  const lang = isTa ? 'ta' : 'en';
 
   panel.style.display = 'block';
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -685,8 +722,19 @@ function displayInstantSilageResult(res) {
   }
 
   if (qualityBadge) {
-    const modeLabel = res.flags?.entry_mode === 'esp32_live' ? '⚡ ESP32 Live' : '✍️ Manual';
-    qualityBadge.textContent = `${p.quality} Quality (${modeLabel}) · Spoilage: ${p.spoilage_risk}`;
+    const modeLabel = res.flags?.entry_mode === 'esp32_live'
+      ? (isTa ? '⚡ ESP32 நேரலை' : '⚡ ESP32 Live')
+      : (isTa ? '✍️ கைமுறை' : '✍️ Manual');
+    const qualityLabel = isTa
+      ? (p.quality === 'Good' ? 'சிறந்த தரம்' : p.quality === 'Moderate' ? 'மிதமான தரம்' : 'தரம் குறைவு')
+      : `${p.quality} Quality`;
+    const spoilageLabel = isTa
+      ? (p.spoilage_risk === 'Low' ? 'குறைந்த அபாயம்' : p.spoilage_risk === 'Medium' ? 'மிதமான அபாயம்' : 'அதிக அபாயம்')
+      : p.spoilage_risk;
+
+    qualityBadge.textContent = isTa
+      ? `${qualityLabel} (${modeLabel}) · கெடுதல்: ${spoilageLabel}`
+      : `${qualityLabel} (${modeLabel}) · Spoilage: ${p.spoilage_risk}`;
     qualityBadge.className = `chip ${p.quality === 'Good' ? 'success' : p.quality === 'Moderate' ? 'warning' : 'danger'}`;
   }
 
@@ -700,10 +748,10 @@ function displayInstantSilageResult(res) {
   if (breakdownDiv && p.breakdown) {
     breakdownDiv.innerHTML = `
       <div style="font-size:11px;display:flex;gap:12px;color:var(--text-secondary);flex-wrap:wrap">
-        <span><b>pH Score:</b> ${p.breakdown.ph || 0}/40</span>
-        <span><b>Moisture Score:</b> ${p.breakdown.moisture || 0}/30</span>
-        <span><b>Temp Rise Score:</b> ${p.breakdown.temperature || 0}/30</span>
-        ${p.breakdown.temp_rise_c !== undefined ? `<span><b>Core ΔT:</b> +${p.breakdown.temp_rise_c}°C</span>` : ''}
+        <span><b>${isTa ? 'pH மதிப்பு:' : 'pH Score:'}</b> ${p.breakdown.ph || 0}/40</span>
+        <span><b>${isTa ? 'ஈரப்பதம்:' : 'Moisture Score:'}</b> ${p.breakdown.moisture || 0}/30</span>
+        <span><b>${isTa ? 'வெப்பநிலை உயர்வு:' : 'Temp Rise Score:'}</b> ${p.breakdown.temperature || 0}/30</span>
+        ${p.breakdown.temp_rise_c !== undefined ? `<span><b>${isTa ? 'மைய ΔT:' : 'Core ΔT:'}</b> +${p.breakdown.temp_rise_c}°C</span>` : ''}
       </div>
     `;
   }
