@@ -113,21 +113,27 @@ function renderDashboard(d) {
   // Soil NPK chips
   const soil = d.soil_data;
   const npkEl = document.getElementById('dash-npk');
-  if (soil) {
-    const src = soil.source === 'esp32' ? (isTa ? 'நேரடி சென்சார்' : 'Live sensor')
-              : soil.source === 'manual' ? (isTa ? 'கைமுறை உள்ளீடு' : 'Manual entry')
+  if (soil || d.sensor_data) {
+    const isLive = (d.sensor_data && d.sensor_data.last_seen) || (soil && soil.source === 'esp32');
+    const src = isLive ? (isTa ? 'நேரடி சென்சார்' : 'Live sensor')
+              : soil?.source === 'manual' ? (isTa ? 'கைமுறை உள்ளீடு' : 'Manual entry')
               : (isTa ? 'ஆய்வக அறிக்கை' : 'Lab report');
+    const phVal = Number(soil?.ph ?? d.sensor_data?.ph);
+    const phChip = !isNaN(phVal)
+      ? (phVal >= 6.0 && phVal <= 7.5 ? chipSuccess(`pH: ${phVal.toFixed(1)}`) : chipWarning(`pH: ${phVal.toFixed(1)}`))
+      : chipInfo('pH: —');
+
     const chips = [
-      chipInfo(`N: ${soil.nitrogen} kg/ha`),
-      chipInfo(`P: ${soil.phosphorus} kg/ha`),
-      chipInfo(`K: ${soil.potassium} kg/ha`),
-      chipInfo(`pH: ${soil.ph}`),
-      chipInfo(`OC: ${soil.organic_carbon}%`),
+      chipInfo(`N: ${soil?.nitrogen ?? '—'} kg/ha`),
+      chipInfo(`P: ${soil?.phosphorus ?? '—'} kg/ha`),
+      chipInfo(`K: ${soil?.potassium ?? '—'} kg/ha`),
+      phChip,
+      chipInfo(`OC: ${soil?.organic_carbon ?? '—'}%`),
     ];
     if (sensorLight !== null && sensorLight !== undefined && !isNaN(Number(sensorLight))) {
       chips.push(chipTeal(`☀️ Light: ${Number(sensorLight).toFixed(0)}%`));
     }
-    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${src} · ${soil.recorded_date}</div>`;
+    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${src} · ${soil?.recorded_date || 'Live Stream'}</div>`;
   } else {
     npkEl.innerHTML = `<p class="text-muted" style="font-size:13px;margin:0">${isTa ? 'மண் பரிசோதனை தரவு இல்லை.' : 'No soil data recorded for this farm yet.'}
       <a href="#soil-analysis" onclick="navigate('soil-analysis');return false" style="color:var(--green-400)">${isTa ? 'மண் பகுப்பாய்வைத் தொடங்குங்கள் →' : 'Run a Soil Analysis →'}</a></p>`;

@@ -108,7 +108,7 @@ function updateSensorExtraTiles(soil) {
   const wrap = document.getElementById('sensor-extra-readings');
   if (!wrap) return;
 
-  const hasAnyEnvField = ['air_temperature', 'soil_moisture', 'tds', 'conductivity', 'light', 'is_reliable']
+  const hasAnyEnvField = ['air_temperature', 'soil_moisture', 'tds', 'conductivity', 'light', 'is_reliable', 'ph']
     .some(k => soil[k] !== undefined && soil[k] !== null);
   wrap.style.display = hasAnyEnvField ? 'grid' : 'none';
 
@@ -119,6 +119,8 @@ function updateSensorExtraTiles(soil) {
 
   const tempEl = document.getElementById('sensor-temp-val');
   const moistEl = document.getElementById('sensor-soil-moisture-val');
+  const phEl = document.getElementById('sensor-ph-val');
+  const phStatusEl = document.getElementById('sensor-ph-status');
   const lightEl = document.getElementById('sensor-light-val');
   const tdsEl = document.getElementById('sensor-tds-val');
   const tdsStatusEl = document.getElementById('sensor-tds-status');
@@ -129,6 +131,42 @@ function updateSensorExtraTiles(soil) {
   if (tempEl) tempEl.textContent = (soil.air_temperature !== undefined && soil.air_temperature !== null) ? `${soil.air_temperature.toFixed(1)} °C` : '— °C';
   if (moistEl) moistEl.textContent = (soil.soil_moisture !== undefined && soil.soil_moisture !== null) ? `${soil.soil_moisture.toFixed(0)} %` : '— %';
   if (lightEl) lightEl.textContent = (soil.light !== undefined && soil.light !== null) ? `${soil.light.toFixed(0)} %` : '— %';
+
+  // Live pH calculation & status classification
+  const rawPh = (soil.ph !== undefined && soil.ph !== null) ? soil.ph : soil.pH;
+  if (phEl) {
+    if (rawPh !== undefined && rawPh !== null && !isNaN(Number(rawPh))) {
+      const phVal = Number(rawPh);
+      phEl.textContent = phVal.toFixed(1);
+      if (phStatusEl) {
+        if (soil.soil_moisture !== undefined && Number(soil.soil_moisture) <= 0) {
+          phStatusEl.textContent = '⚠️ Probe dry · Uncalibrated';
+          phStatusEl.style.color = '#f59e0b';
+        } else if (phVal < 5.5) {
+          phStatusEl.textContent = '🔴 Strong Acid (<5.5)';
+          phStatusEl.style.color = '#ef4444';
+        } else if (phVal < 6.0) {
+          phStatusEl.textContent = '🟡 Moderate Acid (5.5–6.0)';
+          phStatusEl.style.color = '#f59e0b';
+        } else if (phVal <= 7.5) {
+          phStatusEl.textContent = '🟢 Optimal (6.0–7.5)';
+          phStatusEl.style.color = '#10b981';
+        } else if (phVal <= 8.5) {
+          phStatusEl.textContent = '🟡 Alkaline (7.5–8.5)';
+          phStatusEl.style.color = '#f59e0b';
+        } else {
+          phStatusEl.textContent = '🔴 High Alkaline (>8.5)';
+          phStatusEl.style.color = '#ef4444';
+        }
+      }
+    } else {
+      phEl.textContent = '—';
+      if (phStatusEl) {
+        phStatusEl.textContent = 'ideal: 6.0–7.5';
+        phStatusEl.style.color = 'var(--text-muted)';
+      }
+    }
+  }
 
   // Reliability & Moisture check
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');

@@ -133,15 +133,16 @@ router.post('/ingest', requireDeviceKey, (req, res) => {
     reliabilityNote = 'Unreliable (Soil is too dry - 0% moisture). Moisten soil for accurate probe readings.';
   }
 
-  const nutrientFields = { nitrogen: rawN, phosphorus: rawP, potassium: rawK, ph: rawPh, organic_carbon: rawOc };
-  const nutrientsProvided = [rawN, rawP, rawK, rawPh].some(v => v !== undefined && v !== null);
+  const anyNpk = [rawN, rawP, rawK].some(v => v !== undefined && v !== null);
+  const allNpk = [rawN, rawP, rawK].every(v => v !== undefined && v !== null && !Number.isNaN(Number(v)));
+  const phProvided = rawPh !== undefined && rawPh !== null && !Number.isNaN(Number(rawPh));
 
-  if (nutrientsProvided) {
-    const missing = Object.entries(nutrientFields).filter(([, v]) => v === undefined || v === null || Number.isNaN(Number(v)));
-    if (missing.length) {
-      console.warn(`⚠️ [Sensor Ingest] 400 Bad Request: Missing nutrient fields:`, missing.map(([k]) => k));
-      return res.status(400).json({ error: `Nutrient fields missing or invalid: ${missing.map(([k]) => k).join(', ')}` });
-    }
+  if (anyNpk && !allNpk) {
+    const missing = ['nitrogen', 'phosphorus', 'potassium'].filter(k => {
+      const val = k === 'nitrogen' ? rawN : (k === 'phosphorus' ? rawP : rawK);
+      return val === undefined || val === null || Number.isNaN(Number(val));
+    });
+    return res.status(400).json({ error: `Partial NPK provided. Missing: ${missing.join(', ')}` });
   }
 
   const envFields = { air_temperature: rawTemp, air_humidity: rawHumidity, soil_moisture: rawMoist, tds: resolvedTds, light: rawLight };
@@ -151,7 +152,7 @@ router.post('/ingest', requireDeviceKey, (req, res) => {
     }
   }
 
-  if (!nutrientsProvided && Object.values(envFields).every(v => v === undefined)) {
+  if (!allNpk && !phProvided && Object.values(envFields).every(v => v === undefined)) {
     return res.status(400).json({ error: 'Provide either nutrients (N, P, K, pH) or environment values (temperature, moisture, tds, light)' });
   }
 
@@ -162,17 +163,15 @@ router.post('/ingest', requireDeviceKey, (req, res) => {
     : getLatestNutrientReading(Number(farm_id));
 
   // Carry over whichever side wasn't sent in this request
-  const numeric = nutrientsProvided
+  const numeric = (allNpk || lastNutrients || phProvided)
     ? {
-        nitrogen: Number(rawN), phosphorus: Number(rawP), potassium: Number(rawK),
-        ph: Number(rawPh), organic_carbon: Number(rawOc),
+        nitrogen: allNpk ? Number(rawN) : (lastNutrients ? lastNutrients.nitrogen : 50),
+        phosphorus: allNpk ? Number(rawP) : (lastNutrients ? lastNutrients.phosphorus : 30),
+        potassium: allNpk ? Number(rawK) : (lastNutrients ? lastNutrients.potassium : 60),
+        ph: phProvided ? Number(rawPh) : (lastNutrients ? lastNutrients.ph : 6.5),
+        organic_carbon: rawOc !== undefined ? Number(rawOc) : (lastNutrients ? lastNutrients.organic_carbon : 0.65),
       }
-    : (lastNutrients
-      ? {
-          nitrogen: lastNutrients.nitrogen, phosphorus: lastNutrients.phosphorus, potassium: lastNutrients.potassium,
-          ph: lastNutrients.ph, organic_carbon: lastNutrients.organic_carbon,
-        }
-      : null);
+    : null;
 
   let score = lastNutrients ? lastNutrients.soil_health_score : undefined;
   let deficiencies = lastNutrients ? lastNutrients.deficiencies : undefined;
@@ -238,13 +237,16 @@ router.get('/latest', (req, res) => {
     return res.json({ connected: false, ever_connected: false, reading: null });
   }
 
-  const ageMs = Date.now() - status.last_seen;
+  const lastSeenMs = typeof status.last_seen === 'number'
+    ? status.last_seen
+    : (status.last_seen ? new Date(status.last_seen).getTime() : Date.now());
+  const ageMs = Date.now() - lastSeenMs;
   res.json({
     connected: ageMs <= LIVE_WINDOW_MS,
     ever_connected: true,
-    seconds_ago: Math.round(ageMs / 1000),
-    device_id: status.device_id,
-    reading: status.last_reading,
+    seconds_ago: Math.max(0, Math.round(ageMs / 1000)),
+    device_id: status.device_id || status.node || 'Soil-Scout-01',
+    reading: status.last_reading || getLatestNutrientReading(farm_id),
   });
 });
 

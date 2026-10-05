@@ -102,6 +102,7 @@ router.get('/', (req, res) => {
       temperature: liveSensor?.air_temperature ?? soil?.air_temperature,
       moisture:    liveSensor?.soil_moisture ?? soil?.soil_moisture,
       tds:         liveSensor?.tds ?? soil?.tds,
+      ph:          liveSensor?.ph ?? soil?.ph,
       is_reliable: liveSensor?.is_reliable ?? soil?.is_reliable,
       last_seen:   sensorStatus?.last_seen || null,
     } : null,
