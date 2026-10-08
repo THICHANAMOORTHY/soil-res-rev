@@ -308,7 +308,6 @@ function updateSensorExtraTiles(soil) {
   }
 
   // Reliability & Moisture check
-  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   const isReliable = soil.is_reliable !== undefined ? soil.is_reliable : (soil.soil_moisture > 5);
   if (reliableEl) {
     if (isReliable) {
