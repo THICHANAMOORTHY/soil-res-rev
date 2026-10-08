@@ -421,6 +421,23 @@ const TRANSLATIONS = {
     loginRbac: "Role-Based Access Control (RBAC Enforced)",
     loginZeroLag: "Live IoT Telemetry Stream (Zero Lag)",
     loginBilingual: "Bilingual Support: English & தமிழ்",
+
+    // Realtime Direct Sensor NPK Keys
+    lblLiveN: "Live Nitrogen (N)",
+    lblLiveP: "Live Phosphorus (P)",
+    lblLiveK: "Live Potassium (K)",
+    lblNpkRatio: "N:P:K Balance",
+    nTargetRange: "Target: 80–160 kg/ha",
+    pTargetRange: "Target: 30–60 kg/ha",
+    kTargetRange: "Target: 60–120 kg/ha",
+    idealRatioText: "Standard Benchmark: 4 : 2 : 1",
+    directSensorTitle: "Direct Sensor Telemetry & Ingest Stream",
+    directSensorSub: "Push real-time NPK & probe parameters directly into the live website pipeline or activate automated IoT stream",
+    btnStartAutoStream: "Start Live Auto-Stream",
+    btnSensorDirectForm: "Direct Sensor Form",
+    lblSensorPresets: "Probe Presets:",
+    btnTransmitSensor: "Push Sensor Reading to Website",
+    btnRandomizeNoise: "Simulate Natural Drift",
   },
 
   ta: {
@@ -841,6 +858,23 @@ const TRANSLATIONS = {
     loginRbac: "பங்கு அடிப்படையிலான அணுகல் கட்டுப்பாடு (RBAC)",
     loginZeroLag: "நேரலை IoT தொலைஅளவியல் (தாமதமின்றி)",
     loginBilingual: "இருமொழி ஆதரவு: English & தமிழ்",
+
+    // Realtime Direct Sensor NPK Keys
+    lblLiveN: "நேரலை நைட்ரஜன் (N)",
+    lblLiveP: "நேரலை பாஸ்பரஸ் (P)",
+    lblLiveK: "நேரலை பொட்டாசியம் (K)",
+    lblNpkRatio: "NPK சமநிலை",
+    nTargetRange: "இலக்கு: 80–160 கிலோ/ஏக்",
+    pTargetRange: "இலக்கு: 30–60 கிலோ/ஏக்",
+    kTargetRange: "இலக்கு: 60–120 கிலோ/ஏக்",
+    idealRatioText: "நிலையான ஒப்பீடு: 4 : 2 : 1",
+    directSensorTitle: "நேரடி சென்சார் தரவு உள்ளீட்டு தளம்",
+    directSensorSub: "சென்சார் NPK மற்றும் பிற அளவீடுகளை நேரடியாக இணையதளத்திற்கு அனுப்பவும் அல்லது தானியங்கி ஒளிபரப்பைத் தொடங்கவும்",
+    btnStartAutoStream: "நேரலை ஒளிபரப்பு தொடங்கு",
+    btnSensorDirectForm: "நேரடி சென்சார் படிவம்",
+    lblSensorPresets: "சென்சார் மாதிரிகள்:",
+    btnTransmitSensor: "சென்சார் அளவீட்டை இணையதளத்திற்கு அனுப்பு",
+    btnRandomizeNoise: "இயற்கை மாறுபாட்டை உருவகப்படுத்து",
   }
 };
 

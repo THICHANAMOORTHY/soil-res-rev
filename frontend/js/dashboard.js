@@ -123,17 +123,23 @@ function renderDashboard(d) {
       ? (phVal >= 6.0 && phVal <= 7.5 ? chipSuccess(`pH: ${phVal.toFixed(1)}`) : chipWarning(`pH: ${phVal.toFixed(1)}`))
       : chipInfo('pH: —');
 
+    const nVal = (d.sensor_data && d.sensor_data.nitrogen !== undefined) ? d.sensor_data.nitrogen : soil?.nitrogen;
+    const pVal = (d.sensor_data && d.sensor_data.phosphorus !== undefined) ? d.sensor_data.phosphorus : soil?.phosphorus;
+    const kVal = (d.sensor_data && d.sensor_data.potassium !== undefined) ? d.sensor_data.potassium : soil?.potassium;
+    const ocVal = (d.sensor_data && d.sensor_data.organic_carbon !== undefined) ? d.sensor_data.organic_carbon : soil?.organic_carbon;
+
     const chips = [
-      chipInfo(`N: ${soil?.nitrogen ?? '—'} kg/ha`),
-      chipInfo(`P: ${soil?.phosphorus ?? '—'} kg/ha`),
-      chipInfo(`K: ${soil?.potassium ?? '—'} kg/ha`),
+      chipInfo(`N: ${nVal ?? '—'} kg/ha`),
+      chipInfo(`P: ${pVal ?? '—'} kg/ha`),
+      chipInfo(`K: ${kVal ?? '—'} kg/ha`),
       phChip,
-      chipInfo(`OC: ${soil?.organic_carbon ?? '—'}%`),
+      chipInfo(`OC: ${ocVal ?? '—'}%`),
     ];
     if (sensorLight !== null && sensorLight !== undefined && !isNaN(Number(sensorLight))) {
       chips.push(chipTeal(`☀️ Light: ${Number(sensorLight).toFixed(0)}%`));
     }
-    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${src} · ${soil?.recorded_date || 'Live Stream'}</div>`;
+    const devId = d.sensor_data?.device_id || 'Soil-Scout-01';
+    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${isLive ? '🟢 ' : ''}${src} (${devId}) · ${soil?.recorded_date || 'Live Stream'}</div>`;
   } else {
     npkEl.innerHTML = `<p class="text-muted" style="font-size:13px;margin:0">${isTa ? 'மண் பரிசோதனை தரவு இல்லை.' : 'No soil data recorded for this farm yet.'}
       <a href="#soil-analysis" onclick="navigate('soil-analysis');return false" style="color:var(--green-400)">${isTa ? 'மண் பகுப்பாய்வைத் தொடங்குங்கள் →' : 'Run a Soil Analysis →'}</a></p>`;

@@ -937,9 +937,176 @@
         </button>
       </div>
 
-      <div id="sensor-live-banner" class="sensor-live-banner mb-16" style="display:none">
-        <span id="sensor-live-dot" class="sensor-live-dot"></span>
-        <span id="sensor-live-status-text" data-i18n="lblAwaitingSensor">Waiting for ESP32…</span>
+      <div id="sensor-live-banner" class="sensor-live-banner mb-16" style="display:none; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="flex items-center gap-8">
+          <span id="sensor-live-dot" class="sensor-live-dot"></span>
+          <span id="sensor-live-status-text" data-i18n="lblAwaitingSensor">Waiting for ESP32…</span>
+        </div>
+        <div class="flex items-center gap-8">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-stream" onclick="toggleSensorAutoStream()" style="font-size:11px;padding:4px 10px;">
+            <span id="stream-btn-icon">▶</span> <span id="stream-btn-text" data-i18n="btnStartAutoStream">Start Auto-Stream</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleSensorFormVisibility()" style="font-size:11px;padding:4px 10px;">
+            <span id="toggle-form-icon">⚙️</span> <span data-i18n="btnSensorDirectForm">Direct Sensor Form</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Realtime Direct Sensor NPK Telemetry Display ── -->
+      <div id="sensor-npk-live-grid" class="sensor-npk-grid mb-16" style="display:none">
+        <div class="sensor-npk-card n-card">
+          <div class="sensor-npk-top">
+            <span class="sensor-npk-icon">🌿</span>
+            <span class="sensor-npk-name" data-i18n="lblLiveN">Live Nitrogen (N)</span>
+            <span id="sensor-n-status" class="sensor-status-badge optimal">Optimal</span>
+          </div>
+          <div class="sensor-npk-value-wrap">
+            <span class="sensor-npk-num" id="sensor-n-val">—</span>
+            <span class="sensor-npk-unit">kg/ha</span>
+          </div>
+          <div class="sensor-progress-track">
+            <div id="sensor-n-bar" class="sensor-progress-fill n-fill" style="width: 0%"></div>
+          </div>
+          <div class="sensor-npk-meta">
+            <span data-i18n="nTargetRange">Target: 80–160 kg/ha</span>
+            <span id="sensor-n-ppm" class="sensor-ppm-note">— mg/kg</span>
+          </div>
+        </div>
+
+        <div class="sensor-npk-card p-card">
+          <div class="sensor-npk-top">
+            <span class="sensor-npk-icon">💎</span>
+            <span class="sensor-npk-name" data-i18n="lblLiveP">Live Phosphorus (P)</span>
+            <span id="sensor-p-status" class="sensor-status-badge optimal">Optimal</span>
+          </div>
+          <div class="sensor-npk-value-wrap">
+            <span class="sensor-npk-num" id="sensor-p-val">—</span>
+            <span class="sensor-npk-unit">kg/ha</span>
+          </div>
+          <div class="sensor-progress-track">
+            <div id="sensor-p-bar" class="sensor-progress-fill p-fill" style="width: 0%"></div>
+          </div>
+          <div class="sensor-npk-meta">
+            <span data-i18n="pTargetRange">Target: 30–60 kg/ha</span>
+            <span id="sensor-p-ppm" class="sensor-ppm-note">— mg/kg</span>
+          </div>
+        </div>
+
+        <div class="sensor-npk-card k-card">
+          <div class="sensor-npk-top">
+            <span class="sensor-npk-icon">🍌</span>
+            <span class="sensor-npk-name" data-i18n="lblLiveK">Live Potassium (K)</span>
+            <span id="sensor-k-status" class="sensor-status-badge optimal">Optimal</span>
+          </div>
+          <div class="sensor-npk-value-wrap">
+            <span class="sensor-npk-num" id="sensor-k-val">—</span>
+            <span class="sensor-npk-unit">kg/ha</span>
+          </div>
+          <div class="sensor-progress-track">
+            <div id="sensor-k-bar" class="sensor-progress-fill k-fill" style="width: 0%"></div>
+          </div>
+          <div class="sensor-npk-meta">
+            <span data-i18n="kTargetRange">Target: 60–120 kg/ha</span>
+            <span id="sensor-k-ppm" class="sensor-ppm-note">— mg/kg</span>
+          </div>
+        </div>
+
+        <div class="sensor-npk-card ratio-card">
+          <div class="sensor-npk-top">
+            <span class="sensor-npk-icon">⚖️</span>
+            <span class="sensor-npk-name" data-i18n="lblNpkRatio">N:P:K Balance</span>
+            <span id="sensor-ratio-status" class="sensor-status-badge info">Ratio Check</span>
+          </div>
+          <div class="sensor-npk-value-wrap">
+            <span class="sensor-npk-num" id="sensor-ratio-val" style="font-size:20px;letter-spacing:0.5px">— : — : —</span>
+          </div>
+          <div class="sensor-progress-track">
+            <div id="sensor-ratio-bar" class="sensor-progress-fill ratio-fill" style="width: 80%"></div>
+          </div>
+          <div class="sensor-npk-meta">
+            <span data-i18n="idealRatioText">Standard Benchmark: 4 : 2 : 1</span>
+            <span id="sensor-ratio-note" style="color:var(--green-400)">Live Sync</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Direct Sensor Telemetry Form & Live Streamer ── -->
+      <div id="sensor-direct-stream-panel" class="glass-card mb-16 sensor-stream-panel" style="display:none">
+        <div class="sensor-stream-header">
+          <div class="flex items-center gap-12">
+            <div class="sensor-stream-icon-badge">📡</div>
+            <div>
+              <div class="sensor-stream-title" data-i18n="directSensorTitle">Direct Sensor Telemetry & Ingest Stream</div>
+              <div class="sensor-stream-sub" data-i18n="directSensorSub">Push real-time NPK & probe parameters directly into the live website pipeline or activate automated IoT stream</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Form Controls -->
+        <div id="sensor-direct-form-body" class="sensor-stream-body mt-16">
+          <!-- Quick Presets -->
+          <div class="sensor-presets-wrap mb-16">
+            <span class="sensor-preset-label" data-i18n="lblSensorPresets">Probe Presets:</span>
+            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('optimal')">🟢 Optimal Loam (125N : 45P : 90K)</button>
+            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('low_n')">🟡 Low Nitrogen (38N : 42P : 85K)</button>
+            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('acidic')">🔴 Acidic Red (65N : 20P : 50K · pH 5.2)</button>
+            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('saline')">🟣 Saline Alkaline (95N : 18P : 110K · TDS 920)</button>
+            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('dry')">⚠️ Dry Probe (0% Moisture · 0 NPK)</button>
+          </div>
+
+          <form id="sensor-direct-ingest-form" onsubmit="handleDirectSensorSubmit(event)">
+            <div class="sensor-inputs-grid">
+              <div class="form-group">
+                <label class="form-label" for="direct-device-id">Node / Device ID</label>
+                <input type="text" id="direct-device-id" class="form-control" value="Soil-Scout-01" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-n-input">🌿 Nitrogen (N) <span class="unit">kg/ha</span></label>
+                <input type="number" id="direct-n-input" class="form-control" min="0" max="300" step="1" value="115" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-p-input">💎 Phosphorus (P) <span class="unit">kg/ha</span></label>
+                <input type="number" id="direct-p-input" class="form-control" min="0" max="200" step="1" value="42" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-k-input">🍌 Potassium (K) <span class="unit">kg/ha</span></label>
+                <input type="number" id="direct-k-input" class="form-control" min="0" max="300" step="1" value="88" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-ph-input">⚗️ pH Level</label>
+                <input type="number" id="direct-ph-input" class="form-control" min="3.0" max="10.0" step="0.1" value="6.7" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-moisture-input">💧 Soil Moisture <span class="unit">%</span></label>
+                <input type="number" id="direct-moisture-input" class="form-control" min="0" max="100" step="1" value="34" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-temp-input">🌡️ Temperature <span class="unit">°C</span></label>
+                <input type="number" id="direct-temp-input" class="form-control" min="0" max="60" step="0.5" value="28.5"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-tds-input">🧪 Soil TDS <span class="unit">ppm</span></label>
+                <input type="number" id="direct-tds-input" class="form-control" min="0" max="3000" step="1" value="480"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="direct-light-input">☀️ Sunlight <span class="unit">%</span></label>
+                <input type="number" id="direct-light-input" class="form-control" min="0" max="100" step="1" value="82"/>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-12 mt-16" style="flex-wrap:wrap">
+              <div class="flex items-center gap-8">
+                <button type="submit" class="btn btn-primary" id="btn-push-direct-sensor">
+                  <span>⚡</span> <span data-i18n="btnTransmitSensor">Push Sensor Reading to Website</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="randomizeSensorNoise()">
+                  <span>🎲</span> <span data-i18n="btnRandomizeNoise">Simulate Natural Drift</span>
+                </button>
+              </div>
+              <div id="sensor-transmit-feedback" style="font-size:12px;color:var(--green-400);font-weight:600"></div>
+            </div>
+          </form>
+        </div>
       </div>
 
       <!-- Supplementary sensor readings (not part of the health score) -->

@@ -3193,6 +3193,245 @@ select option { background: var(--bg-surface); }
   transition: var(--transition);
 }
 
+/* ── Realtime Direct Sensor NPK Telemetry & Direct Stream Form ── */
+.sensor-npk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.sensor-npk-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.sensor-npk-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.sensor-npk-card.n-card {
+  border-left: 4px solid #22c55e;
+}
+
+.sensor-npk-card.p-card {
+  border-left: 4px solid #06b6d4;
+}
+
+.sensor-npk-card.k-card {
+  border-left: 4px solid #f59e0b;
+}
+
+.sensor-npk-card.ratio-card {
+  border-left: 4px solid #a855f7;
+}
+
+.sensor-npk-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sensor-npk-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  flex-grow: 1;
+}
+
+.sensor-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sensor-status-badge.optimal {
+  background: rgba(34, 197, 94, 0.16);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.sensor-status-badge.deficient {
+  background: rgba(239, 68, 68, 0.16);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.sensor-status-badge.high {
+  background: rgba(245, 158, 11, 0.16);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.sensor-status-badge.info {
+  background: rgba(168, 85, 247, 0.16);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.sensor-npk-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sensor-npk-num {
+  font-family: 'Outfit', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.sensor-npk-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.sensor-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.sensor-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sensor-progress-fill.n-fill {
+  background: linear-gradient(90deg, #10b981, #22c55e);
+}
+
+.sensor-progress-fill.p-fill {
+  background: linear-gradient(90deg, #0284c7, #06b6d4);
+}
+
+.sensor-progress-fill.k-fill {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+.sensor-progress-fill.ratio-fill {
+  background: linear-gradient(90deg, #9333ea, #a855f7);
+}
+
+.sensor-npk-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Stream & Direct Ingest Panel ── */
+.sensor-stream-panel {
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: rgba(18, 24, 38, 0.65);
+  backdrop-filter: blur(8px);
+}
+
+.sensor-stream-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sensor-stream-icon-badge {
+  font-size: 26px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 10px;
+}
+
+.sensor-stream-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sensor-stream-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.sensor-presets-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sensor-preset-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sensor-preset-pill {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sensor-preset-pill:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: var(--text-primary);
+}
+
+.sensor-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.sensor-inputs-grid .form-group {
+  margin-bottom: 0;
+}
+
+.sensor-inputs-grid .form-label {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.sensor-inputs-grid .form-control {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
 /* ── GPS Farm Zones & Spatial Map Grid ──────────────────────── */
 .gps-farm-plot-container {
   display: flex;

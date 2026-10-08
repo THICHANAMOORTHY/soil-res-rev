@@ -77,14 +77,14 @@ function evaluateCropsFromReading(soilReading, farmId = 101, season = 'Kharif') 
 }
 
 // ─────────────────────────────────────────────────────────────
-// POST /api/soil-sensor/ingest — Soil Scout / ESP32 pushes reading
+// Shared Sensor Ingestion Logic for ESP32 and Direct Web Feeds
 // ─────────────────────────────────────────────────────────────
-router.post('/ingest', requireDeviceKey, (req, res) => {
-  console.log(`📡 [Sensor Ingest] Incoming reading from device "${req.body?.device_id || req.body?.deviceId || 'Soil-Scout-01'}" (Farm ${req.body?.farm_id || 101})`);
-  console.log(`   Payload:`, JSON.stringify(req.body));
-
+function processSensorIngestion(req, res) {
   const farm_id = Number(req.body.farm_id || 101);
   const device_id = req.body.device_id || req.body.deviceId || 'Soil-Scout-01';
+
+  console.log(`📡 [Sensor Ingest] Incoming reading from device "${device_id}" (Farm ${farm_id})`);
+  console.log(`   Payload:`, JSON.stringify(req.body));
 
   // Support field aliases from Soil Scout serial output
   const rawN = req.body.nitrogen !== undefined ? req.body.nitrogen : (req.body.n !== undefined ? req.body.n : req.body.estimated_n);
@@ -224,7 +224,17 @@ router.post('/ingest', requireDeviceKey, (req, res) => {
     predicted_crops: predictions.slice(0, 5),
     reading: entry,
   });
-});
+}
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/soil-sensor/ingest — Soil Scout / ESP32 pushes reading (Device Authenticated)
+// ─────────────────────────────────────────────────────────────
+router.post('/ingest', requireDeviceKey, processSensorIngestion);
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/soil-sensor/direct-feed — Direct web sensor ingest / telemetry simulator
+// ─────────────────────────────────────────────────────────────
+router.post('/direct-feed', processSensorIngestion);
 
 // ─────────────────────────────────────────────────────────────
 // GET /api/soil-sensor/latest?farm_id=101 — frontend polling target
@@ -241,12 +251,14 @@ router.get('/latest', (req, res) => {
     ? status.last_seen
     : (status.last_seen ? new Date(status.last_seen).getTime() : Date.now());
   const ageMs = Date.now() - lastSeenMs;
+  const hasLiveReading = Boolean(status.last_reading);
+  const isConnected = hasLiveReading && (ageMs <= LIVE_WINDOW_MS);
   res.json({
-    connected: ageMs <= LIVE_WINDOW_MS,
-    ever_connected: true,
+    connected: isConnected,
+    ever_connected: hasLiveReading,
     seconds_ago: Math.max(0, Math.round(ageMs / 1000)),
-    device_id: status.device_id || status.node || 'Soil-Scout-01',
-    reading: status.last_reading || getLatestNutrientReading(farm_id),
+    device_id: status.device_id || (hasLiveReading ? 'Soil-Scout-01' : null),
+    reading: status.last_reading || null,
   });
 });
 

@@ -24,6 +24,8 @@ function setSoilDataMode(mode) {
   const liveBtn = document.getElementById('soil-mode-btn-live');
   const banner = document.getElementById('sensor-live-banner');
   const predictBanner = document.getElementById('sensor-predict-banner');
+  const npkGrid = document.getElementById('sensor-npk-live-grid');
+  const streamPanel = document.getElementById('sensor-direct-stream-panel');
   const sliderIds = ['n-slider', 'p-slider', 'k-slider', 'ph-slider', 'oc-slider'];
 
   if (mode === 'live') {
@@ -31,6 +33,8 @@ function setSoilDataMode(mode) {
     liveBtn?.classList.add('active');
     if (banner) banner.style.display = 'flex';
     if (predictBanner) predictBanner.style.display = 'block';
+    if (npkGrid) npkGrid.style.display = 'grid';
+    if (streamPanel) streamPanel.style.display = 'block';
     sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
     startSensorPolling();
   } else {
@@ -38,10 +42,13 @@ function setSoilDataMode(mode) {
     manualBtn?.classList.add('active');
     if (banner) banner.style.display = 'none';
     if (predictBanner) predictBanner.style.display = 'none';
+    if (npkGrid) npkGrid.style.display = 'none';
+    if (streamPanel) streamPanel.style.display = 'none';
     const extraTiles = document.getElementById('sensor-extra-readings');
     if (extraTiles) extraTiles.style.display = 'none';
     sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
     stopSensorPolling();
+    if (sensorAutoStreamTimer) toggleSensorAutoStream();
   }
 }
 window.setSoilDataMode = setSoilDataMode;
@@ -105,6 +112,136 @@ function prefillSliders(soil) {
 }
 
 function updateSensorExtraTiles(soil) {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+  // ── 1. Update Realtime NPK Telemetry Cards Direct from Sensor ──
+  const npkGrid = document.getElementById('sensor-npk-live-grid');
+  const hasNpk = (soil.nitrogen !== undefined && soil.nitrogen !== null) ||
+                 (soil.phosphorus !== undefined && soil.phosphorus !== null) ||
+                 (soil.potassium !== undefined && soil.potassium !== null);
+
+  if (npkGrid && (soilDataMode === 'live' || hasNpk)) {
+    npkGrid.style.display = 'grid';
+  }
+
+  const nVal = (soil.nitrogen !== undefined && soil.nitrogen !== null) ? Number(soil.nitrogen) : null;
+  const pVal = (soil.phosphorus !== undefined && soil.phosphorus !== null) ? Number(soil.phosphorus) : null;
+  const kVal = (soil.potassium !== undefined && soil.potassium !== null) ? Number(soil.potassium) : null;
+
+  // Nitrogen (N)
+  const nEl = document.getElementById('sensor-n-val');
+  const nStatusEl = document.getElementById('sensor-n-status');
+  const nBarEl = document.getElementById('sensor-n-bar');
+  const nPpmEl = document.getElementById('sensor-n-ppm');
+  if (nEl) {
+    if (nVal !== null) {
+      nEl.textContent = nVal.toFixed(0);
+      if (nPpmEl) nPpmEl.textContent = `≈ ${(nVal * 0.5).toFixed(0)} mg/kg`;
+      if (nBarEl) nBarEl.style.width = `${Math.min(100, Math.max(5, (nVal / 200) * 100))}%`;
+      if (nStatusEl) {
+        if (nVal < 80) {
+          nStatusEl.className = 'sensor-status-badge deficient';
+          nStatusEl.textContent = isTa ? 'குறைவு (<80)' : 'Deficient (<80)';
+        } else if (nVal <= 160) {
+          nStatusEl.className = 'sensor-status-badge optimal';
+          nStatusEl.textContent = isTa ? 'உகந்தது (80–160)' : 'Optimal (80–160)';
+        } else {
+          nStatusEl.className = 'sensor-status-badge high';
+          nStatusEl.textContent = isTa ? 'அதிகம் (>160)' : 'Surplus (>160)';
+        }
+      }
+    } else {
+      nEl.textContent = '—';
+      if (nStatusEl) { nStatusEl.className = 'sensor-status-badge info'; nStatusEl.textContent = 'Awaiting'; }
+      if (nBarEl) nBarEl.style.width = '0%';
+    }
+  }
+
+  // Phosphorus (P)
+  const pEl = document.getElementById('sensor-p-val');
+  const pStatusEl = document.getElementById('sensor-p-status');
+  const pBarEl = document.getElementById('sensor-p-bar');
+  const pPpmEl = document.getElementById('sensor-p-ppm');
+  if (pEl) {
+    if (pVal !== null) {
+      pEl.textContent = pVal.toFixed(0);
+      if (pPpmEl) pPpmEl.textContent = `≈ ${(pVal * 0.5).toFixed(0)} mg/kg`;
+      if (pBarEl) pBarEl.style.width = `${Math.min(100, Math.max(5, (pVal / 100) * 100))}%`;
+      if (pStatusEl) {
+        if (pVal < 30) {
+          pStatusEl.className = 'sensor-status-badge deficient';
+          pStatusEl.textContent = isTa ? 'குறைவு (<30)' : 'Deficient (<30)';
+        } else if (pVal <= 60) {
+          pStatusEl.className = 'sensor-status-badge optimal';
+          pStatusEl.textContent = isTa ? 'உகந்தது (30–60)' : 'Optimal (30–60)';
+        } else {
+          pStatusEl.className = 'sensor-status-badge high';
+          pStatusEl.textContent = isTa ? 'அதிகம் (>60)' : 'Surplus (>60)';
+        }
+      }
+    } else {
+      pEl.textContent = '—';
+      if (pStatusEl) { pStatusEl.className = 'sensor-status-badge info'; pStatusEl.textContent = 'Awaiting'; }
+      if (pBarEl) pBarEl.style.width = '0%';
+    }
+  }
+
+  // Potassium (K)
+  const kEl = document.getElementById('sensor-k-val');
+  const kStatusEl = document.getElementById('sensor-k-status');
+  const kBarEl = document.getElementById('sensor-k-bar');
+  const kPpmEl = document.getElementById('sensor-k-ppm');
+  if (kEl) {
+    if (kVal !== null) {
+      kEl.textContent = kVal.toFixed(0);
+      if (kPpmEl) kPpmEl.textContent = `≈ ${(kVal * 0.5).toFixed(0)} mg/kg`;
+      if (kBarEl) kBarEl.style.width = `${Math.min(100, Math.max(5, (kVal / 200) * 100))}%`;
+      if (kStatusEl) {
+        if (kVal < 60) {
+          kStatusEl.className = 'sensor-status-badge deficient';
+          kStatusEl.textContent = isTa ? 'குறைவு (<60)' : 'Deficient (<60)';
+        } else if (kVal <= 120) {
+          kStatusEl.className = 'sensor-status-badge optimal';
+          kStatusEl.textContent = isTa ? 'உகந்தது (60–120)' : 'Optimal (60–120)';
+        } else {
+          kStatusEl.className = 'sensor-status-badge high';
+          kStatusEl.textContent = isTa ? 'அதிகம் (>120)' : 'Surplus (>120)';
+        }
+      }
+    } else {
+      kEl.textContent = '—';
+      if (kStatusEl) { kStatusEl.className = 'sensor-status-badge info'; kStatusEl.textContent = 'Awaiting'; }
+      if (kBarEl) kBarEl.style.width = '0%';
+    }
+  }
+
+  // N:P:K Ratio
+  const ratioValEl = document.getElementById('sensor-ratio-val');
+  const ratioStatusEl = document.getElementById('sensor-ratio-status');
+  const ratioNoteEl = document.getElementById('sensor-ratio-note');
+  if (ratioValEl) {
+    if (nVal !== null && pVal !== null && kVal !== null && pVal > 0) {
+      const nRatio = (nVal / pVal).toFixed(1);
+      const kRatio = (kVal / pVal).toFixed(1);
+      ratioValEl.textContent = `${nRatio} : 1.0 : ${kRatio}`;
+      if (ratioStatusEl) {
+        const isEquilibrium = (nVal / pVal >= 2.0 && nVal / pVal <= 4.5 && kVal / pVal >= 1.0 && kVal / pVal <= 3.0);
+        ratioStatusEl.className = isEquilibrium ? 'sensor-status-badge optimal' : 'sensor-status-badge high';
+        ratioStatusEl.textContent = isEquilibrium ? (isTa ? 'சமநிலை' : 'Equilibrium') : (isTa ? 'மாறுபட்டது' : 'Imbalance');
+      }
+      if (ratioNoteEl) ratioNoteEl.textContent = isTa ? 'நேரலை ஆய்வு' : 'Active Probe';
+    } else if (nVal !== null && pVal !== null && kVal !== null) {
+      ratioValEl.textContent = `${nVal} : ${pVal} : ${kVal}`;
+      if (ratioStatusEl) {
+        ratioStatusEl.className = 'sensor-status-badge deficient';
+        ratioStatusEl.textContent = 'Zero P';
+      }
+    } else {
+      ratioValEl.textContent = '— : — : —';
+    }
+  }
+
+  // ── 2. Update Supplementary Environmental Tiles ──
   const wrap = document.getElementById('sensor-extra-readings');
   if (!wrap) return;
 
@@ -128,8 +265,10 @@ function updateSensorExtraTiles(soil) {
   const reliableSub = document.getElementById('sensor-reliable-sub');
   const dryWarning = document.getElementById('sensor-dry-warning');
 
-  if (tempEl) tempEl.textContent = (soil.air_temperature !== undefined && soil.air_temperature !== null) ? `${soil.air_temperature.toFixed(1)} °C` : '— °C';
-  if (moistEl) moistEl.textContent = (soil.soil_moisture !== undefined && soil.soil_moisture !== null) ? `${soil.soil_moisture.toFixed(0)} %` : '— %';
+  const curTemp = (soil.air_temperature !== undefined && soil.air_temperature !== null) ? soil.air_temperature : soil.temperature;
+  const curMoist = (soil.soil_moisture !== undefined && soil.soil_moisture !== null) ? soil.soil_moisture : soil.moisture;
+  if (tempEl) tempEl.textContent = (curTemp !== undefined && curTemp !== null) ? `${Number(curTemp).toFixed(1)} °C` : '— °C';
+  if (moistEl) moistEl.textContent = (curMoist !== undefined && curMoist !== null) ? `${Number(curMoist).toFixed(0)} %` : '— %';
   if (lightEl) lightEl.textContent = (soil.light !== undefined && soil.light !== null) ? `${soil.light.toFixed(0)} %` : '— %';
 
   // Live pH calculation & status classification
@@ -441,3 +580,197 @@ function renderSoilResult(result) {
 
   container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ── Direct Sensor Ingest & Auto-Streaming Controller ─────────────
+let sensorAutoStreamTimer = null;
+
+function toggleSensorFormVisibility() {
+  const panel = document.getElementById('sensor-direct-stream-panel');
+  if (!panel) return;
+  const isHidden = (panel.style.display === 'none' || !panel.style.display);
+  panel.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.toggleSensorFormVisibility = toggleSensorFormVisibility;
+
+function applySensorPreset(preset) {
+  const nInput = document.getElementById('direct-n-input');
+  const pInput = document.getElementById('direct-p-input');
+  const kInput = document.getElementById('direct-k-input');
+  const phInput = document.getElementById('direct-ph-input');
+  const moistInput = document.getElementById('direct-moisture-input');
+  const tempInput = document.getElementById('direct-temp-input');
+  const tdsInput = document.getElementById('direct-tds-input');
+  const lightInput = document.getElementById('direct-light-input');
+
+  const presets = {
+    optimal: { n: 125, p: 45, k: 90, ph: 6.8, moist: 34, temp: 28.5, tds: 480, light: 82 },
+    low_n:   { n: 38,  p: 42, k: 85, ph: 6.5, moist: 28, temp: 29.0, tds: 420, light: 80 },
+    acidic:  { n: 65,  p: 20, k: 50, ph: 5.2, moist: 22, temp: 30.0, tds: 310, light: 85 },
+    saline:  { n: 95,  p: 18, k: 110, ph: 8.2, moist: 35, temp: 31.0, tds: 920, light: 88 },
+    dry:     { n: 0,   p: 0,  k: 0,  ph: 4.0, moist: 0,  temp: 32.5, tds: 0,   light: 95 }
+  };
+
+  const p = presets[preset] || presets.optimal;
+  if (nInput) nInput.value = p.n;
+  if (pInput) pInput.value = p.p;
+  if (kInput) kInput.value = p.k;
+  if (phInput) phInput.value = p.ph;
+  if (moistInput) moistInput.value = p.moist;
+  if (tempInput) tempInput.value = p.temp;
+  if (tdsInput) tdsInput.value = p.tds;
+  if (lightInput) lightInput.value = p.light;
+
+  // Auto-transmit on preset click for instant feedback
+  submitDirectSensorData();
+}
+window.applySensorPreset = applySensorPreset;
+
+function randomizeSensorNoise() {
+  const nInput = document.getElementById('direct-n-input');
+  const pInput = document.getElementById('direct-p-input');
+  const kInput = document.getElementById('direct-k-input');
+  const phInput = document.getElementById('direct-ph-input');
+  const moistInput = document.getElementById('direct-moisture-input');
+  const tempInput = document.getElementById('direct-temp-input');
+
+  const jitter = (val, maxDelta, min = 0, max = 300) => {
+    const delta = (Math.random() * maxDelta * 2) - maxDelta;
+    return Math.max(min, Math.min(max, Math.round(val + delta)));
+  };
+
+  if (nInput) nInput.value = jitter(Number(nInput.value) || 115, 6, 0, 250);
+  if (pInput) pInput.value = jitter(Number(pInput.value) || 42, 4, 0, 150);
+  if (kInput) kInput.value = jitter(Number(kInput.value) || 88, 5, 0, 250);
+  if (phInput) phInput.value = Math.max(4.0, Math.min(9.0, Number((Number(phInput.value || 6.7) + (Math.random() * 0.4 - 0.2)).toFixed(1))));
+  if (moistInput) moistInput.value = jitter(Number(moistInput.value) || 34, 3, 0, 100);
+  if (tempInput) tempInput.value = (Number(tempInput.value || 28.5) + (Math.random() * 0.6 - 0.3)).toFixed(1);
+
+  submitDirectSensorData();
+}
+window.randomizeSensorNoise = randomizeSensorNoise;
+
+async function handleDirectSensorSubmit(event) {
+  if (event) event.preventDefault();
+  await submitDirectSensorData();
+}
+window.handleDirectSensorSubmit = handleDirectSensorSubmit;
+
+async function submitDirectSensorData() {
+  const btn = document.getElementById('btn-push-direct-sensor');
+  const feedback = document.getElementById('sensor-transmit-feedback');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+  const deviceId = document.getElementById('direct-device-id')?.value || 'Soil-Scout-01';
+  const n = parseFloat(document.getElementById('direct-n-input')?.value || 100);
+  const p = parseFloat(document.getElementById('direct-p-input')?.value || 40);
+  const k = parseFloat(document.getElementById('direct-k-input')?.value || 80);
+  const ph = parseFloat(document.getElementById('direct-ph-input')?.value || 6.8);
+  const moisture = parseFloat(document.getElementById('direct-moisture-input')?.value || 30);
+  const temperature = parseFloat(document.getElementById('direct-temp-input')?.value || 28.5);
+  const tds = parseFloat(document.getElementById('direct-tds-input')?.value || 450);
+  const light = parseFloat(document.getElementById('direct-light-input')?.value || 80);
+
+  const payload = {
+    farm_id: state.farm_id,
+    device_id: deviceId,
+    nitrogen: n,
+    phosphorus: p,
+    potassium: k,
+    ph: ph,
+    soil_moisture: moisture,
+    air_temperature: temperature,
+    tds: tds,
+    light: light,
+    reading_reliable: moisture > 5
+  };
+
+  try {
+    if (btn) btn.disabled = true;
+    if (feedback) feedback.textContent = isTa ? '📡 சென்சார் தரவு அனுப்பப்படுகிறது…' : '📡 Transmitting sensor payload…';
+
+    const res = await apiPost('/soil-sensor/direct-feed', payload);
+
+    if (res.success && res.reading) {
+      // Ensure we switch to live mode UI display
+      if (soilDataMode !== 'live') {
+        setSoilDataMode('live');
+      }
+
+      // Prefill sliders & realtime NPK cards
+      prefillSliders(res.reading);
+
+      // Render soil analysis result card
+      if (res.soil_health_score !== undefined) {
+        state.soilData = {
+          ...res.reading,
+          soil_health_score: res.soil_health_score,
+          deficiencies: res.deficiencies || [],
+          adequate: res.adequate || []
+        };
+        renderSoilResult(state.soilData);
+      }
+
+      // Update dot & status
+      const dot = document.getElementById('sensor-live-dot');
+      const text = document.getElementById('sensor-live-status-text');
+      if (dot) dot.className = 'sensor-live-dot connected';
+      if (text) {
+        text.textContent = isTa
+          ? `🟢 நேரடி இணைப்பு · சாதனம் "${deviceId}" · இப்போதுதான் புதுப்பிக்கப்பட்டது`
+          : `🟢 Live · device "${deviceId}" · updated just now (direct stream)`;
+      }
+
+      if (feedback) {
+        feedback.textContent = isTa
+          ? `✓ சென்சார் அளவீடு வெற்றிகரமாக உட்செலுத்தப்பட்டது (${n}N : ${p}P : ${k}K)`
+          : `✓ Telemetry synced: ${n}N : ${p}P : ${k}K kg/ha (Score: ${res.soil_health_score || '—'})`;
+        setTimeout(() => { if (feedback) feedback.textContent = ''; }, 4000);
+      }
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.textContent = `❌ ${err.message}`;
+      feedback.style.color = 'var(--red-400)';
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+window.submitDirectSensorData = submitDirectSensorData;
+
+function toggleSensorAutoStream() {
+  const btn = document.getElementById('btn-toggle-stream');
+  const icon = document.getElementById('stream-btn-icon');
+  const text = document.getElementById('stream-btn-text');
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+  if (sensorAutoStreamTimer) {
+    clearInterval(sensorAutoStreamTimer);
+    sensorAutoStreamTimer = null;
+    if (btn) btn.classList.remove('active');
+    if (icon) icon.textContent = '▶';
+    if (text) text.textContent = isTa ? 'நேரலை தானியங்கி ஒளிபரப்பு' : 'Start Auto-Stream';
+  } else {
+    // If not in live mode, switch to live mode
+    if (soilDataMode !== 'live') setSoilDataMode('live');
+
+    // Run first immediately
+    randomizeSensorNoise();
+
+    sensorAutoStreamTimer = setInterval(() => {
+      const viewActive = document.getElementById('view-soil-analysis')?.classList.contains('active');
+      if (!viewActive) {
+        toggleSensorAutoStream(); // Stop if user leaves view
+        return;
+      }
+      randomizeSensorNoise();
+    }, 4500);
+
+    if (btn) btn.classList.add('active');
+    if (icon) icon.textContent = '⏹';
+    if (text) text.textContent = isTa ? 'ஒளிபரப்பு இயங்குகிறது (நிறுத்து)' : 'Streaming Live (Stop)';
+  }
+}
+window.toggleSensorAutoStream = toggleSensorAutoStream;
+
