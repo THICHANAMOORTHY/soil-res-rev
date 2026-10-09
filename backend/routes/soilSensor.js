@@ -10,9 +10,8 @@ const db = require('../data/seed');
 const { computeHealth } = require('../utils/soilScoring');
 const cropMlEngine = require('../services/cropMlEngine');
 
-// A reading counts as "live" (device actively connected) if it
-// arrived within this window; otherwise it's shown as offline/disconnected.
-const LIVE_WINDOW_MS = 15 * 1000;
+// A reading counts as actively live if it arrived within this window (60s).
+const LIVE_WINDOW_MS = 60 * 1000;
 
 // Latest known nutrient reading for a farm, regardless of source (manual
 // entry, seed data, or a prior ESP32 post) — used to carry nutrients over
@@ -309,13 +308,12 @@ router.get('/latest', (req, res) => {
 
   res.json({
     connected: isConnected,
-    device_status: isConnected ? 'ONLINE' : 'OFFLINE',
+    device_status: isConnected ? 'ONLINE' : 'STANDBY',
     hardware_on: isConnected,
     seconds_ago: Math.max(0, Math.round(ageMs / 1000)),
     device_id: status.device_id || 'Soil-Scout-01',
-    // ONLY provide reading if the device is currently ON and connected!
-    reading: isConnected ? status.last_reading : null,
-    message: isConnected ? 'Real hardware online and streaming.' : 'Device is OFF (no signal in last 15s).'
+    reading: status.last_reading,
+    message: isConnected ? 'Real hardware online and streaming.' : `Sensor idle (last packet received ${Math.round(ageMs / 1000)}s ago).`
   });
 });
 

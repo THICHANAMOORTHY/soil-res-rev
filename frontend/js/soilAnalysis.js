@@ -258,18 +258,23 @@ async function pollSensorOnce() {
     const data = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
     if (soilDataMode !== 'live') return; // Exit if user switched mode during network request
     
-    // Strict Hardware Check: ONLY show Live / ON if hardware is actively transmitting within 15s
-    if (data.connected && data.reading) {
-      if (dot) dot.className = 'sensor-live-dot connected';
+    // Display readings whenever telemetry data exists
+    if (data.reading) {
+      if (dot) dot.className = data.connected ? 'sensor-live-dot connected' : 'sensor-live-dot standby';
       if (text) {
-        text.textContent = isTa
-          ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
-          : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
+        if (data.connected) {
+          text.textContent = isTa
+            ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
+            : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
+        } else {
+          text.textContent = isTa
+            ? `🟡 காத்திருப்பு · சாதனம் "${data.device_id}" · கடைசி அளவீடு ${data.seconds_ago} வினாடிகளுக்கு முன் பெறப்பட்டது`
+            : `🟡 Standby · "${data.device_id}" last seen ${data.seconds_ago}s ago (waiting for next interval)`;
+        }
       }
-      // ONLY update live telemetry display — NEVER pollute manual sliders
       updateLiveSensorDisplay(data.reading);
     } else {
-      // Physical hardware is OFF / disconnected
+      // No reading has been received yet
       if (dot) dot.className = 'sensor-live-dot offline';
       if (text) {
         const devName = data.device_id || 'Soil-Scout-01';

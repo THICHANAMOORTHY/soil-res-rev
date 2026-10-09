@@ -3125,7 +3125,8 @@ select option { background: var(--bg-surface); }
   animation: sensorPulse 1.6s ease-in-out infinite;
 }
 
-.sensor-live-dot.stale {
+.sensor-live-dot.stale,
+.sensor-live-dot.standby {
   background: var(--amber-400);
   box-shadow: 0 0 8px var(--amber-glow);
 }
