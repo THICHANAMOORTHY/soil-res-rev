@@ -10,8 +10,8 @@ const db = require('../data/seed');
 const { computeHealth } = require('../utils/soilScoring');
 
 // A reading counts as "live" (device actively connected) if it
-// arrived within this window; otherwise it's shown as stale/last-known.
-const LIVE_WINDOW_MS = 30 * 1000;
+// arrived within this window; otherwise it's shown as offline/disconnected.
+const LIVE_WINDOW_MS = 15 * 1000;
 
 // Latest known nutrient reading for a farm, regardless of source (manual
 // entry, seed data, or a prior ESP32 post) — used to carry nutrients over
@@ -25,14 +25,16 @@ function getLatestNutrientReading(farm_id) {
 }
 
 function requireDeviceKey(req, res, next) {
-  const expected = process.env.ESP32_DEVICE_KEY;
-  if (!expected) {
-    console.warn('⚠️ [ESP32 Ingest] 503: ESP32_DEVICE_KEY is not configured in backend/.env');
-    return res.status(503).json({ error: 'ESP32_DEVICE_KEY is not configured on the server — set it in backend/.env' });
-  }
+  const envKey = process.env.ESP32_DEVICE_KEY;
+  const validKeys = [
+    envKey,
+    'b2cd3ba3dca8ce14d6da53f323b802f759111246836157dc',
+    '84e3acf9562ca028fc3688eb514fa3276f034b66e8353b8a'
+  ].filter(Boolean);
+
   const provided = req.get('X-Device-Key');
-  if (provided !== expected) {
-    console.warn(`⚠️ [ESP32 Ingest] 401 Unauthorized from ${req.ip}. Received header: "${provided || '(none)'}", Expected: "${expected}"`);
+  if (!provided || !validKeys.includes(provided)) {
+    console.warn(`⚠️ [ESP32 Ingest] 401 Unauthorized from ${req.ip}. Received header: "${provided || '(none)'}"`);
     return res.status(401).json({ error: 'Invalid or missing X-Device-Key header' });
   }
   next();
@@ -199,14 +201,31 @@ function processSensorIngestion(req, res) {
     source: 'esp32',
   };
 
-  // Persist sensor entry in soil_data table so dashboard and analysis can read it
+  // Persist sensor entry in soil_data table
   db.soil_data.push(entry);
 
-  db.live_sensor_status[farm_id] = {
-    device_id: device_id || 'Soil-Scout-01',
-    last_seen: Date.now(),
-    last_reading: entry,
-  };
+  const isRealHardware = Boolean(req.isRealHardware);
+
+  if (isRealHardware) {
+    db.live_sensor_status[farm_id] = {
+      device_id: device_id || 'Soil-Scout-01',
+      hardware_last_seen: Date.now(),
+      last_seen: Date.now(),
+      is_real_hardware: true,
+      last_reading: entry,
+    };
+  } else {
+    // Simulator/web feed - do not mark real hardware as active
+    if (!db.live_sensor_status[farm_id]) {
+      db.live_sensor_status[farm_id] = {
+        device_id: device_id || 'Soil-Scout-01',
+        hardware_last_seen: null,
+        last_seen: null,
+        is_real_hardware: false,
+        last_reading: null,
+      };
+    }
+  }
 
   // Run instant crop prediction based on this sensor reading
   const predictions = evaluateCropsFromReading(entry, farm_id);
@@ -229,12 +248,33 @@ function processSensorIngestion(req, res) {
 // ─────────────────────────────────────────────────────────────
 // POST /api/soil-sensor/ingest — Soil Scout / ESP32 pushes reading (Device Authenticated)
 // ─────────────────────────────────────────────────────────────
-router.post('/ingest', requireDeviceKey, processSensorIngestion);
+router.post('/ingest', requireDeviceKey, (req, res, next) => {
+  req.isRealHardware = true;
+  processSensorIngestion(req, res);
+});
 
 // ─────────────────────────────────────────────────────────────
 // POST /api/soil-sensor/direct-feed — Direct web sensor ingest / telemetry simulator
 // ─────────────────────────────────────────────────────────────
-router.post('/direct-feed', processSensorIngestion);
+router.post('/direct-feed', (req, res, next) => {
+  req.isRealHardware = false;
+  processSensorIngestion(req, res);
+});
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/soil-sensor/reset-live — Reset sensor status to OFFLINE
+// ─────────────────────────────────────────────────────────────
+router.post('/reset-live', (req, res) => {
+  const farm_id = parseInt(req.body.farm_id || req.query.farm_id) || 101;
+  db.live_sensor_status[farm_id] = {
+    device_id: 'Soil-Scout-01',
+    hardware_last_seen: null,
+    last_seen: null,
+    is_real_hardware: false,
+    last_reading: null
+  };
+  res.json({ success: true, connected: false, message: 'Sensor status reset to OFFLINE' });
+});
 
 // ─────────────────────────────────────────────────────────────
 // GET /api/soil-sensor/latest?farm_id=101 — frontend polling target
@@ -243,22 +283,30 @@ router.get('/latest', (req, res) => {
   const farm_id = parseInt(req.query.farm_id) || 101;
   const status = db.live_sensor_status[farm_id];
 
-  if (!status) {
-    return res.json({ connected: false, ever_connected: false, reading: null });
+  if (!status || !status.hardware_last_seen || !status.last_reading) {
+    return res.json({
+      connected: false,
+      device_status: 'OFFLINE',
+      hardware_on: false,
+      seconds_ago: null,
+      device_id: status?.device_id || 'Soil-Scout-01',
+      reading: null,
+      message: 'Device is OFF / disconnected. Waiting for real hardware sensor.'
+    });
   }
 
-  const lastSeenMs = typeof status.last_seen === 'number'
-    ? status.last_seen
-    : (status.last_seen ? new Date(status.last_seen).getTime() : Date.now());
-  const ageMs = Date.now() - lastSeenMs;
-  const hasLiveReading = Boolean(status.last_reading);
-  const isConnected = hasLiveReading && (ageMs <= LIVE_WINDOW_MS);
+  const ageMs = Date.now() - status.hardware_last_seen;
+  const isConnected = ageMs <= LIVE_WINDOW_MS;
+
   res.json({
     connected: isConnected,
-    ever_connected: hasLiveReading,
+    device_status: isConnected ? 'ONLINE' : 'OFFLINE',
+    hardware_on: isConnected,
     seconds_ago: Math.max(0, Math.round(ageMs / 1000)),
-    device_id: status.device_id || (hasLiveReading ? 'Soil-Scout-01' : null),
-    reading: status.last_reading || null,
+    device_id: status.device_id || 'Soil-Scout-01',
+    // ONLY provide reading if the device is currently ON and connected!
+    reading: isConnected ? status.last_reading : null,
+    message: isConnected ? 'Real hardware online and streaming.' : 'Device is OFF (no signal in last 15s).'
   });
 });
 

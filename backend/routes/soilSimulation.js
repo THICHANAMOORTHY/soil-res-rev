@@ -155,4 +155,5 @@ router.post('/', (req, res) => {
   res.json({ plan_id, timeline });
 });
 
+router.applySeasonEffects = applySeasonEffects;
 module.exports = router;

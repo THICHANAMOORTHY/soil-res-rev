@@ -269,22 +269,11 @@ const users = [];
 
 // ============================================================
 // live_sensor_status — Latest ESP32 heartbeat per farm_id, keyed
-// by farm_id. Used to show "connected / stale / never connected"
-// in the Soil Analysis Live Sensor UI without scanning soil_data.
+// by farm_id. Starts empty so physical hardware must actively transmit
+// before any farm is shown as connected or live.
 // ============================================================
-const live_sensor_status = {
-  101: { connected: true, last_seen: new Date().toISOString(), battery: 94, node: 'SS-NODE-101' },
-  102: { connected: true, last_seen: new Date().toISOString(), battery: 91, node: 'SS-NODE-102' },
-  103: { connected: true, last_seen: new Date().toISOString(), battery: 88, node: 'SS-NODE-103' },
-  104: { connected: true, last_seen: new Date().toISOString(), battery: 76, node: 'SS-NODE-104' },
-  105: { connected: true, last_seen: new Date().toISOString(), battery: 95, node: 'SS-NODE-105' },
-  106: { connected: false, last_seen: new Date(Date.now() - 3600000 * 24).toISOString(), battery: 42, node: 'SS-NODE-106' },
-  107: { connected: true, last_seen: new Date().toISOString(), battery: 89, node: 'SS-NODE-107' },
-  108: { connected: true, last_seen: new Date().toISOString(), battery: 92, node: 'SS-NODE-108' },
-  109: { connected: true, last_seen: new Date().toISOString(), battery: 96, node: 'SS-NODE-109' },
-  110: { connected: true, last_seen: new Date().toISOString(), battery: 85, node: 'SS-NODE-110' },
-  111: { connected: true, last_seen: new Date().toISOString(), battery: 90, node: 'DF-PROBE-111' },
-};
+const live_sensor_status = {};
+
 
 
 function ensureFarm(farmId) {

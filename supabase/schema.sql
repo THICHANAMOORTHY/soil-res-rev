@@ -408,9 +408,9 @@ CREATE TABLE IF NOT EXISTS org_sensors (
     sensor_type         VARCHAR(60) NOT NULL,   -- 'Soil Scout 7-in-1', 'DairyFeed Dual-Node Silage', 'Weather Station'
     hardware_model      VARCHAR(60) DEFAULT 'ESP32-RS485-MAX485',
     battery_pct         INT DEFAULT 95 CHECK (battery_pct BETWEEN 0 AND 100),
-    status              VARCHAR(20) DEFAULT 'online' CHECK (status IN ('online', 'offline', 'maintenance')),
+    status              VARCHAR(20) DEFAULT 'offline' CHECK (status IN ('online', 'offline', 'maintenance')),
     last_reading_val    JSONB,
-    last_heartbeat      TIMESTAMPTZ DEFAULT NOW(),
+    last_heartbeat      TIMESTAMPTZ,
     created_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -472,14 +472,14 @@ VALUES
 (5, 1, 'CLUSTER-05', 'Annur Semi-Arid Cluster', 'Tiruppur', 'Tamil Nadu')
 ON CONFLICT (cluster_id) DO NOTHING;
 
--- Seed Initial IoT Sensor Hardware Nodes
-INSERT INTO org_sensors (sensor_id, org_id, sensor_type, hardware_model, battery_pct, status)
+-- Seed Initial IoT Sensor Hardware Nodes (Defaults to offline until hardware streams)
+INSERT INTO org_sensors (sensor_id, org_id, sensor_type, hardware_model, battery_pct, status, last_reading_val, last_heartbeat)
 VALUES
-('SS-NODE-01', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 96, 'online'),
-('SS-NODE-02', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 88, 'online'),
-('SS-NODE-03', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 92, 'online'),
-('DF-PROBE-01', 1, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 95, 'online'),
-('DF-PROBE-02', 2, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 91, 'online')
+('SS-NODE-01', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 96, 'offline', NULL, NULL),
+('SS-NODE-02', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 88, 'offline', NULL, NULL),
+('SS-NODE-03', 1, 'Soil Scout 7-in-1', 'ESP32-RS485-MAX485', 92, 'offline', NULL, NULL),
+('DF-PROBE-01', 1, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 95, 'offline', NULL, NULL),
+('DF-PROBE-02', 2, 'DairyFeed Dual-Node Silage', 'ESP32-DS18B20-TCS3200', 91, 'offline', NULL, NULL)
 ON CONFLICT (sensor_id) DO NOTHING;
 
 -- Seed Sample Agronomic Action Alerts

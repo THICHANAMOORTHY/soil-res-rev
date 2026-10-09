@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const db = require('../data/seed');
+const { applySeasonEffects } = require('./soilSimulation');
 
 // ── GET /api/dashboard?farm_id=101 ──────────────────────────
 router.get('/', (req, res) => {
@@ -16,7 +17,8 @@ router.get('/', (req, res) => {
 
   // Latest sensor status & reading from the sensor table
   const sensorStatus = db.live_sensor_status[farm_id];
-  const liveSensor = sensorStatus?.last_reading || null;
+  const isHardwareLive = Boolean(sensorStatus && sensorStatus.hardware_last_seen && (Date.now() - sensorStatus.hardware_last_seen <= 15000));
+  const liveSensor = isHardwareLive ? sensorStatus.last_reading : null;
 
   // Direct sensor light value from sensor table
   const sensorLight = (liveSensor && liveSensor.light !== undefined && liveSensor.light !== null)
@@ -52,14 +54,45 @@ router.get('/', (req, res) => {
     if (ps.length) rotation_plan = ps;
   }
 
-  // Soil recovery curve
+  // Soil recovery curve (accurately simulated across rotation seasons, strictly bounded 0-100)
   const simLog = db.soil_simulation_log
     .filter(sl => recPlan && sl.plan_id === recPlan.plan_id)
     .sort((a, b) => a.season_order - b.season_order);
   let recovery = null;
   if (soil) {
-    recovery = [soil.soil_health_score, ...simLog.map(s => s.predicted_soil_health)];
-    while (recovery.length < 4) recovery.push(recovery[recovery.length - 1] + 7);
+    const startScore = Math.min(100, Math.max(0, Math.round(soil.soil_health_score || 60)));
+    if (simLog.length >= 3) {
+      recovery = [startScore, ...simLog.slice(0, 3).map(s => Math.min(100, Math.max(0, Math.round(s.predicted_soil_health))))];
+    } else {
+      // Agronomically simulate across the rotation plan seasons
+      let simState = {
+        nitrogen: soil.nitrogen ?? 50,
+        phosphorus: soil.phosphorus ?? 30,
+        potassium: soil.potassium ?? 60,
+        ph: soil.ph ?? 6.5,
+        organic_carbon: soil.organic_carbon ?? 0.65,
+        soil_health: startScore
+      };
+      recovery = [startScore];
+      const planCrops = rotation_plan.slice(0, 3);
+      for (const cropName of planCrops) {
+        const cropObj = db.crops.find(c => c.name.toLowerCase() === String(cropName).toLowerCase());
+        if (typeof applySeasonEffects === 'function' && cropObj) {
+          simState = applySeasonEffects({ ...simState }, cropObj);
+          recovery.push(Math.min(100, Math.max(0, Math.round(simState.soil_health))));
+        } else {
+          // Bounded asymptotic approach to 90-95%
+          const last = recovery[recovery.length - 1];
+          const gap = 95 - last;
+          const nextVal = gap > 0 ? Math.round(last + Math.max(2, gap * 0.35)) : Math.round(Math.max(88, last - 2));
+          recovery.push(Math.min(100, Math.max(0, nextVal)));
+        }
+      }
+      while (recovery.length < 4) {
+        const last = recovery[recovery.length - 1];
+        recovery.push(Math.min(100, Math.max(0, last)));
+      }
+    }
   }
 
   // Why this plan
@@ -96,19 +129,20 @@ router.get('/', (req, res) => {
     farm_health:            soil ? soil.soil_health_score : null,
     soil_alerts:            soil ? (soil.deficiencies || []) : [],
     light:                  sensorLight,
-    sensor_data: (liveSensor || (soil && soil.source === 'esp32')) ? {
-      device_id:      sensorStatus?.device_id || 'Soil-Scout-01',
+    sensor_data: isHardwareLive && liveSensor ? {
+      device_id:      sensorStatus.device_id || 'Soil-Scout-01',
       light:          sensorLight,
-      nitrogen:       liveSensor?.nitrogen ?? soil?.nitrogen,
-      phosphorus:     liveSensor?.phosphorus ?? soil?.phosphorus,
-      potassium:      liveSensor?.potassium ?? soil?.potassium,
-      organic_carbon: liveSensor?.organic_carbon ?? soil?.organic_carbon,
-      temperature:    liveSensor?.air_temperature ?? soil?.air_temperature,
-      moisture:       liveSensor?.soil_moisture ?? soil?.soil_moisture,
-      tds:            liveSensor?.tds ?? soil?.tds,
-      ph:             liveSensor?.ph ?? soil?.ph,
-      is_reliable:    liveSensor?.is_reliable ?? soil?.is_reliable,
-      last_seen:      sensorStatus?.last_seen || null,
+      nitrogen:       liveSensor.nitrogen,
+      phosphorus:     liveSensor.phosphorus,
+      potassium:      liveSensor.potassium,
+      organic_carbon: liveSensor.organic_carbon,
+      temperature:    liveSensor.air_temperature,
+      moisture:       liveSensor.soil_moisture,
+      tds:            liveSensor.tds,
+      ph:             liveSensor.ph,
+      is_reliable:    liveSensor.is_reliable,
+      last_seen:      sensorStatus.hardware_last_seen,
+      is_live:        true
     } : null,
     soil_data: soil ? {
       nitrogen:      soil.nitrogen,

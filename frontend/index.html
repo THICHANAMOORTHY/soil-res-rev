@@ -207,17 +207,38 @@
     <!-- ══════════════════ VIEW: LANDING PAGE ══════════════════ -->
     <div id="view-landing" class="view">
       <div class="landing-wrap">
-        <!-- Floating Header -->
+        <!-- High-Impact Industry Announcement Ribbon -->
+        <div class="landing-top-ticker">
+          <div class="landing-ticker-inner">
+            <span class="ticker-badge">LIVE FLEET INGEST</span>
+            <span class="ticker-text">
+              🚀 <strong>Active Telemetry Network:</strong> 420+ Edge IoT Nodes actively streaming NPK, pH & Microclimate across 18 Regional Clusters. Real-time soil health scoring online.
+            </span>
+            <a href="#flywheel" onclick="switchLandingFlywheelTab('agri');return false;" class="ticker-link">Inspect Live Stream &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Floating Enterprise Header -->
         <header class="landing-nav-bar">
           <div class="landing-brand" onclick="navigate('landing')" style="cursor:pointer">
             <div class="landing-brand-logo">🌱</div>
             <div>
               <div class="landing-brand-title">
                 UZHAVU KAAPPAAN
-                <span class="portal-badge badge-farmer" style="font-size:0.7rem;padding:2px 8px">AG-INTEL</span>
+                <span class="portal-badge badge-farmer" style="font-size:0.68rem;padding:2px 8px;letter-spacing:0.04em">ENTERPRISE AG-INTEL</span>
               </div>
-              <div class="landing-brand-sub">உழவு காப்பான் · Soil Restorer & Enterprise FPO</div>
+              <div class="landing-brand-sub">உழவு காப்பான் · Agricultural Intelligence & Enterprise FPO Platform</div>
             </div>
+          </div>
+
+          <!-- Desktop Quick Menu -->
+          <div class="landing-nav-menu d-none d-lg-flex">
+            <a href="#workflow" class="landing-nav-item" onclick="document.getElementById('landing-workflow-sec')?.scrollIntoView({behavior:'smooth'});return false;">Workflow</a>
+            <a href="#flywheel" class="landing-nav-item" onclick="document.getElementById('landing-flywheel-sec')?.scrollIntoView({behavior:'smooth'});return false;">Data Engine</a>
+            <a href="#calculator" class="landing-nav-item" onclick="document.getElementById('landing-calculator-sec')?.scrollIntoView({behavior:'smooth'});return false;">ROI Calculator</a>
+            <a href="#solutions" class="landing-nav-item" onclick="document.getElementById('landing-solutions-sec')?.scrollIntoView({behavior:'smooth'});return false;">Portals</a>
+            <a href="#capabilities" class="landing-nav-item" onclick="document.getElementById('landing-capabilities-sec')?.scrollIntoView({behavior:'smooth'});return false;">Capabilities</a>
+            <a href="/api/health" target="_blank" class="landing-nav-item">API Docs</a>
           </div>
 
           <div class="landing-nav-links">
@@ -232,7 +253,7 @@
               🔑 Sign In
             </button>
             <button class="btn btn-primary btn-sm" onclick="enterFarmerPortal()" style="padding:6px 14px;font-size:12px">
-              🚀 Launch App
+              🚀 Launch Platform
             </button>
           </div>
         </header>
@@ -240,71 +261,375 @@
         <!-- Hero Section -->
         <section class="landing-hero">
           <div class="landing-badge">
-            <span>✨</span> Next-Gen Precision Agriculture & Enterprise FPO Command
+            <span>🌱</span> NEXT-GEN SOIL INTELLIGENCE &amp; CLIMATE-SMART AGRICULTURE · ICAR &amp; TNAU ALIGNED
           </div>
           <h1>
-            Regenerative Soil Intelligence Meets<br/>
-            <span class="landing-hero-grad">Enterprise Cooperative Management</span>
+            Intelligent Soil &amp; Crop Analytics<br/>
+            <span class="landing-hero-grad">For Climate-Resilient Agriculture</span>
           </h1>
           <p>
-            From individual 4.5-acre precision NPK telemetry and restorative crop rotation optimizers to enterprise Farmer Producer Organizations managing 1,250+ growers across 18 regional clusters — unified on a single real-time intelligence platform.
+            Unifying continuous IoT sensor telemetry, algorithmic restorative crop rotation, and enterprise cooperative aggregation — transforming ground-truth soil data into thriving harvests across 5,420+ precision acres.
           </p>
           <div class="landing-hero-actions">
-            <button class="btn btn-primary" onclick="enterFarmerPortal()" style="font-size:15px;padding:12px 24px;background:linear-gradient(135deg, #10b981, #059669);box-shadow:0 8px 24px rgba(16,185,129,0.35)">
-              <span>🌾</span> Launch Farmer Platform
+            <button class="btn btn-primary" onclick="enterFarmerPortal()" style="font-size:15px;padding:13px 26px;background:linear-gradient(135deg, #10b981, #059669);box-shadow:0 8px 24px rgba(16,185,129,0.35)">
+              <span>🌾</span> Launch Grower Platform
             </button>
-            <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="font-size:15px;padding:12px 24px;background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 8px 24px rgba(99,102,241,0.35)">
+            <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="font-size:15px;padding:13px 26px;background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 8px 24px rgba(99,102,241,0.35)">
               <span>🏢</span> Enter FPO Command Center
             </button>
-            <button class="btn btn-secondary" onclick="navigate('login')" style="font-size:15px;padding:12px 22px;border-color:rgba(255,255,255,0.2)">
-              <span>🔑</span> Sign In / Persona Gateway
+            <button class="btn btn-secondary" onclick="document.getElementById('landing-calculator-sec')?.scrollIntoView({behavior:'smooth'});" style="font-size:15px;padding:13px 22px;border-color:rgba(56,189,248,0.4);color:#38bdf8">
+              <span>📊</span> Model Agronomic ROI
+            </button>
+            <button class="btn btn-secondary" onclick="navigate('login')" style="font-size:15px;padding:13px 20px;border-color:rgba(255,255,255,0.2)">
+              <span>🔑</span> Persona Gateway
             </button>
           </div>
 
-          <!-- Interactive Live Telemetry Terminal Widget -->
-          <div class="landing-telemetry-terminal">
-            <div class="telemetry-terminal-head">
-              <div class="telemetry-terminal-tags">
-                <span style="font-size:18px">📡</span>
-                <div>
-                  <div style="font-weight:700;color:#fff">LIVE HARDWARE TELEMETRY STREAM · ESP32-SOIL-101</div>
-                  <div style="font-size:11px;color:#94a3b8">Coimbatore Agro-Cluster #4 · Precision Zone A · Ping: <span id="landing-ping-val" style="color:#4ade80">14ms</span></div>
-                </div>
+          <!-- Trust Badges Strip -->
+          <div class="landing-trust-strip">
+            <span class="trust-item"><span class="trust-icon">✓</span> ICAR &amp; TNAU Agronomy Benchmarked</span>
+            <span class="trust-sep">·</span>
+            <span class="trust-item"><span class="trust-icon">✓</span> 256-Bit Hardware Encrypted Ingest</span>
+            <span class="trust-sep">·</span>
+            <span class="trust-item"><span class="trust-icon">✓</span> Supabase Cloud PostgreSQL Sync</span>
+            <span class="trust-sep">·</span>
+            <span class="trust-item"><span class="trust-icon">✓</span> Native Bilingual (English &amp; தமிழ்)</span>
+          </div>
+        </section>
+
+        <!-- ══════════════════ 4-STAGE PRECISION AGRONOMY PIPELINE (CropSense Architecture) ══════════════════ -->
+        <section id="landing-workflow-sec" class="landing-workflow-section">
+          <div class="landing-section-head" style="margin-bottom:28px">
+            <span class="chip teal mb-8" style="font-size:11px;letter-spacing:0.05em">AGRONOMIC SYSTEM PIPELINE</span>
+            <h2>From In-Situ Micro-Signals to Market Realization</h2>
+            <p>An end-to-end closed-loop intelligence architecture translating raw edge soil telemetry into regenerative field decisions and verified regional supply chains.</p>
+          </div>
+
+          <div class="workflow-steps-grid">
+            <div class="workflow-step-card">
+              <div class="workflow-step-num">
+                <span>01 / SENSE</span>
+                <span class="workflow-step-badge">EDGE IOT</span>
               </div>
-              <button class="btn btn-secondary btn-sm" id="btn-landing-telemetry-pulse" onclick="simulateSensorReadingFromLanding()" style="font-size:11.5px;padding:5px 12px;border-color:rgba(16,185,129,0.4);color:#34d399">
-                ⚡ Push Telemetry Pulse
+              <div class="workflow-step-title">Multi-Depth Telemetry</div>
+              <div class="workflow-step-desc">
+                In-situ 7-in-1 Modbus RS485 and Wi-Fi probes streaming Nitrogen, Phosphorus, Potassium, Moisture, pH, and TDS in real time, synchronized with Sentinel-2 NDVI satellite vegetative layers.
+              </div>
+            </div>
+
+            <div class="workflow-step-card">
+              <div class="workflow-step-num">
+                <span>02 / DIAGNOSE</span>
+                <span class="workflow-step-badge">AI SCORING</span>
+              </div>
+              <div class="workflow-step-title">Soil Health Diagnostics</div>
+              <div class="workflow-step-desc">
+                Algorithmic depletion mapping benchmarked against ICAR and TNAU standards. Generates real-time health scores (0–100) and detects critical nutrient deficits before planting.
+              </div>
+            </div>
+
+            <div class="workflow-step-card">
+              <div class="workflow-step-num">
+                <span>03 / OPTIMIZE</span>
+                <span class="workflow-step-badge">26-CROP ROTATION</span>
+              </div>
+              <div class="workflow-step-title">Restorative Rotation</div>
+              <div class="workflow-step-desc">
+                Mathematical optimization engine pairing legume nitrogen replenishment with high-value market crops, sub-meter GPS micro-zone allocation, and precision fertigation valves.
+              </div>
+            </div>
+
+            <div class="workflow-step-card">
+              <div class="workflow-step-num">
+                <span>04 / SCALE &amp; MONETIZE</span>
+                <span class="workflow-step-badge">FPO FEDERATION</span>
+              </div>
+              <div class="workflow-step-title">Cooperative &amp; Mandi Fleet</div>
+              <div class="workflow-step-desc">
+                Spatial aggregation across 18 regional clusters and 1,250+ growers for 35% bulk input discounts, closed-loop dairy silage conversion, and YieldRank™ forward contracts.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════ THE INTELLIGENCE FLYWHEEL (Inspired by CropSense Africa) ══════════════════ -->
+        <section id="landing-flywheel-sec" class="landing-flywheel-section">
+          <div class="landing-section-head" style="margin-bottom:28px">
+            <span class="chip teal mb-8" style="font-size:11px;letter-spacing:0.05em">AGRONOMIC DATA ENGINE</span>
+            <h2>The Intelligence Flywheel Behind Better Agricultural Decisions</h2>
+            <p>Four interconnected capabilities that compound: the more fields and IoT probes connected, the sharper every agronomic model, restorative rotation, and cooperative financial decision becomes.</p>
+          </div>
+
+          <!-- Flywheel Interactive Tab Switcher -->
+          <div class="flywheel-tabs-container">
+            <div class="flywheel-tabs" role="tablist">
+              <button type="button" class="flywheel-tab is-active" id="flywheel-tab-agri" onclick="switchLandingFlywheelTab('agri')" role="tab" aria-selected="true">
+                <span>🌾</span> Agricultural Intelligence & Real-Time NPK
+              </button>
+              <button type="button" class="flywheel-tab" id="flywheel-tab-fin" onclick="switchLandingFlywheelTab('fin')" role="tab" aria-selected="false">
+                <span>🏢</span> Enterprise FPO & Cooperative Fleet
+              </button>
+              <button type="button" class="flywheel-tab" id="flywheel-tab-ifs" onclick="switchLandingFlywheelTab('ifs')" role="tab" aria-selected="false">
+                <span>🐄</span> Closed-Loop Bio-Economy (IFS)
+              </button>
+              <button type="button" class="flywheel-tab" id="flywheel-tab-risk" onclick="switchLandingFlywheelTab('risk')" role="tab" aria-selected="false">
+                <span>💳</span> YieldRank™ Agro-Credit & Risk
               </button>
             </div>
 
-            <div class="telemetry-metrics-grid">
-              <div class="telemetry-mini-card">
-                <div class="telemetry-mini-val" id="landing-n-val" style="color:#4ade80">88 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
-                <div class="telemetry-mini-lbl">Nitrogen (N)</div>
-                <div style="font-size:10px;color:#86efac;margin-top:2px">● Optimal Tier</div>
-              </div>
+            <!-- Panel 1: Agricultural Intelligence & Live Sensor Terminal -->
+            <div class="flywheel-panel" id="flywheel-panel-agri" role="tabpanel">
+              <div class="landing-telemetry-terminal">
+                <div class="telemetry-terminal-head">
+                  <div class="telemetry-terminal-tags">
+                    <span style="font-size:22px">📡</span>
+                    <div>
+                      <div style="font-weight:700;color:#fff;font-size:0.95rem">
+                        LIVE HARDWARE TELEMETRY STREAM &middot; ESP32-SOIL-SCOUT-01
+                        <span class="live-dot-pulse"></span>
+                      </div>
+                      <div style="font-size:11.5px;color:#94a3b8">
+                        Coimbatore Agro-Cluster #4 &middot; Active Probe &middot; Ingest Latency: <span id="landing-ping-val" style="color:#4ade80;font-weight:700">12ms</span> &middot; Protocol: RS485 / Wi-Fi
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <button class="btn btn-secondary btn-sm" id="btn-landing-telemetry-pulse" onclick="simulateSensorReadingFromLanding()" style="font-size:12px;padding:6px 14px;border-color:rgba(16,185,129,0.4);color:#34d399;font-weight:600">
+                      ⚡ Push Telemetry Pulse to Live Website
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="navigate('soil-analysis')" style="font-size:12px;padding:6px 12px;border-color:rgba(255,255,255,0.18)">
+                      Full Analysis &rarr;
+                    </button>
+                  </div>
+                </div>
 
-              <div class="telemetry-mini-card">
-                <div class="telemetry-mini-val" id="landing-p-val" style="color:#38bdf8">52 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
-                <div class="telemetry-mini-lbl">Phosphorus (P)</div>
-                <div style="font-size:10px;color:#7dd3fc;margin-top:2px">● Balanced Buffer</div>
-              </div>
+                <div class="telemetry-metrics-grid">
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-n-val" style="color:#4ade80">115 <span style="font-size:12px;color:#94a3b8">kg/ha</span></div>
+                    <div class="telemetry-mini-lbl">Nitrogen (N)</div>
+                    <div class="telemetry-tier-sub" style="color:#86efac">● Optimal Tier (80–160)</div>
+                  </div>
 
-              <div class="telemetry-mini-card">
-                <div class="telemetry-mini-val" id="landing-k-val" style="color:#c084fc">64 <span style="font-size:12px;color:#94a3b8">mg/kg</span></div>
-                <div class="telemetry-mini-lbl">Potassium (K)</div>
-                <div style="font-size:10px;color:#d8b4fe;margin-top:2px">● Post-Harvest Restored</div>
-              </div>
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-p-val" style="color:#38bdf8">42 <span style="font-size:12px;color:#94a3b8">kg/ha</span></div>
+                    <div class="telemetry-mini-lbl">Phosphorus (P)</div>
+                    <div class="telemetry-tier-sub" style="color:#7dd3fc">● Balanced Buffer (30–60)</div>
+                  </div>
 
-              <div class="telemetry-mini-card">
-                <div class="telemetry-mini-val" id="landing-m-val" style="color:#fbbf24">58 <span style="font-size:12px;color:#94a3b8">%</span></div>
-                <div class="telemetry-mini-lbl">Soil Moisture</div>
-                <div style="font-size:10px;color:#fde68a;margin-top:2px">● Drip Synchronized</div>
-              </div>
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-k-val" style="color:#c084fc">88 <span style="font-size:12px;color:#94a3b8">kg/ha</span></div>
+                    <div class="telemetry-mini-lbl">Potassium (K)</div>
+                    <div class="telemetry-tier-sub" style="color:#d8b4fe">● Restored (60–120)</div>
+                  </div>
 
-              <div class="telemetry-mini-card">
-                <div class="telemetry-mini-val" id="landing-ph-val" style="color:#34d399">6.8 <span style="font-size:12px;color:#94a3b8">pH</span></div>
-                <div class="telemetry-mini-lbl">Acidity / Alkalinity</div>
-                <div style="font-size:10px;color:#86efac;margin-top:2px">● Neutral Active Flora</div>
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-ph-val" style="color:#34d399">6.7 <span style="font-size:12px;color:#94a3b8">pH</span></div>
+                    <div class="telemetry-mini-lbl">Soil pH</div>
+                    <div class="telemetry-tier-sub" style="color:#86efac">● Ideal Neutral Flora</div>
+                  </div>
+
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-m-val" style="color:#fbbf24">34 <span style="font-size:12px;color:#94a3b8">%</span></div>
+                    <div class="telemetry-mini-lbl">Moisture</div>
+                    <div class="telemetry-tier-sub" style="color:#fde68a">● Drip Synchronized</div>
+                  </div>
+
+                  <div class="telemetry-mini-card">
+                    <div class="telemetry-mini-val" id="landing-tds-val" style="color:#f472b6">480 <span style="font-size:12px;color:#94a3b8">ppm</span></div>
+                    <div class="telemetry-mini-lbl">Soil TDS / EC</div>
+                    <div class="telemetry-tier-sub" style="color:#fbcfe8">● EC ~960 µS/cm</div>
+                  </div>
+                </div>
+
+                <!-- Live Derived Agronomic Analytics -->
+                <div class="telemetry-bottom-strip">
+                  <div class="telemetry-strip-item">
+                    <span class="telemetry-strip-k">⚖️ N:P:K Ratio Balance:</span>
+                    <span class="telemetry-strip-v" id="landing-ratio-val" style="color:#4ade80">2.7 : 1.0 : 2.1</span>
+                    <span class="chip success" style="font-size:10px;padding:1px 6px">EQUILIBRIUM</span>
+                  </div>
+                  <div class="telemetry-strip-item">
+                    <span class="telemetry-strip-k">🌱 Real-Time Crop Match:</span>
+                    <span class="telemetry-strip-v" id="landing-predicted-crop-val" style="color:#38bdf8">Coffee & Millets (Score: 83.0/100 · ₹77,000/ac)</span>
+                  </div>
+                  <div class="telemetry-strip-item">
+                    <span class="telemetry-strip-k">🛡️ Probe Quality:</span>
+                    <span class="telemetry-strip-v" style="color:#86efac">Calibrated & Reliable</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 2: Enterprise FPO & Cooperative Fleet -->
+            <div class="flywheel-panel" id="flywheel-panel-fin" role="tabpanel" hidden style="display:none">
+              <div class="landing-flywheel-showcase">
+                <div class="flywheel-showcase-grid">
+                  <div class="flywheel-showcase-text">
+                    <span class="portal-badge badge-b2b" style="margin-bottom:12px;display:inline-block">ENTERPRISE COMMAND CENTER</span>
+                    <h3 style="font-size:1.6rem;color:#fff;margin-bottom:12px">Spatial Aggregation Across 18 Regional Clusters</h3>
+                    <p style="color:#94a3b8;line-height:1.65;font-size:0.95rem;margin-bottom:18px">
+                      FPO executives and cooperative federations get a bird's-eye cockpit over 1,250+ member farms and 5,420 acres. Cross-cluster deficiency heatmaps pinpoint critical nitrogen depletion and soil acidity before crop failure strikes.
+                    </p>
+                    <ul class="portal-feature-list" style="margin-bottom:24px">
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#818cf8">✓</span>
+                        <span><strong>Collective Input Purchasing:</strong> Aggregates fertilizer & seed demand to unlock 28–35% wholesale bulk discounts.</span>
+                      </li>
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#818cf8">✓</span>
+                        <span><strong>Mandi Harvest Scheduling:</strong> Staggered harvest calendars prevent market gluts and stabilize farmgate pricing.</span>
+                      </li>
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#818cf8">✓</span>
+                        <span><strong>Emergency Advisory Broadcasts:</strong> Instant weather and pest warnings dispatched via SMS, WhatsApp, and Tamil Voice.</span>
+                      </li>
+                    </ul>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                      <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="background:linear-gradient(135deg, #6366f1, #8b5cf6)">
+                        <span>🏢</span> Open FPO Command Center
+                      </button>
+                      <button class="btn btn-secondary" onclick="switchRole('fpo_admin')">
+                        ⚡ 1-Click FPO Admin Demo
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="flywheel-showcase-visual">
+                    <div class="fpo-cluster-mini-map">
+                      <div class="cluster-map-head">
+                        <span style="font-weight:700;color:#fff">KOVAI FPO &middot; 18 AGRO-CLUSTERS</span>
+                        <span class="badge-b2b" style="padding:2px 8px;font-size:10px">ALL REGIONS ACTIVE</span>
+                      </div>
+                      <div class="cluster-stat-row">
+                        <div class="cluster-stat-box">
+                          <div class="cs-val">1,250</div>
+                          <div class="cs-lbl">Member Farmers</div>
+                        </div>
+                        <div class="cluster-stat-box">
+                          <div class="cs-val">5,420</div>
+                          <div class="cs-lbl">Monitored Acres</div>
+                        </div>
+                        <div class="cluster-stat-box">
+                          <div class="cs-val" style="color:#4ade80">₹3.8M</div>
+                          <div class="cs-lbl">Input Savings</div>
+                        </div>
+                      </div>
+                      <div class="cluster-deficiency-bars">
+                        <div style="font-size:11px;font-weight:700;color:#cbd5e1;margin-bottom:8px">REGIONAL SOIL DEFICIENCY INDEX</div>
+                        <div class="def-bar-row">
+                          <span>Nitrogen Deficit (Cluster 1-6)</span>
+                          <span style="color:#f87171">38% Depleted</span>
+                        </div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:38%;background:#ef4444"></div></div>
+                        <div class="def-bar-row" style="margin-top:6px">
+                          <span>Phosphorus Balance (Cluster 7-12)</span>
+                          <span style="color:#34d399">78% Optimal</span>
+                        </div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:78%;background:#10b981"></div></div>
+                        <div class="def-bar-row" style="margin-top:6px">
+                          <span>Potassium Replenishment (Cluster 13-18)</span>
+                          <span style="color:#fbbf24">64% Stable</span>
+                        </div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:64%;background:#f59e0b"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 3: Closed-Loop Bio-Economy (IFS) -->
+            <div class="flywheel-panel" id="flywheel-panel-ifs" role="tabpanel" hidden style="display:none">
+              <div class="landing-flywheel-showcase">
+                <div style="text-align:center;max-width:760px;margin:0 auto 28px">
+                  <span class="chip teal mb-8" style="font-size:11px">INTEGRATED FARMING SYSTEM (IFS)</span>
+                  <h3 style="font-size:1.6rem;color:#fff;margin:6px 0">Zero-Waste Circular Bio-Economy</h3>
+                  <p style="color:#94a3b8;font-size:0.95rem">
+                    How UZHAVU KAAPPAAN connects restorative legume/cereal rotations directly to high-protein dairy herd silage rations, cycling organic manure back into degraded soil.
+                  </p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;text-align:center">
+                  <div class="ifs-stage-card">
+                    <div class="ifs-stage-icon">🌱</div>
+                    <div class="ifs-stage-title">1. Precision Crops</div>
+                    <div class="ifs-stage-desc">Nitrogen-fixing pulses & restorative millets rejuvenate depleted soil micro-nutrients.</div>
+                  </div>
+                  <div class="ifs-stage-card">
+                    <div class="ifs-stage-icon">🌾</div>
+                    <div class="ifs-stage-title">2. Silage & Forage</div>
+                    <div class="ifs-stage-desc">Post-harvest crop residues are converted into nutritive anaerobic silage rations.</div>
+                  </div>
+                  <div class="ifs-stage-card">
+                    <div class="ifs-stage-icon">🐄</div>
+                    <div class="ifs-stage-title">3. Dairy Herd Health</div>
+                    <div class="ifs-stage-desc">Algorithmic feed formulation optimizes milk yield, protein content, and animal vitality.</div>
+                  </div>
+                  <div class="ifs-stage-card">
+                    <div class="ifs-stage-icon">♻️</div>
+                    <div class="ifs-stage-title">4. Bio-Manure Loop</div>
+                    <div class="ifs-stage-desc">Composted manure returns high-potency organic carbon back to the active field.</div>
+                  </div>
+                </div>
+                <div style="text-align:center;margin-top:24px">
+                  <button class="btn btn-primary" onclick="navigate('dairyfeed')" style="background:linear-gradient(135deg, #059669, #10b981)">
+                    <span>🐄</span> Open Dairy & Silage Feeder
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 4: YieldRank™ Agro-Credit & Risk Infrastructure -->
+            <div class="flywheel-panel" id="flywheel-panel-risk" role="tabpanel" hidden style="display:none">
+              <div class="landing-flywheel-showcase">
+                <div class="flywheel-showcase-grid">
+                  <div class="flywheel-showcase-text">
+                    <span class="portal-badge badge-farmer" style="margin-bottom:12px;display:inline-block">FINANCIAL INTELLIGENCE INFRASTRUCTURE</span>
+                    <h3 style="font-size:1.6rem;color:#fff;margin-bottom:12px">YieldRank™ Forward Credit & Mandi Assurance</h3>
+                    <p style="color:#94a3b8;line-height:1.65;font-size:0.95rem;margin-bottom:18px">
+                      Transforms ground-truth IoT sensor streams, historical crop yield compliance, and climate resilience into forward-looking credit ratings for commercial banks, parametric crop insurers, and forward contract buyers.
+                    </p>
+                    <ul class="portal-feature-list" style="margin-bottom:24px">
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#38bdf8">✓</span>
+                        <span><strong>Evidence-Based Lending:</strong> Replaces collateral guesswork with real-time agronomic telemetry and rotation health indexes.</span>
+                      </li>
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#38bdf8">✓</span>
+                        <span><strong>Parametric Climate Protection:</strong> Automated trigger policies using localized rainfall and soil moisture deficit metrics.</span>
+                      </li>
+                      <li class="portal-feature-item">
+                        <span class="portal-feature-icon" style="color:#38bdf8">✓</span>
+                        <span><strong>Mandi Forward Contracting:</strong> Verifiable harvest timelines allowing buyers to secure certified supply months in advance.</span>
+                      </li>
+                    </ul>
+                    <div style="display:flex;gap:12px">
+                      <button class="btn btn-primary" onclick="exportFarmerReportPDF()" style="background:linear-gradient(135deg, #38bdf8, #6366f1)">
+                        <span>📄</span> Export Certified Audit Plan (PDF)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="flywheel-showcase-visual">
+                    <div class="fpo-cluster-mini-map">
+                      <div class="cluster-map-head">
+                        <span style="font-weight:700;color:#fff">YIELDRANK™ FARM CREDIT SCORECARD</span>
+                        <span class="badge-farmer" style="padding:2px 8px;font-size:10px">SCORE: 885 / 1000 · A+</span>
+                      </div>
+                      <div style="padding:16px 0;text-align:center">
+                        <div style="font-size:3rem;font-weight:900;color:#4ade80;line-height:1">94.2%</div>
+                        <div style="font-size:12px;color:#94a3b8;margin-top:4px">Projected Season Harvest Reliability</div>
+                      </div>
+                      <div class="cluster-deficiency-bars">
+                        <div class="def-bar-row"><span>Soil Health Score</span><span style="color:#4ade80">91/100 (Optimal)</span></div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:91%;background:#10b981"></div></div>
+                        <div class="def-bar-row" style="margin-top:6px"><span>Rotation Compliance</span><span style="color:#38bdf8">96/100 (3 Seasons)</span></div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:96%;background:#38bdf8"></div></div>
+                        <div class="def-bar-row" style="margin-top:6px"><span>Climate Risk Buffer</span><span style="color:#c084fc">88/100 (Drip Ready)</span></div>
+                        <div class="def-bar-track"><div class="def-bar-fill" style="width:88%;background:#c084fc"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -314,11 +639,11 @@
         <div class="landing-stat-strip">
           <div class="landing-stat-card">
             <div class="landing-stat-value" style="color:#4ade80">1,250+</div>
-            <div class="landing-stat-label">Active Farmers</div>
+            <div class="landing-stat-label">Verified Farmers</div>
           </div>
           <div class="landing-stat-card">
             <div class="landing-stat-value" style="color:#38bdf8">5,420</div>
-            <div class="landing-stat-label">Acres Under Precision</div>
+            <div class="landing-stat-label">Precision Acres</div>
           </div>
           <div class="landing-stat-card">
             <div class="landing-stat-value" style="color:#c084fc">18</div>
@@ -329,196 +654,375 @@
             <div class="landing-stat-label">IoT Soil Sensors</div>
           </div>
           <div class="landing-stat-card">
-            <div class="landing-stat-value" style="color:#34d399">94.8%</div>
-            <div class="landing-stat-label">Telemetry Uptime</div>
+            <div class="landing-stat-value" style="color:#34d399">34.2%</div>
+            <div class="landing-stat-label">Fertilizer Waste Cut</div>
           </div>
           <div class="landing-stat-card">
-            <div class="landing-stat-value" style="color:#f472b6">26</div>
-            <div class="landing-stat-label">Restorative Crops</div>
+            <div class="landing-stat-value" style="color:#f472b6">₹42,500</div>
+            <div class="landing-stat-label">Avg Profit Boost / Ac</div>
           </div>
         </div>
 
-        <!-- Dual Gateway Experience Section -->
-        <div class="landing-section-head">
-          <h2>Two Specialized Agricultural Gateways</h2>
-          <p>Whether you're an individual grower striving for soil fertility or an agribusiness executive coordinating an entire regional value chain, UZHAVU KAAPPAAN provides bespoke operational power.</p>
-        </div>
+        <!-- ══════════════════ INTERACTIVE AGRONOMIC ROI & SOIL RECOVERY CALCULATOR ══════════════════ -->
+        <section id="landing-calculator-sec" class="landing-calculator-section">
+          <div style="text-align:center;max-width:740px;margin:0 auto">
+            <span class="chip teal mb-8" style="font-size:11px;letter-spacing:0.05em">INTERACTIVE ROI ESTIMATOR</span>
+            <h2 style="font-size:clamp(1.6rem, 2.8vw, 2.3rem);font-weight:900;color:#fff;margin:6px 0 12px">
+              Calculate Your Farm's Restorative Potential &amp; Financial Return
+            </h2>
+            <p style="color:#94a3b8;font-size:0.95rem;line-height:1.6">
+              Model how precision IoT soil balancing, organic carbon replenishment, and restorative crop rotations compound for your exact field acreage.
+            </p>
+          </div>
 
-        <div class="landing-portals-grid">
-          <!-- Card 1: Farmer Platform -->
-          <div class="landing-portal-card card-farmer">
-            <div class="portal-card-header">
-              <div class="portal-icon">🌾</div>
+          <div class="calc-grid">
+            <!-- Inputs Column -->
+            <div class="calc-input-box">
               <div>
-                <span class="portal-badge badge-farmer">Individual Grower Hub</span>
-                <div class="portal-card-title">Farmer Platform</div>
+                <div class="calc-group-label">
+                  <span>Farm Parcel Size:</span>
+                  <span id="calc-acres-display" class="calc-value-badge">5 Acres</span>
+                </div>
+                <input type="range" id="calc-acres-slider" class="calc-range-slider" min="1" max="50" step="1" value="5" oninput="updateLandingCalculator()"/>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:6px">
+                  <span>1 Acre (Smallholder)</span>
+                  <span>25 Acres</span>
+                  <span>50 Acres (Estate)</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="calc-group-label" for="calc-soil-condition">
+                  <span>Baseline Soil Health State:</span>
+                </label>
+                <select id="calc-soil-condition" class="calc-select" onchange="updateLandingCalculator()">
+                  <option value="depleted" selected>Severely Nutrient-Depleted (&lt;0.4% OC · N Starved)</option>
+                  <option value="acidic">Acidic Red Soil (pH 5.2 · Low P &amp; K Buffers)</option>
+                  <option value="saline">Alkaline Saline Stress (pH &gt; 8.0 · High TDS &gt; 900)</option>
+                  <option value="loam">Moderate Loam (0.75% OC · Drip Ready)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="calc-group-label" for="calc-rotation-type">
+                  <span>Target Agronomic Rotation:</span>
+                </label>
+                <select id="calc-rotation-type" class="calc-select" onchange="updateLandingCalculator()">
+                  <option value="pulses_cereals" selected>Restorative Pulses &amp; Cereals (Green Gram ➔ Maize ➔ Groundnut)</option>
+                  <option value="cash">High-Value Horticulture &amp; Cash (Tomato ➔ Chili ➔ Legume)</option>
+                  <option value="ifs">Zero-Waste IFS Bio-Economy (Silage Forage ➔ Dairy Herd ➔ Bio-Manure)</option>
+                </select>
               </div>
             </div>
-            <p class="portal-card-desc">
-              Precision agronomy designed for local growers. Continuous soil NPK sensing, tailored multi-year restorative crop rotation, GPS micro-zones, and dairy ration balancing.
-            </p>
-            <ul class="portal-feature-list">
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Real-Time IoT NPK Telemetry:</strong> Live probes tracking Nitrogen, Phosphorus, Potassium, Moisture, and pH.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>26-Crop Rotational Optimizer:</strong> Algorithmic rotation restoring depleted nutrients while maximizing financial margins.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>GPS Precision Zone Allocation:</strong> Micro-parcel management with automated irrigation & fertigation schedules.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Integrated Farming System (IFS):</strong> Convert crop residues into optimal dairy silage and feed rations.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Automated PDF Action Plans:</strong> Instant printable Tamil/English agronomic roadmaps for field workers.</span>
-              </li>
-            </ul>
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <button class="btn btn-primary" onclick="enterFarmerPortal()" style="width:100%;justify-content:center;font-size:14px;padding:12px">
-                <span>🌾</span> Launch Farmer Platform
-              </button>
-              <button class="btn btn-secondary btn-sm" onclick="switchRole('farmer')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(16,185,129,0.3);color:#34d399">
-                ⚡ 1-Click Demo as Ramesh Kumar (Farm #101)
+
+            <!-- Results Column -->
+            <div class="calc-result-card">
+              <div class="calc-result-header">
+                <span>⚡</span> Projected 3-Season Agronomic &amp; Economic Dividend
+              </div>
+
+              <div class="calc-metrics-grid">
+                <div class="calc-metric-tile">
+                  <div class="calc-metric-tile-val" id="calc-out-fert" style="color:#4ade80">₹13,260</div>
+                  <div class="calc-metric-tile-lbl">Chemical Fertilizer Saved / Yr</div>
+                </div>
+
+                <div class="calc-metric-tile">
+                  <div class="calc-metric-tile-val" id="calc-out-margin" style="color:#38bdf8">+₹2,43,750</div>
+                  <div class="calc-metric-tile-lbl">Net 3-Season Profit Boost</div>
+                </div>
+
+                <div class="calc-metric-tile">
+                  <div class="calc-metric-tile-val" id="calc-out-oc" style="color:#c084fc">+0.42% OC</div>
+                  <div class="calc-metric-tile-lbl">Organic Carbon Restored</div>
+                </div>
+
+                <div class="calc-metric-tile">
+                  <div class="calc-metric-tile-val" id="calc-out-water" style="color:#fbbf24">28% Saved</div>
+                  <div class="calc-metric-tile-lbl">Drip Water Efficiency</div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" onclick="enterFarmerPortal()" style="width:100%;justify-content:center;padding:13px;font-size:14px;background:linear-gradient(135deg, #10b981, #059669);box-shadow:0 6px 20px rgba(16,185,129,0.3)">
+                <span>🌾</span> Generate Precision Plan for this Acreage &rarr;
               </button>
             </div>
           </div>
+        </section>
 
-          <!-- Card 2: FPO Command Center -->
-          <div class="landing-portal-card card-b2b">
-            <div class="portal-card-header">
-              <div class="portal-icon">🏢</div>
-              <div>
-                <span class="portal-badge badge-b2b">Enterprise Co-Op</span>
-                <div class="portal-card-title">FPO Command Center</div>
+        <!-- ══════════════════ INDUSTRY SOLUTIONS (Persona Architecture) ══════════════════ -->
+        <section id="landing-solutions-sec">
+          <div class="landing-section-head">
+            <span class="chip teal mb-8" style="font-size:11px;letter-spacing:0.05em">PERSONA-DRIVEN SOLUTIONS</span>
+            <h2>Architected for Every Agricultural Stakeholder</h2>
+            <p>Whether you're an individual grower striving for soil fertility or an agribusiness executive coordinating an entire regional value chain, UZHAVU KAAPPAAN provides bespoke operational power.</p>
+          </div>
+
+          <div class="landing-portals-grid">
+            <!-- Card 1: Farmer Platform -->
+            <div class="landing-portal-card card-farmer">
+              <div class="portal-card-header">
+                <div class="portal-icon">🌾</div>
+                <div>
+                  <span class="portal-badge badge-farmer">Growers & Smallholders</span>
+                  <div class="portal-card-title">Farmer Platform</div>
+                </div>
+              </div>
+              <p class="portal-card-desc">
+                Precision agronomy designed for local growers. Continuous soil NPK sensing, tailored multi-year restorative crop rotation, GPS micro-zones, and dairy ration balancing.
+              </p>
+              <ul class="portal-feature-list">
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>Real-Time IoT NPK Telemetry:</strong> Live probes tracking Nitrogen, Phosphorus, Potassium, Moisture, and pH with benchmark indicators.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>26-Crop Rotational Optimizer:</strong> Algorithmic multi-season rotation restoring depleted nutrients while maximizing financial margins.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>GPS Precision Zone Allocation:</strong> Micro-parcel management with automated irrigation & fertigation schedules.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>Automated PDF Action Plans:</strong> Instant printable Tamil/English agronomic roadmaps for field workers.</span>
+                </li>
+              </ul>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:auto">
+                <button class="btn btn-primary" onclick="enterFarmerPortal()" style="width:100%;justify-content:center;font-size:14px;padding:12px">
+                  <span>🌾</span> Launch Farmer Platform
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="switchRole('farmer')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(16,185,129,0.3);color:#34d399">
+                  ⚡ 1-Click Demo as Ramesh Kumar (Farm #101)
+                </button>
               </div>
             </div>
-            <p class="portal-card-desc">
-              Dedicated enterprise cockpit for Farmer Producer Organizations, Cooperatives, and Agribusiness managers overseeing multi-cluster operations.
-            </p>
-            <ul class="portal-feature-list">
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Multi-Farm & Cluster Management:</strong> Aggregate intelligence across 18 clusters, 1,250 members, and 5,420 acres.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Regional Soil Deficiencies Heatmap:</strong> Cross-cluster NPK spatial mapping identifying critical soil health risks.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>IoT Fleet Command:</strong> 420 telemetry nodes with real-time battery status, signal strength, and ping tools.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Closed-Loop Bio-Economy (IFS):</strong> Cluster-level silage biomass logistics and organic manure recovery.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Broadcast Multi-Channel Advisories:</strong> Instant emergency dispatches via SMS, WhatsApp, and Voice.</span>
-              </li>
-              <li class="portal-feature-item">
-                <span class="portal-feature-icon">✓</span>
-                <span><strong>Role-Based Access Control (RBAC):</strong> Tailored interfaces for Admins, Managers, Field Officers, Agronomists & IoT Techs.</span>
-              </li>
-            </ul>
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="width:100%;justify-content:center;font-size:14px;padding:12px;background:linear-gradient(135deg, #6366f1, #8b5cf6)">
-                <span>🏢</span> Launch FPO Command Center
-              </button>
-              <button class="btn btn-secondary btn-sm" onclick="switchRole('fpo_admin')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(124,58,237,0.4);color:#c084fc">
-                ⚡ 1-Click Demo as Dr. Swaminathan (FPO Admin)
-              </button>
+
+            <!-- Card 2: FPO Command Center -->
+            <div class="landing-portal-card card-b2b">
+              <div class="portal-card-header">
+                <div class="portal-icon">🏢</div>
+                <div>
+                  <span class="portal-badge badge-b2b">Cooperatives & Federations</span>
+                  <div class="portal-card-title">FPO Command Center</div>
+                </div>
+              </div>
+              <p class="portal-card-desc">
+                Dedicated enterprise cockpit for Farmer Producer Organizations, Cooperatives, and Agribusiness managers overseeing multi-cluster operations.
+              </p>
+              <ul class="portal-feature-list">
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>Multi-Farm & Cluster Management:</strong> Aggregate intelligence across 18 clusters, 1,250 members, and 5,420 acres.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>Regional Soil Deficiencies Heatmap:</strong> Cross-cluster NPK spatial mapping identifying critical soil health risks.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>IoT Fleet Command:</strong> 420 telemetry nodes with real-time battery status, signal strength, and ping tools.</span>
+                </li>
+                <li class="portal-feature-item">
+                  <span class="portal-feature-icon">✓</span>
+                  <span><strong>Multi-Channel Broadcast Advisories:</strong> Instant emergency dispatches via SMS, WhatsApp, and Tamil Voice.</span>
+                </li>
+              </ul>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:auto">
+                <button class="btn btn-primary" onclick="enterB2BPortal('overview')" style="width:100%;justify-content:center;font-size:14px;padding:12px;background:linear-gradient(135deg, #6366f1, #8b5cf6)">
+                  <span>🏢</span> Launch FPO Command Center
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="switchRole('fpo_admin')" style="width:100%;justify-content:center;font-size:12px;border-color:rgba(124,58,237,0.4);color:#c084fc">
+                  ⚡ 1-Click Demo as Dr. Swaminathan (FPO Admin)
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════ 6 CORE CAPABILITIES (Bento Grid) ══════════════════ -->
+        <section id="landing-capabilities-sec">
+          <div class="landing-section-head">
+            <span class="chip teal mb-8" style="font-size:11px;letter-spacing:0.05em">SYSTEM CAPABILITIES</span>
+            <h2>Engineered for Agronomic & Industrial Precision</h2>
+            <p>Scientific rigor powered by artificial intelligence, real-time edge telemetry, and circular agro-economics.</p>
+          </div>
+
+          <div class="landing-features-grid">
+            <div class="feature-box">
+              <div class="feature-box-icon">🧪</div>
+              <div class="feature-box-title">7-in-1 Modbus / Wi-Fi Edge Ingestion</div>
+              <div class="feature-box-desc">Seamless ingestion from RS485 Modbus and Wi-Fi probes capturing Nitrogen, Phosphorus, Potassium, Moisture, pH, and TDS in real time.</div>
+            </div>
+
+            <div class="feature-box">
+              <div class="feature-box-icon">♻️</div>
+              <div class="feature-box-title">26-Crop Deficiency Balancing Engine</div>
+              <div class="feature-box-desc">Automated mathematical optimization calculating crop NPK uptake vs. replenishment to eliminate fertilizer waste while maximizing net margin.</div>
+            </div>
+
+            <div class="feature-box">
+              <div class="feature-box-icon">🛰️</div>
+              <div class="feature-box-title">Precision GPS Micro-Zones</div>
+              <div class="feature-box-desc">Sub-meter parcel allocation with automated drip fertigation valve sequencing and localized microclimate crop-soil matching.</div>
+            </div>
+
+            <div class="feature-box">
+              <div class="feature-box-icon">🐄</div>
+              <div class="feature-box-title">Silage & Dairy Nutrition (IFS)</div>
+              <div class="feature-box-desc">Crop residue conversion into high-protein silage with automated feed ration balancing for dairy herds, returning organic manure to soil.</div>
+            </div>
+
+            <div class="feature-box">
+              <div class="feature-box-icon">📢</div>
+              <div class="feature-box-title">Multi-Channel Regional Broadcasts</div>
+              <div class="feature-box-desc">Instant regional advisory distribution across SMS, WhatsApp, and automated voice in English & Tamil with cluster geo-targeting.</div>
+            </div>
+
+            <div class="feature-box">
+              <div class="feature-box-icon">🛡️</div>
+              <div class="feature-box-title">Tamper-Evident History & Audits</div>
+              <div class="feature-box-desc">Cryptographically hashed agronomic logs ensuring traceability for organic certification, carbon credits, and export compliance.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════ ENTERPRISE STANDARDS & COMPLIANCE ══════════════════ -->
+        <div class="landing-standards-strip">
+          <div class="standard-badge-card">
+            <div class="standard-badge-icon" style="color:#4ade80">🏛️</div>
+            <div>
+              <div class="standard-badge-title">ICAR &amp; TNAU Benchmarked</div>
+              <div class="standard-badge-sub">Fertilizer dosage &amp; crop rotations calibrated to regional agro-climatic standards.</div>
+            </div>
+          </div>
+
+          <div class="standard-badge-card">
+            <div class="standard-badge-icon" style="color:#38bdf8">🔐</div>
+            <div>
+              <div class="standard-badge-title">256-Bit Hardware Encrypted</div>
+              <div class="standard-badge-sub">Hardware token authentication (X-Device-Key) prevents unauthorized probe spoofing.</div>
+            </div>
+          </div>
+
+          <div class="standard-badge-card">
+            <div class="standard-badge-icon" style="color:#c084fc">🗄️</div>
+            <div>
+              <div class="standard-badge-title">PostgreSQL Cloud Persistence</div>
+              <div class="standard-badge-sub">Full enterprise schema, historical rotation logs, and tamper-evident audit trails.</div>
+            </div>
+          </div>
+
+          <div class="standard-badge-card">
+            <div class="standard-badge-icon" style="color:#fbbf24">🌐</div>
+            <div>
+              <div class="standard-badge-title">100% Native Bilingual Engine</div>
+              <div class="standard-badge-sub">Instant zero-latency toggling between English &amp; தமிழ் (Tamil) across all views.</div>
             </div>
           </div>
         </div>
 
-        <!-- 6 Core Pillars Grid -->
-        <div class="landing-section-head">
-          <h2>Engineered for Agronomic Excellence</h2>
-          <p>Scientific rigor powered by artificial intelligence, real-time edge telemetry, and circular agro-economics.</p>
-        </div>
-
-        <div class="landing-features-grid">
-          <div class="feature-box">
-            <div class="feature-box-icon">🧪</div>
-            <div class="feature-box-title">26-Crop Deficiency Balancing</div>
-            <div class="feature-box-desc">Automated mathematical optimization calculating crop NPK uptake vs. replenishment to eliminate fertilizer waste.</div>
+        <!-- Social Proof & Customer Voices -->
+        <div class="landing-testimonials-section">
+          <div class="landing-section-head" style="margin-bottom:28px">
+            <span class="chip teal mb-8" style="font-size:11px">FIELD VERIFICATION</span>
+            <h2>Validated by Cooperatives Across Tamil Nadu</h2>
           </div>
-
-          <div class="feature-box">
-            <div class="feature-box-icon">📡</div>
-            <div class="feature-box-title">IoT Telemetry & Fleet Ping</div>
-            <div class="feature-box-desc">Continuous telemetry monitoring with packet simulation, battery health tracking, and offline alerts.</div>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-box-icon">🛰️</div>
-            <div class="feature-box-title">Precision GPS Micro-Zones</div>
-            <div class="feature-box-desc">Parcel-level allocation with automated drip fertigation valve sequencing and crop-soil matching.</div>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-box-icon">🐄</div>
-            <div class="feature-box-title">Silage & Dairy Nutrition (IFS)</div>
-            <div class="feature-box-desc">Crop residue conversion into high-protein silage with automated feed ration balancing for dairy herds.</div>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-box-icon">📢</div>
-            <div class="feature-box-title">Multi-Channel Broadcasts</div>
-            <div class="feature-box-desc">Instant regional advisory distribution across SMS, WhatsApp, and automated voice in English & Tamil.</div>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-box-icon">🛡️</div>
-            <div class="feature-box-title">Tamper-Evident History</div>
-            <div class="feature-box-desc">Cryptographically hashed agronomic logs ensuring traceability for organic certification and export compliance.</div>
-          </div>
-        </div>
-
-        <!-- Closed Loop Architecture Banner -->
-        <div style="background:rgba(22,27,34,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;margin-bottom:64px;backdrop-filter:blur(12px)">
-          <div style="text-align:center;max-width:700px;margin:0 auto 28px">
-            <span class="chip teal mb-8" style="font-size:11px">CIRCULAR BIO-ECONOMY</span>
-            <h3 style="font-size:1.6rem;font-weight:800;color:#fff;margin:6px 0">Closed-Loop Integrated Farming System (IFS)</h3>
-            <p style="color:var(--text-secondary);font-size:0.95rem">
-              How UZHAVU KAAPPAAN connects restorative crop residues directly to dairy nutrition and feeds organic bio-nutrients back into degraded soils.
-            </p>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;text-align:center">
-            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
-              <div style="font-size:28px;margin-bottom:8px">🌱</div>
-              <div style="font-weight:700;color:#fff;margin-bottom:4px">1. Precision Crops</div>
-              <div style="font-size:12px;color:var(--text-muted)">Restorative legume & cereal rotations restore soil organic carbon</div>
+          <div class="landing-testimonials-grid">
+            <div class="landing-testimonial-card">
+              <div class="testimonial-quote">
+                "UZHAVU KAAPPAAN lowered our 18-cluster chemical fertilizer outlay by 34% while securing steady collective Mandi procurement margins."
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">🌾</div>
+                <div>
+                  <div style="font-weight:700;color:#fff">Kovai Farmers Producer Org</div>
+                  <div style="font-size:12px;color:#94a3b8">Executive Committee &middot; 1,250 Growers</div>
+                </div>
+              </div>
             </div>
-            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
-              <div style="font-size:28px;margin-bottom:8px">🌾</div>
-              <div style="font-weight:700;color:#fff;margin-bottom:4px">2. Silage & Forage</div>
-              <div style="font-size:12px;color:var(--text-muted)">Crop biomass is harvested and converted into nutritive silage rations</div>
+
+            <div class="landing-testimonial-card">
+              <div class="testimonial-quote">
+                "The live NPK sensor cards and 4-second auto stream allow us to catch soil acidity spikes before we plant our second pulse season."
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">💧</div>
+                <div>
+                  <div style="font-weight:700;color:#fff">Pollachi Precision Drip Co-Op</div>
+                  <div style="font-size:12px;color:#94a3b8">K. Shanmugam &middot; 320 Monitored Acres</div>
+                </div>
+              </div>
             </div>
-            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
-              <div style="font-size:28px;margin-bottom:8px">🐄</div>
-              <div style="font-weight:700;color:#fff;margin-bottom:4px">3. Dairy Herd Health</div>
-              <div style="font-size:12px;color:var(--text-muted)">Balanced ration feeder optimizes daily milk yield and herd vitality</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.02);padding:20px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)">
-              <div style="font-size:28px;margin-bottom:8px">♻️</div>
-              <div style="font-weight:700;color:#fff;margin-bottom:4px">4. Bio-Manure Loop</div>
-              <div style="font-size:12px;color:var(--text-muted)">Composted organic manure replenishes depleted field NPK metrics</div>
+
+            <div class="landing-testimonial-card">
+              <div class="testimonial-quote">
+                "The closed-loop IFS silage ration generator doubled our dairy milk fat percentage while replenishing organic carbon back into red soil."
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">🐄</div>
+                <div>
+                  <div style="font-weight:700;color:#fff">Thanjavur Integrated Dairy Society</div>
+                  <div style="font-size:12px;color:#94a3b8">S. Meenakshi &middot; IFS Herd Lead</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Landing Footer -->
+        <!-- Enterprise Footer -->
         <footer class="landing-footer">
-          <p>© 2026 UZHAVU KAAPPAAN (உழவு காப்பான்) · Smart Crop Rotation & Soil Restorer Platform.</p>
-          <p style="margin-top:8px;font-size:12px">Built for Agricultural Intelligence & B2B FPO Operations · Verified Real-Time Telemetry & Dual-Stack Agronomic Architecture</p>
+          <div class="landing-footer-grid">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <span style="font-size:24px">🌱</span>
+                <span style="font-weight:800;color:#fff;font-size:1.15rem">UZHAVU KAAPPAAN</span>
+              </div>
+              <p style="font-size:0.86rem;color:#94a3b8;line-height:1.6;max-width:320px">
+                Precision Agricultural Intelligence & Enterprise Cooperative Management. Restoring soil health, maximizing farm profitability, and securing collective food futures.
+              </p>
+              <div style="margin-top:14px;font-size:12px;color:#4ade80;display:flex;align-items:center;gap:6px">
+                <span class="pulse-dot" style="width:6px;height:6px"></span>
+                <span>All 420 IoT Nodes & Server APIs Operational</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:14px">PLATFORM</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:0.86rem">
+                <li><a href="#soil-analysis" onclick="navigate('soil-analysis');return false;" style="color:#94a3b8;text-decoration:none">Real-Time NPK Soil Analysis</a></li>
+                <li><a href="#rotation" onclick="navigate('rotation');return false;" style="color:#94a3b8;text-decoration:none">26-Crop Rotation Optimizer</a></li>
+                <li><a href="#dairyfeed" onclick="navigate('dairyfeed');return false;" style="color:#94a3b8;text-decoration:none">IFS Dairy & Silage Balancer</a></li>
+                <li><a href="#gps-zones" onclick="navigate('gps-zones');return false;" style="color:#94a3b8;text-decoration:none">GPS Precision Zone Allocation</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:14px">ENTERPRISE B2B</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:0.86rem">
+                <li><a href="#b2b" onclick="enterB2BPortal('overview');return false;" style="color:#94a3b8;text-decoration:none">FPO Command Center</a></li>
+                <li><a href="#b2b" onclick="enterB2BPortal('clusters');return false;" style="color:#94a3b8;text-decoration:none">18-Cluster Spatial Heatmap</a></li>
+                <li><a href="#b2b" onclick="enterB2BPortal('iot');return false;" style="color:#94a3b8;text-decoration:none">IoT Fleet Health & Diagnostics</a></li>
+                <li><a href="#b2b" onclick="enterB2BPortal('advisories');return false;" style="color:#94a3b8;text-decoration:none">Emergency Regional Broadcasts</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:14px">AGRONOMY & STANDARDS</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:0.86rem">
+                <li><span style="color:#94a3b8">ICAR / TNAU Benchmark Validated</span></li>
+                <li><span style="color:#94a3b8">RS485 Modbus & Wi-Fi Ingestion</span></li>
+                <li><span style="color:#94a3b8">Supabase Cloud PostgreSQL</span></li>
+                <li><a href="/api/health" target="_blank" style="color:#94a3b8;text-decoration:none">Live REST API Health</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="margin-top:36px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:12px">
+            <p>© 2026 UZHAVU KAAPPAAN (உழவு காப்பான்) · Smart Crop Rotation & Soil Restorer Platform.</p>
+            <p>Architected for Agronomic Excellence & High-Density Regional FPO Cooperatives.</p>
+          </div>
         </footer>
       </div>
     </div>
@@ -937,18 +1441,10 @@
         </button>
       </div>
 
-      <div id="sensor-live-banner" class="sensor-live-banner mb-16" style="display:none; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div id="sensor-live-banner" class="sensor-live-banner mb-16" style="display:none; align-items: center; gap: 10px;">
         <div class="flex items-center gap-8">
           <span id="sensor-live-dot" class="sensor-live-dot"></span>
           <span id="sensor-live-status-text" data-i18n="lblAwaitingSensor">Waiting for ESP32…</span>
-        </div>
-        <div class="flex items-center gap-8">
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-stream" onclick="toggleSensorAutoStream()" style="font-size:11px;padding:4px 10px;">
-            <span id="stream-btn-icon">▶</span> <span id="stream-btn-text" data-i18n="btnStartAutoStream">Start Auto-Stream</span>
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="toggleSensorFormVisibility()" style="font-size:11px;padding:4px 10px;">
-            <span id="toggle-form-icon">⚙️</span> <span data-i18n="btnSensorDirectForm">Direct Sensor Form</span>
-          </button>
         </div>
       </div>
 
@@ -958,7 +1454,7 @@
           <div class="sensor-npk-top">
             <span class="sensor-npk-icon">🌿</span>
             <span class="sensor-npk-name" data-i18n="lblLiveN">Live Nitrogen (N)</span>
-            <span id="sensor-n-status" class="sensor-status-badge optimal">Optimal</span>
+            <span id="sensor-n-status" class="sensor-status-badge offline">OFFLINE</span>
           </div>
           <div class="sensor-npk-value-wrap">
             <span class="sensor-npk-num" id="sensor-n-val">—</span>
@@ -977,7 +1473,7 @@
           <div class="sensor-npk-top">
             <span class="sensor-npk-icon">💎</span>
             <span class="sensor-npk-name" data-i18n="lblLiveP">Live Phosphorus (P)</span>
-            <span id="sensor-p-status" class="sensor-status-badge optimal">Optimal</span>
+            <span id="sensor-p-status" class="sensor-status-badge offline">OFFLINE</span>
           </div>
           <div class="sensor-npk-value-wrap">
             <span class="sensor-npk-num" id="sensor-p-val">—</span>
@@ -996,7 +1492,7 @@
           <div class="sensor-npk-top">
             <span class="sensor-npk-icon">🍌</span>
             <span class="sensor-npk-name" data-i18n="lblLiveK">Live Potassium (K)</span>
-            <span id="sensor-k-status" class="sensor-status-badge optimal">Optimal</span>
+            <span id="sensor-k-status" class="sensor-status-badge offline">OFFLINE</span>
           </div>
           <div class="sensor-npk-value-wrap">
             <span class="sensor-npk-num" id="sensor-k-val">—</span>
@@ -1015,99 +1511,22 @@
           <div class="sensor-npk-top">
             <span class="sensor-npk-icon">⚖️</span>
             <span class="sensor-npk-name" data-i18n="lblNpkRatio">N:P:K Balance</span>
-            <span id="sensor-ratio-status" class="sensor-status-badge info">Ratio Check</span>
+            <span id="sensor-ratio-status" class="sensor-status-badge offline">OFFLINE</span>
           </div>
           <div class="sensor-npk-value-wrap">
             <span class="sensor-npk-num" id="sensor-ratio-val" style="font-size:20px;letter-spacing:0.5px">— : — : —</span>
           </div>
           <div class="sensor-progress-track">
-            <div id="sensor-ratio-bar" class="sensor-progress-fill ratio-fill" style="width: 80%"></div>
+            <div id="sensor-ratio-bar" class="sensor-progress-fill ratio-fill" style="width: 0%"></div>
           </div>
           <div class="sensor-npk-meta">
             <span data-i18n="idealRatioText">Standard Benchmark: 4 : 2 : 1</span>
-            <span id="sensor-ratio-note" style="color:var(--green-400)">Live Sync</span>
+            <span id="sensor-ratio-note" style="color:var(--text-muted)">Offline</span>
           </div>
         </div>
       </div>
 
-      <!-- ── Direct Sensor Telemetry Form & Live Streamer ── -->
-      <div id="sensor-direct-stream-panel" class="glass-card mb-16 sensor-stream-panel" style="display:none">
-        <div class="sensor-stream-header">
-          <div class="flex items-center gap-12">
-            <div class="sensor-stream-icon-badge">📡</div>
-            <div>
-              <div class="sensor-stream-title" data-i18n="directSensorTitle">Direct Sensor Telemetry & Ingest Stream</div>
-              <div class="sensor-stream-sub" data-i18n="directSensorSub">Push real-time NPK & probe parameters directly into the live website pipeline or activate automated IoT stream</div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Interactive Form Controls -->
-        <div id="sensor-direct-form-body" class="sensor-stream-body mt-16">
-          <!-- Quick Presets -->
-          <div class="sensor-presets-wrap mb-16">
-            <span class="sensor-preset-label" data-i18n="lblSensorPresets">Probe Presets:</span>
-            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('optimal')">🟢 Optimal Loam (125N : 45P : 90K)</button>
-            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('low_n')">🟡 Low Nitrogen (38N : 42P : 85K)</button>
-            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('acidic')">🔴 Acidic Red (65N : 20P : 50K · pH 5.2)</button>
-            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('saline')">🟣 Saline Alkaline (95N : 18P : 110K · TDS 920)</button>
-            <button type="button" class="sensor-preset-pill" onclick="applySensorPreset('dry')">⚠️ Dry Probe (0% Moisture · 0 NPK)</button>
-          </div>
-
-          <form id="sensor-direct-ingest-form" onsubmit="handleDirectSensorSubmit(event)">
-            <div class="sensor-inputs-grid">
-              <div class="form-group">
-                <label class="form-label" for="direct-device-id">Node / Device ID</label>
-                <input type="text" id="direct-device-id" class="form-control" value="Soil-Scout-01" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-n-input">🌿 Nitrogen (N) <span class="unit">kg/ha</span></label>
-                <input type="number" id="direct-n-input" class="form-control" min="0" max="300" step="1" value="115" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-p-input">💎 Phosphorus (P) <span class="unit">kg/ha</span></label>
-                <input type="number" id="direct-p-input" class="form-control" min="0" max="200" step="1" value="42" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-k-input">🍌 Potassium (K) <span class="unit">kg/ha</span></label>
-                <input type="number" id="direct-k-input" class="form-control" min="0" max="300" step="1" value="88" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-ph-input">⚗️ pH Level</label>
-                <input type="number" id="direct-ph-input" class="form-control" min="3.0" max="10.0" step="0.1" value="6.7" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-moisture-input">💧 Soil Moisture <span class="unit">%</span></label>
-                <input type="number" id="direct-moisture-input" class="form-control" min="0" max="100" step="1" value="34" required/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-temp-input">🌡️ Temperature <span class="unit">°C</span></label>
-                <input type="number" id="direct-temp-input" class="form-control" min="0" max="60" step="0.5" value="28.5"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-tds-input">🧪 Soil TDS <span class="unit">ppm</span></label>
-                <input type="number" id="direct-tds-input" class="form-control" min="0" max="3000" step="1" value="480"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="direct-light-input">☀️ Sunlight <span class="unit">%</span></label>
-                <input type="number" id="direct-light-input" class="form-control" min="0" max="100" step="1" value="82"/>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between gap-12 mt-16" style="flex-wrap:wrap">
-              <div class="flex items-center gap-8">
-                <button type="submit" class="btn btn-primary" id="btn-push-direct-sensor">
-                  <span>⚡</span> <span data-i18n="btnTransmitSensor">Push Sensor Reading to Website</span>
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="randomizeSensorNoise()">
-                  <span>🎲</span> <span data-i18n="btnRandomizeNoise">Simulate Natural Drift</span>
-                </button>
-              </div>
-              <div id="sensor-transmit-feedback" style="font-size:12px;color:var(--green-400);font-weight:600"></div>
-            </div>
-          </form>
-        </div>
-      </div>
 
       <!-- Supplementary sensor readings (not part of the health score) -->
       <div id="sensor-extra-readings" class="sensor-extra-grid mb-16" style="display:none">

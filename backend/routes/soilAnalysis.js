@@ -42,9 +42,12 @@ router.post('/', (req, res) => {
 // GET latest soil data for a farm
 router.get('/', (req, res) => {
   const farm_id = parseInt(req.query.farm_id) || 101;
-  const latest = [...db.soil_data]
-    .filter(s => s.farm_id === farm_id)
-    .sort((a, b) => b.soil_id - a.soil_id)[0];
+  const source  = req.query.source;
+  let candidates = [...db.soil_data].filter(s => s.farm_id === farm_id);
+  if (source) {
+    candidates = candidates.filter(s => s.source === source);
+  }
+  const latest = candidates.sort((a, b) => b.soil_id - a.soil_id)[0];
   if (!latest) return res.status(404).json({ error: 'No soil data found' });
   res.json(latest);
 });

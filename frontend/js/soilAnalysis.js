@@ -2,30 +2,59 @@
 //  soilAnalysis.js — Soil Analysis view
 // ============================================================
 
-let soilDataMode = 'manual'; // 'manual' | 'live'
+let soilDataMode = 'live'; // Defaults to 'live' so physical hardware view is immediate
+try {
+  const saved = localStorage.getItem('soilDataMode');
+  if (saved) soilDataMode = saved;
+} catch(_) {}
+
 let sensorPollTimer = null;
 const SENSOR_POLL_MS = 4000;
 
+function resetSlidersToDefault() {
+  setSlider('n-slider', 0, 'n-val');
+  setSlider('p-slider', 0, 'p-val');
+  setSlider('k-slider', 0, 'k-val');
+  setSlider('ph-slider', 70, 'ph-val', v => (v/10).toFixed(1));
+  setSlider('oc-slider', 50, 'oc-val', v => (v/100).toFixed(2));
+}
+window.resetSlidersToDefault = resetSlidersToDefault;
+
 VIEW_LOADERS['soil-analysis'] = async function loadSoilAnalysis() {
-  // Only pre-fill sliders from a REAL prior reading (a manual submission or
-  // a live ESP32 post) — never from the seeded demo 'lab_report' entry.
-  // Otherwise every fresh page load looked like a soil test had already
-  // been run, when nobody had actually entered or measured anything.
+  let savedMode = 'live';
   try {
-    const soil = await apiGet(`/soil-analysis?farm_id=${state.farm_id}`);
-    if (soil && soil.source !== 'lab_report') prefillSliders(soil);
+    savedMode = localStorage.getItem('soilDataMode') || 'live';
   } catch(_) {}
+  setSoilDataMode(savedMode);
+
+  if (savedMode === 'live') {
+    // In live mode, poll genuine hardware; sliders stay locked/cleared until live packet arrives
+    await pollSensorOnce();
+  } else {
+    // Only pre-fill manual sliders from a REAL PRIOR MANUAL entry, never from ESP32 or lab demo
+    try {
+      const soil = await apiGet(`/soil-analysis?farm_id=${state.farm_id}&source=manual`);
+      if (soil && soil.source === 'manual') {
+        prefillSliders(soil);
+      } else {
+        resetSlidersToDefault();
+      }
+    } catch(_) {
+      resetSlidersToDefault();
+    }
+  }
 };
 
 // ── Manual / Live (ESP32 / Soil Scout) mode switcher ─────────────────────
 function setSoilDataMode(mode) {
   soilDataMode = mode;
+  try { localStorage.setItem('soilDataMode', mode); } catch(_) {}
+
   const manualBtn = document.getElementById('soil-mode-btn-manual');
   const liveBtn = document.getElementById('soil-mode-btn-live');
   const banner = document.getElementById('sensor-live-banner');
   const predictBanner = document.getElementById('sensor-predict-banner');
   const npkGrid = document.getElementById('sensor-npk-live-grid');
-  const streamPanel = document.getElementById('sensor-direct-stream-panel');
   const sliderIds = ['n-slider', 'p-slider', 'k-slider', 'ph-slider', 'oc-slider'];
 
   if (mode === 'live') {
@@ -34,8 +63,10 @@ function setSoilDataMode(mode) {
     if (banner) banner.style.display = 'flex';
     if (predictBanner) predictBanner.style.display = 'block';
     if (npkGrid) npkGrid.style.display = 'grid';
-    if (streamPanel) streamPanel.style.display = 'block';
     sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
+
+    // Instantly clear live telemetry cards until verified live packet arrives
+    clearLiveSensorReadings();
     startSensorPolling();
   } else {
     liveBtn?.classList.remove('active');
@@ -43,12 +74,12 @@ function setSoilDataMode(mode) {
     if (banner) banner.style.display = 'none';
     if (predictBanner) predictBanner.style.display = 'none';
     if (npkGrid) npkGrid.style.display = 'none';
-    if (streamPanel) streamPanel.style.display = 'none';
     const extraTiles = document.getElementById('sensor-extra-readings');
     if (extraTiles) extraTiles.style.display = 'none';
+    const soilResult = document.getElementById('soil-result');
+    if (soilResult) soilResult.style.display = 'none';
     sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
     stopSensorPolling();
-    if (sensorAutoStreamTimer) toggleSensorAutoStream();
   }
 }
 window.setSoilDataMode = setSoilDataMode;
@@ -60,7 +91,7 @@ window.stopSensorPolling = stopSensorPolling;
 
 function startSensorPolling() {
   stopSensorPolling();
-  pollSensorOnce(); // immediate first check, don't wait for the interval
+  pollSensorOnce(); // immediate check
   sensorPollTimer = setInterval(() => {
     const viewActive = document.getElementById('view-soil-analysis')?.classList.contains('active');
     if (!viewActive || soilDataMode !== 'live') { stopSensorPolling(); return; }
@@ -68,38 +99,153 @@ function startSensorPolling() {
   }, SENSOR_POLL_MS);
 }
 
+function clearLiveSensorReadings() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+  // Nitrogen (N)
+  const nEl = document.getElementById('sensor-n-val');
+  const nStatusEl = document.getElementById('sensor-n-status');
+  const nBarEl = document.getElementById('sensor-n-bar');
+  const nPpmEl = document.getElementById('sensor-n-ppm');
+  if (nEl) nEl.textContent = '—';
+  if (nStatusEl) {
+    nStatusEl.className = 'sensor-status-badge offline';
+    nStatusEl.textContent = isTa ? 'சாதனம் ஆஃப்' : 'Device OFF';
+  }
+  if (nBarEl) nBarEl.style.width = '0%';
+  if (nPpmEl) nPpmEl.textContent = '— mg/kg';
+
+  // Phosphorus (P)
+  const pEl = document.getElementById('sensor-p-val');
+  const pStatusEl = document.getElementById('sensor-p-status');
+  const pBarEl = document.getElementById('sensor-p-bar');
+  const pPpmEl = document.getElementById('sensor-p-ppm');
+  if (pEl) pEl.textContent = '—';
+  if (pStatusEl) {
+    pStatusEl.className = 'sensor-status-badge offline';
+    pStatusEl.textContent = isTa ? 'சாதனம் ஆஃப்' : 'Device OFF';
+  }
+  if (pBarEl) pBarEl.style.width = '0%';
+  if (pPpmEl) pPpmEl.textContent = '— mg/kg';
+
+  // Potassium (K)
+  const kEl = document.getElementById('sensor-k-val');
+  const kStatusEl = document.getElementById('sensor-k-status');
+  const kBarEl = document.getElementById('sensor-k-bar');
+  const kPpmEl = document.getElementById('sensor-k-ppm');
+  if (kEl) kEl.textContent = '—';
+  if (kStatusEl) {
+    kStatusEl.className = 'sensor-status-badge offline';
+    kStatusEl.textContent = isTa ? 'சாதனம் ஆஃப்' : 'Device OFF';
+  }
+  if (kBarEl) kBarEl.style.width = '0%';
+  if (kPpmEl) kPpmEl.textContent = '— mg/kg';
+
+  // N:P:K Ratio
+  const ratioValEl = document.getElementById('sensor-ratio-val');
+  const ratioStatusEl = document.getElementById('sensor-ratio-status');
+  const ratioNoteEl = document.getElementById('sensor-ratio-note');
+  if (ratioValEl) ratioValEl.textContent = '— : — : —';
+  if (ratioStatusEl) {
+    ratioStatusEl.className = 'sensor-status-badge offline';
+    ratioStatusEl.textContent = isTa ? 'ஆஃப்லைன்' : 'Offline';
+  }
+  if (ratioNoteEl) ratioNoteEl.textContent = isTa ? 'சிக்னல் இல்லை' : 'No Signal';
+
+  // Environmental telemetry tiles
+  const tempEl = document.getElementById('sensor-temp-val');
+  const moistEl = document.getElementById('sensor-soil-moisture-val');
+  const phEl = document.getElementById('sensor-ph-val');
+  const phStatusEl = document.getElementById('sensor-ph-status');
+  const lightEl = document.getElementById('sensor-light-val');
+  const tdsEl = document.getElementById('sensor-tds-val');
+  const tdsStatusEl = document.getElementById('sensor-tds-status');
+  const reliableEl = document.getElementById('sensor-reliable-val');
+  const reliableSub = document.getElementById('sensor-reliable-sub');
+
+  if (tempEl) tempEl.textContent = '— °C';
+  if (moistEl) moistEl.textContent = '— %';
+  if (phEl) phEl.textContent = '—';
+  if (phStatusEl) {
+    phStatusEl.textContent = isTa ? 'சாதனம் ஆஃப்' : 'Device OFF';
+    phStatusEl.style.color = 'var(--text-muted)';
+  }
+  if (lightEl) lightEl.textContent = '— %';
+  if (tdsEl) tdsEl.textContent = '— ppm';
+  if (tdsStatusEl) {
+    tdsStatusEl.textContent = isTa ? 'ஆஃப்லைன்' : 'Offline';
+    tdsStatusEl.style.color = 'var(--text-muted)';
+  }
+  if (reliableEl) {
+    reliableEl.textContent = isTa ? '🔴 ஆஃப்லைன்' : '🔴 Offline';
+    reliableEl.style.color = '#ef4444';
+  }
+  if (reliableSub) {
+    reliableSub.textContent = isTa ? 'சென்சார் சாதனம் அணைக்கப்பட்டுள்ளது' : 'Device is powered off';
+  }
+
+  // Reset sliders so offline live mode never displays old/stale numbers
+  if (soilDataMode === 'live') {
+    resetSlidersToDefault();
+  }
+
+  // Clear soil analysis results card if visible in live mode so no fake data is displayed
+  const soilResult = document.getElementById('soil-result');
+  if (soilResult && soilDataMode === 'live') {
+    soilResult.innerHTML = `
+      <div class="glass-card mt-24 p-24" style="text-align:center;border:1px dashed rgba(239, 68, 68, 0.4);background:rgba(239, 68, 68, 0.04)">
+        <div style="font-size:32px;margin-bottom:8px">🔌</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red-400);margin-bottom:6px">
+          ${isTa ? 'சென்சார் சாதனம் தற்போது ஆஃப் (OFF) செய்யப்பட்டுள்ளது' : 'Real Hardware Sensor is Currently OFF'}
+        </div>
+        <div style="color:var(--text-muted);font-size:14px;max-width:540px;margin:0 auto">
+          ${isTa ? 'நேரலை மண் பகுப்பாய்வை பெற உங்கள் ESP32 / Soil Scout சாதனத்தை இயக்கவும். சாதனம் ஆன் செய்யப்பட்டவுடன் உண்மையான நேரலை அளவீடுகள் தானாகவே காட்டப்படும்.' : 'Real-time telemetry and analysis will automatically activate once your physical ESP32 / Soil Scout probe is powered ON and begins transmitting.'}
+        </div>
+      </div>
+    `;
+    soilResult.style.display = 'block';
+  }
+}
+window.clearLiveSensorReadings = clearLiveSensorReadings;
+
 async function pollSensorOnce() {
   const dot = document.getElementById('sensor-live-dot');
   const text = document.getElementById('sensor-live-status-text');
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   try {
     const data = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
-    if (!data.ever_connected) {
-      dot.className = 'sensor-live-dot error';
-      text.textContent = isTa
-        ? '⚠️ இந்த பண்ணைக்கு இதுவரை Soil Scout / ESP32 சென்சார் இணைக்கப்படவில்லை. நேரடி தரவுகளுக்கு உங்கள் சாதனத்தை இணைக்கவும்.'
-        : '⚠ No Soil Scout / ESP32 sensor has reported for this farm yet. Connect your device to push live readings.';
-      return;
-    }
-    if (data.connected) {
-      dot.className = 'sensor-live-dot connected';
-      text.textContent = isTa
-        ? `🟢 நேரடி இணைப்பு · சாதனம் "${data.device_id}" · ${data.seconds_ago} வினாடிகளுக்கு முன்`
-        : `🟢 Live · device "${data.device_id}" · updated ${data.seconds_ago}s ago`;
+    
+    // Strict Hardware Check: ONLY show Live / ON if hardware is actively transmitting within 15s
+    if (data.connected && data.reading) {
+      if (dot) dot.className = 'sensor-live-dot connected';
+      if (text) {
+        text.textContent = isTa
+          ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
+          : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
+      }
+      prefillSliders(data.reading);
     } else {
-      dot.className = 'sensor-live-dot stale';
-      text.textContent = isTa
-        ? `🟡 சிக்னல் காத்திருப்பு · கடைசி அளவீடு ${data.seconds_ago} வினாடிகளுக்கு முன் (சாதனம் "${data.device_id}")`
-        : `🟡 Signal standby · last reading from ${data.seconds_ago}s ago (device "${data.device_id}")`;
+      // Physical hardware is OFF / disconnected
+      if (dot) dot.className = 'sensor-live-dot offline';
+      if (text) {
+        const devName = data.device_id || 'Soil-Scout-01';
+        text.textContent = isTa
+          ? `🔴 சாதனம் ஆஃப் (OFF) செய்யப்பட்டுள்ளது · சாதனம் "${devName}" ஆஃப்லைனில் உள்ளது. நேரலை தரவுகளுக்கு சாதனத்தை ஆன் செய்யவும்.`
+          : `🔴 Device is OFF / Disconnected · "${devName}" is offline. Power ON physical sensor to view realtime telemetry.`;
+      }
+      clearLiveSensorReadings();
     }
-    if (data.reading) prefillSliders(data.reading);
   } catch (err) {
-    dot.className = 'sensor-live-dot error';
-    text.textContent = isTa
-      ? `⚠️ சென்சார் நிலை முனைப்புள்ளியை அணுக முடியவில்லை: ${err.message}`
-      : `⚠ Could not reach sensor status endpoint: ${err.message}`;
+    if (dot) dot.className = 'sensor-live-dot error';
+    if (text) {
+      text.textContent = isTa
+        ? `⚠️ சென்சார் சேவையகத்தை அணுக முடியவில்லை: ${err.message}`
+        : `⚠ Could not reach sensor status endpoint: ${err.message}`;
+    }
+    clearLiveSensorReadings();
   }
 }
+
 
 function prefillSliders(soil) {
   if (soil.nitrogen       !== undefined && soil.nitrogen       !== null) setSlider('n-slider',  soil.nitrogen,  'n-val');
@@ -369,6 +515,19 @@ async function predictCropsFromSensor() {
   out.innerHTML = `<div class="loading-wrap" style="padding:16px"><div class="spinner"></div><span style="font-size:13px;color:var(--text-secondary)">${isTa ? 'சென்சார் அளவீடுகளிலிருந்து உகந்த பயிர்களைக் கணிக்கிறது...' : 'Predicting optimal crops from sensor parameters...'}</span></div>`;
 
   try {
+    const latestCheck = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`).catch(() => ({ connected: false }));
+    if (!latestCheck.connected) {
+      out.innerHTML = `
+        <div class="alert-banner warning" style="margin-top:12px">
+          <span>🔌</span>
+          <div>
+            <b>${isTa ? 'சென்சார் சாதனம் தற்போது ஆஃப் செய்யப்பட்டுள்ளது' : 'Real Hardware Sensor is Currently OFF'}</b><br/>
+            ${isTa ? 'நேரலைத் தரவுகளில் இருந்து பயிர் கணிப்பை பெற உங்கள் ESP32 சென்சாரை இயக்கவும்.' : 'Please power ON your ESP32 / Soil Scout probe to generate recommendations from real-time live telemetry.'}
+          </div>
+        </div>`;
+      return;
+    }
+
     const data = await apiGet(`/soil-sensor/predict?farm_id=${state.farm_id}`);
     const top = data.predictions?.[0];
 
@@ -473,19 +632,43 @@ async function handleSoilSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('soil-submit-btn');
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+  let liveCheck = null;
+  if (soilDataMode === 'live') {
+    // Strict Hardware Check: live analysis requires an actively connected sensor
+    try {
+      liveCheck = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
+      if (!liveCheck.connected || !liveCheck.reading) {
+        document.getElementById('soil-result').innerHTML = `
+          <div class="alert-banner warning mt-24">
+            <span>🔌</span>
+            <div>
+              <b>${isTa ? 'சென்சார் சாதனம் தற்போது ஆஃப் செய்யப்பட்டுள்ளது!' : 'Sensor Hardware is Currently OFF!'}</b><br/>
+              ${isTa ? 'நேரலை பகுப்பாய்வை இயக்க சென்சாரை ஆன் செய்து தரவு அனுப்ப வேண்டும். சாதனம் ஆன் செய்யப்பட்டவுடன் மட்டுமே பகுப்பாய்வு கணக்கிடப்படும்.' : 'Real-time soil analysis requires your physical sensor hardware to be powered ON and actively transmitting. Please power on your ESP32 / Soil Scout device.'}
+            </div>
+          </div>
+        `;
+        document.getElementById('soil-result').style.display = 'block';
+        return;
+      }
+    } catch (_) {}
+  }
+
   btn.disabled = true;
   btn.textContent = isTa ? '⏳ பகுப்பாய்வு செய்கிறது…' : '⏳ Analysing…';
 
-  const nitrogen       = parseFloat(document.getElementById('n-slider').value);
-  const phosphorus     = parseFloat(document.getElementById('p-slider').value);
-  const potassium      = parseFloat(document.getElementById('k-slider').value);
-  const ph             = parseFloat(document.getElementById('ph-slider').value) / 10;
-  const organic_carbon = parseFloat(document.getElementById('oc-slider').value) / 100;
+  const r = liveCheck?.reading;
+  const nitrogen       = (soilDataMode === 'live' && r?.nitrogen !== undefined) ? Number(r.nitrogen) : parseFloat(document.getElementById('n-slider').value);
+  const phosphorus     = (soilDataMode === 'live' && r?.phosphorus !== undefined) ? Number(r.phosphorus) : parseFloat(document.getElementById('p-slider').value);
+  const potassium      = (soilDataMode === 'live' && r?.potassium !== undefined) ? Number(r.potassium) : parseFloat(document.getElementById('k-slider').value);
+  const ph             = (soilDataMode === 'live' && r?.ph !== undefined) ? Number(r.ph) : parseFloat(document.getElementById('ph-slider').value) / 10;
+  const organic_carbon = (soilDataMode === 'live' && r?.organic_carbon !== undefined) ? Number(r.organic_carbon) : parseFloat(document.getElementById('oc-slider').value) / 100;
 
   try {
     const result = await apiPost('/soil-analysis', {
       farm_id: state.farm_id,
       nitrogen, phosphorus, potassium, ph, organic_carbon,
+      source: soilDataMode === 'live' ? 'esp32' : 'manual'
     });
     state.soilData = result;
     renderSoilResult(result);
@@ -552,6 +735,15 @@ function renderSoilResult(result) {
           <span>✓</span>
           <div>${isTa ? '<b>சிறந்த மண் வளம்!</b> உங்கள் நிலம் நல்ல சமநிலையில் உள்ளது, பயிர் சாகுபடிக்கு உகந்தது.' : '<b>Excellent Soil Health!</b> Your farm is well-balanced and ready for optimal planting.'}</div>
         </div>`}
+
+      <div class="mt-20 flex items-center gap-12" style="flex-wrap:wrap">
+        <button type="button" class="btn btn-primary" onclick="exportFarmerReportPDF()">
+          <span>📄</span> <span>${isTa ? 'மண் வள திட்ட அறிக்கையைப் பதிவிறக்கு (PDF)' : 'Download Soil Action Plan Report (PDF)'}</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="navigate('crop-history')">
+          <span>${isTa ? 'அடுத்தது: பயிர் வரலாறு →' : 'Next: Crop History →'}</span>
+        </button>
+      </div>
     </div>`;
 
   // Animate ring
@@ -580,196 +772,5 @@ function renderSoilResult(result) {
   container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Direct Sensor Ingest & Auto-Streaming Controller ─────────────
-let sensorAutoStreamTimer = null;
 
-function toggleSensorFormVisibility() {
-  const panel = document.getElementById('sensor-direct-stream-panel');
-  if (!panel) return;
-  const isHidden = (panel.style.display === 'none' || !panel.style.display);
-  panel.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-window.toggleSensorFormVisibility = toggleSensorFormVisibility;
-
-function applySensorPreset(preset) {
-  const nInput = document.getElementById('direct-n-input');
-  const pInput = document.getElementById('direct-p-input');
-  const kInput = document.getElementById('direct-k-input');
-  const phInput = document.getElementById('direct-ph-input');
-  const moistInput = document.getElementById('direct-moisture-input');
-  const tempInput = document.getElementById('direct-temp-input');
-  const tdsInput = document.getElementById('direct-tds-input');
-  const lightInput = document.getElementById('direct-light-input');
-
-  const presets = {
-    optimal: { n: 125, p: 45, k: 90, ph: 6.8, moist: 34, temp: 28.5, tds: 480, light: 82 },
-    low_n:   { n: 38,  p: 42, k: 85, ph: 6.5, moist: 28, temp: 29.0, tds: 420, light: 80 },
-    acidic:  { n: 65,  p: 20, k: 50, ph: 5.2, moist: 22, temp: 30.0, tds: 310, light: 85 },
-    saline:  { n: 95,  p: 18, k: 110, ph: 8.2, moist: 35, temp: 31.0, tds: 920, light: 88 },
-    dry:     { n: 0,   p: 0,  k: 0,  ph: 4.0, moist: 0,  temp: 32.5, tds: 0,   light: 95 }
-  };
-
-  const p = presets[preset] || presets.optimal;
-  if (nInput) nInput.value = p.n;
-  if (pInput) pInput.value = p.p;
-  if (kInput) kInput.value = p.k;
-  if (phInput) phInput.value = p.ph;
-  if (moistInput) moistInput.value = p.moist;
-  if (tempInput) tempInput.value = p.temp;
-  if (tdsInput) tdsInput.value = p.tds;
-  if (lightInput) lightInput.value = p.light;
-
-  // Auto-transmit on preset click for instant feedback
-  submitDirectSensorData();
-}
-window.applySensorPreset = applySensorPreset;
-
-function randomizeSensorNoise() {
-  const nInput = document.getElementById('direct-n-input');
-  const pInput = document.getElementById('direct-p-input');
-  const kInput = document.getElementById('direct-k-input');
-  const phInput = document.getElementById('direct-ph-input');
-  const moistInput = document.getElementById('direct-moisture-input');
-  const tempInput = document.getElementById('direct-temp-input');
-
-  const jitter = (val, maxDelta, min = 0, max = 300) => {
-    const delta = (Math.random() * maxDelta * 2) - maxDelta;
-    return Math.max(min, Math.min(max, Math.round(val + delta)));
-  };
-
-  if (nInput) nInput.value = jitter(Number(nInput.value) || 115, 6, 0, 250);
-  if (pInput) pInput.value = jitter(Number(pInput.value) || 42, 4, 0, 150);
-  if (kInput) kInput.value = jitter(Number(kInput.value) || 88, 5, 0, 250);
-  if (phInput) phInput.value = Math.max(4.0, Math.min(9.0, Number((Number(phInput.value || 6.7) + (Math.random() * 0.4 - 0.2)).toFixed(1))));
-  if (moistInput) moistInput.value = jitter(Number(moistInput.value) || 34, 3, 0, 100);
-  if (tempInput) tempInput.value = (Number(tempInput.value || 28.5) + (Math.random() * 0.6 - 0.3)).toFixed(1);
-
-  submitDirectSensorData();
-}
-window.randomizeSensorNoise = randomizeSensorNoise;
-
-async function handleDirectSensorSubmit(event) {
-  if (event) event.preventDefault();
-  await submitDirectSensorData();
-}
-window.handleDirectSensorSubmit = handleDirectSensorSubmit;
-
-async function submitDirectSensorData() {
-  const btn = document.getElementById('btn-push-direct-sensor');
-  const feedback = document.getElementById('sensor-transmit-feedback');
-  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
-
-  const deviceId = document.getElementById('direct-device-id')?.value || 'Soil-Scout-01';
-  const n = parseFloat(document.getElementById('direct-n-input')?.value || 100);
-  const p = parseFloat(document.getElementById('direct-p-input')?.value || 40);
-  const k = parseFloat(document.getElementById('direct-k-input')?.value || 80);
-  const ph = parseFloat(document.getElementById('direct-ph-input')?.value || 6.8);
-  const moisture = parseFloat(document.getElementById('direct-moisture-input')?.value || 30);
-  const temperature = parseFloat(document.getElementById('direct-temp-input')?.value || 28.5);
-  const tds = parseFloat(document.getElementById('direct-tds-input')?.value || 450);
-  const light = parseFloat(document.getElementById('direct-light-input')?.value || 80);
-
-  const payload = {
-    farm_id: state.farm_id,
-    device_id: deviceId,
-    nitrogen: n,
-    phosphorus: p,
-    potassium: k,
-    ph: ph,
-    soil_moisture: moisture,
-    air_temperature: temperature,
-    tds: tds,
-    light: light,
-    reading_reliable: moisture > 5
-  };
-
-  try {
-    if (btn) btn.disabled = true;
-    if (feedback) feedback.textContent = isTa ? '📡 சென்சார் தரவு அனுப்பப்படுகிறது…' : '📡 Transmitting sensor payload…';
-
-    const res = await apiPost('/soil-sensor/direct-feed', payload);
-
-    if (res.success && res.reading) {
-      // Ensure we switch to live mode UI display
-      if (soilDataMode !== 'live') {
-        setSoilDataMode('live');
-      }
-
-      // Prefill sliders & realtime NPK cards
-      prefillSliders(res.reading);
-
-      // Render soil analysis result card
-      if (res.soil_health_score !== undefined) {
-        state.soilData = {
-          ...res.reading,
-          soil_health_score: res.soil_health_score,
-          deficiencies: res.deficiencies || [],
-          adequate: res.adequate || []
-        };
-        renderSoilResult(state.soilData);
-      }
-
-      // Update dot & status
-      const dot = document.getElementById('sensor-live-dot');
-      const text = document.getElementById('sensor-live-status-text');
-      if (dot) dot.className = 'sensor-live-dot connected';
-      if (text) {
-        text.textContent = isTa
-          ? `🟢 நேரடி இணைப்பு · சாதனம் "${deviceId}" · இப்போதுதான் புதுப்பிக்கப்பட்டது`
-          : `🟢 Live · device "${deviceId}" · updated just now (direct stream)`;
-      }
-
-      if (feedback) {
-        feedback.textContent = isTa
-          ? `✓ சென்சார் அளவீடு வெற்றிகரமாக உட்செலுத்தப்பட்டது (${n}N : ${p}P : ${k}K)`
-          : `✓ Telemetry synced: ${n}N : ${p}P : ${k}K kg/ha (Score: ${res.soil_health_score || '—'})`;
-        setTimeout(() => { if (feedback) feedback.textContent = ''; }, 4000);
-      }
-    }
-  } catch (err) {
-    if (feedback) {
-      feedback.textContent = `❌ ${err.message}`;
-      feedback.style.color = 'var(--red-400)';
-    }
-  } finally {
-    if (btn) btn.disabled = false;
-  }
-}
-window.submitDirectSensorData = submitDirectSensorData;
-
-function toggleSensorAutoStream() {
-  const btn = document.getElementById('btn-toggle-stream');
-  const icon = document.getElementById('stream-btn-icon');
-  const text = document.getElementById('stream-btn-text');
-  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
-
-  if (sensorAutoStreamTimer) {
-    clearInterval(sensorAutoStreamTimer);
-    sensorAutoStreamTimer = null;
-    if (btn) btn.classList.remove('active');
-    if (icon) icon.textContent = '▶';
-    if (text) text.textContent = isTa ? 'நேரலை தானியங்கி ஒளிபரப்பு' : 'Start Auto-Stream';
-  } else {
-    // If not in live mode, switch to live mode
-    if (soilDataMode !== 'live') setSoilDataMode('live');
-
-    // Run first immediately
-    randomizeSensorNoise();
-
-    sensorAutoStreamTimer = setInterval(() => {
-      const viewActive = document.getElementById('view-soil-analysis')?.classList.contains('active');
-      if (!viewActive) {
-        toggleSensorAutoStream(); // Stop if user leaves view
-        return;
-      }
-      randomizeSensorNoise();
-    }, 4500);
-
-    if (btn) btn.classList.add('active');
-    if (icon) icon.textContent = '⏹';
-    if (text) text.textContent = isTa ? 'ஒளிபரப்பு இயங்குகிறது (நிறுத்து)' : 'Streaming Live (Stop)';
-  }
-}
-window.toggleSensorAutoStream = toggleSensorAutoStream;
 

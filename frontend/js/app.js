@@ -415,63 +415,146 @@ function togglePasswordVisibility() {
 }
 window.togglePasswordVisibility = togglePasswordVisibility;
 
-// ── Interactive Landing Page Live Telemetry Push ─────────────
-async function simulateSensorReadingFromLanding() {
+// ── Interactive Landing Page Live Telemetry & Flywheel ──────
+VIEW_LOADERS['landing'] = function loadLanding() {
+  updateLandingCalculator();
+};
+
+function switchLandingFlywheelTab(tabKey) {
+  document.querySelectorAll('.flywheel-tab').forEach(b => {
+    b.classList.remove('is-active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('.flywheel-panel').forEach(p => {
+    p.hidden = true;
+    p.style.display = 'none';
+  });
+
+  const activeBtn = document.getElementById(`flywheel-tab-${tabKey}`);
+  const activePanel = document.getElementById(`flywheel-panel-${tabKey}`);
+  if (activeBtn) {
+    activeBtn.classList.add('is-active');
+    activeBtn.setAttribute('aria-selected', 'true');
+  }
+  if (activePanel) {
+    activePanel.hidden = false;
+    activePanel.style.display = 'block';
+  }
+}
+window.switchLandingFlywheelTab = switchLandingFlywheelTab;
+
+function updateLandingCalculator() {
+  const acres = parseFloat(document.getElementById('calc-acres-slider')?.value || 5);
+  const soilType = document.getElementById('calc-soil-condition')?.value || 'depleted';
+  const rotationType = document.getElementById('calc-rotation-type')?.value || 'pulses_cereals';
+
+  const acresBadge = document.getElementById('calc-acres-display');
+  if (acresBadge) acresBadge.textContent = `${acres} ${acres === 1 ? 'Acre' : 'Acres'}`;
+
+  // Agronomic calculations benchmarked against ICAR/TNAU standards
+  let fertFactor = 7800;   // Base chemical fertilizer outlay per acre (INR)
+  let fertPct = 0.34;      // 34% reduction
+  let yieldFactor = 39000; // Base net profit per acre (INR)
+  let ocDelta = 0.42;      // Organic carbon percentage point boost
+  let waterPct = 28;       // Water savings %
+
+  if (soilType === 'acidic') {
+    fertPct = 0.38;
+    yieldFactor = 42500;
+    ocDelta = 0.48;
+  } else if (soilType === 'saline') {
+    fertPct = 0.30;
+    yieldFactor = 33000;
+    ocDelta = 0.34;
+    waterPct = 22;
+  } else if (soilType === 'loam') {
+    fertPct = 0.28;
+    yieldFactor = 46000;
+    ocDelta = 0.52;
+    waterPct = 32;
+  }
+
+  if (rotationType === 'cash') {
+    fertFactor *= 1.35;
+    yieldFactor *= 1.45;
+  } else if (rotationType === 'ifs') {
+    fertPct += 0.05;
+    yieldFactor *= 1.30;
+    ocDelta += 0.12;
+  }
+
+  const annualFertSavings = Math.round(acres * fertFactor * fertPct);
+  const totalMarginIncrease = Math.round(acres * yieldFactor * 1.25);
+
+  const fertSavingsEl = document.getElementById('calc-out-fert');
+  const marginEl = document.getElementById('calc-out-margin');
+  const ocEl = document.getElementById('calc-out-oc');
+  const waterEl = document.getElementById('calc-out-water');
+
+  if (fertSavingsEl) fertSavingsEl.textContent = `₹${annualFertSavings.toLocaleString('en-IN')}`;
+  if (marginEl) marginEl.textContent = `+₹${totalMarginIncrease.toLocaleString('en-IN')}`;
+  if (ocEl) ocEl.textContent = `+${ocDelta.toFixed(2)}% OC`;
+  if (waterEl) waterEl.textContent = `${waterPct}% Saved`;
+}
+window.updateLandingCalculator = updateLandingCalculator;
+
+function simulateSensorReadingFromLanding() {
   const btn = document.getElementById('btn-landing-telemetry-pulse');
   const nEl = document.getElementById('landing-n-val');
   const pEl = document.getElementById('landing-p-val');
   const kEl = document.getElementById('landing-k-val');
   const mEl = document.getElementById('landing-m-val');
   const phEl = document.getElementById('landing-ph-val');
+  const tdsEl = document.getElementById('landing-tds-val');
   const pingEl = document.getElementById('landing-ping-val');
+  const cropEl = document.getElementById('landing-predicted-crop-val');
+  const ratioEl = document.getElementById('landing-ratio-val');
 
   if (btn) {
     btn.disabled = true;
-    btn.textContent = '📡 Transmitting Packet…';
+    btn.textContent = '📡 Simulating Test Packet…';
   }
 
-  // Generate realistic slight telemetry variations
-  const newN = Math.floor(86 + Math.random() * 8);
-  const newP = Math.floor(50 + Math.random() * 6);
-  const newK = Math.floor(63 + Math.random() * 7);
-  const newM = Math.floor(56 + Math.random() * 5);
-  const newPh = (6.7 + Math.random() * 0.25).toFixed(1);
-  const newPing = Math.floor(11 + Math.random() * 6);
+  // Realistic randomized agronomic telemetry preview (client-side demo)
+  const newN = Math.floor(112 + Math.random() * 16);
+  const newP = Math.floor(38 + Math.random() * 8);
+  const newK = Math.floor(82 + Math.random() * 12);
+  const newM = Math.floor(33 + Math.random() * 5);
+  const newPh = Number((6.6 + Math.random() * 0.3).toFixed(1));
+  const newTds = Math.floor(465 + Math.random() * 30);
+  const newPing = Math.floor(9 + Math.random() * 6);
 
-  try {
-    const payload = {
-      farm_id: 101,
-      device_id: 'ESP32-SOIL-101',
-      nitrogen: newN,
-      phosphorus: newP,
-      potassium: newK,
-      ph: parseFloat(newPh),
-      soil_moisture: newM,
-      organic_carbon: 0.88,
-      air_temperature: 28.5,
-      air_humidity: 64
-    };
+  if (nEl) { nEl.innerHTML = `${newN} <span style="font-size:12px;color:#94a3b8">kg/ha</span>`; nEl.style.transform = 'scale(1.08)'; setTimeout(() => nEl.style.transform = 'scale(1)', 300); }
+  if (pEl) { pEl.innerHTML = `${newP} <span style="font-size:12px;color:#94a3b8">kg/ha</span>`; pEl.style.transform = 'scale(1.08)'; setTimeout(() => pEl.style.transform = 'scale(1)', 300); }
+  if (kEl) { kEl.innerHTML = `${newK} <span style="font-size:12px;color:#94a3b8">kg/ha</span>`; kEl.style.transform = 'scale(1.08)'; setTimeout(() => kEl.style.transform = 'scale(1)', 300); }
+  if (mEl) { mEl.innerHTML = `${newM} <span style="font-size:12px;color:#94a3b8">%</span>`; mEl.style.transform = 'scale(1.08)'; setTimeout(() => mEl.style.transform = 'scale(1)', 300); }
+  if (phEl) { phEl.innerHTML = `${newPh} <span style="font-size:12px;color:#94a3b8">pH</span>`; phEl.style.transform = 'scale(1.08)'; setTimeout(() => phEl.style.transform = 'scale(1)', 300); }
+  if (tdsEl) { tdsEl.innerHTML = `${newTds} <span style="font-size:12px;color:#94a3b8">ppm</span>`; }
+  if (pingEl) { pingEl.textContent = `${newPing}ms`; }
 
-    await apiPost('/orgs/1/sensors/simulate-reading', payload);
+  if (ratioEl && newP > 0) {
+    ratioEl.textContent = `${(newN / newP).toFixed(1)} : 1.0 : ${(newK / newP).toFixed(1)}`;
+  }
 
-    if (nEl) { nEl.innerHTML = `${newN} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; nEl.style.transform = 'scale(1.1)'; setTimeout(() => nEl.style.transform = 'scale(1)', 300); }
-    if (pEl) { pEl.innerHTML = `${newP} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; pEl.style.transform = 'scale(1.1)'; setTimeout(() => pEl.style.transform = 'scale(1)', 300); }
-    if (kEl) { kEl.innerHTML = `${newK} <span style="font-size:12px;color:#94a3b8">mg/kg</span>`; kEl.style.transform = 'scale(1.1)'; setTimeout(() => kEl.style.transform = 'scale(1)', 300); }
-    if (mEl) { mEl.innerHTML = `${newM} <span style="font-size:12px;color:#94a3b8">%</span>`; mEl.style.transform = 'scale(1.1)'; setTimeout(() => mEl.style.transform = 'scale(1)', 300); }
-    if (phEl) { phEl.innerHTML = `${newPh} <span style="font-size:12px;color:#94a3b8">pH</span>`; phEl.style.transform = 'scale(1.1)'; setTimeout(() => phEl.style.transform = 'scale(1)', 300); }
-    if (pingEl) { pingEl.textContent = `${newPing}ms`; }
+  const sampleCrops = [
+    'Green Gram & Maize (Score: 89.2/100 · ₹82,000/ac)',
+    'Groundnut & Sorghum (Score: 87.5/100 · ₹76,500/ac)',
+    'Tomato & Legume Bio-Cover (Score: 91.0/100 · ₹94,000/ac)',
+    'Coffee & Millets (Score: 88.0/100 · ₹85,000/ac)'
+  ];
+  if (cropEl) {
+    cropEl.textContent = sampleCrops[Math.floor(Math.random() * sampleCrops.length)];
+  }
 
-  } catch (err) {
-    console.warn('Simulate pulse error:', err);
-  } finally {
+  setTimeout(() => {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '✓ Pulse Ingested (Live)';
+      btn.textContent = '✓ Simulated Packet Streamed';
       setTimeout(() => {
-        if (btn) btn.textContent = '⚡ Push Telemetry Pulse';
-      }, 2000);
+        if (btn) btn.textContent = '⚡ Test Ingest Pulse';
+      }, 1800);
     }
-  }
+  }, 400);
 }
 window.simulateSensorReadingFromLanding = simulateSensorReadingFromLanding;
 

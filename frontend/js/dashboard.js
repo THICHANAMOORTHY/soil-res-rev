@@ -114,8 +114,8 @@ function renderDashboard(d) {
   const soil = d.soil_data;
   const npkEl = document.getElementById('dash-npk');
   if (soil || d.sensor_data) {
-    const isLive = (d.sensor_data && d.sensor_data.last_seen) || (soil && soil.source === 'esp32');
-    const src = isLive ? (isTa ? 'நேரடி சென்சார்' : 'Live sensor')
+    const isLive = Boolean(d.sensor_data && d.sensor_data.is_live);
+    const src = isLive ? (isTa ? 'நேரடி சென்சார் (ஆன்லைனில்)' : 'Live sensor (Online)')
               : soil?.source === 'manual' ? (isTa ? 'கைமுறை உள்ளீடு' : 'Manual entry')
               : (isTa ? 'ஆய்வக அறிக்கை' : 'Lab report');
     const phVal = Number(soil?.ph ?? d.sensor_data?.ph);
@@ -139,7 +139,10 @@ function renderDashboard(d) {
       chips.push(chipTeal(`☀️ Light: ${Number(sensorLight).toFixed(0)}%`));
     }
     const devId = d.sensor_data?.device_id || 'Soil-Scout-01';
-    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${isLive ? '🟢 ' : ''}${src} (${devId}) · ${soil?.recorded_date || 'Live Stream'}</div>`;
+    const metaText = isLive
+      ? `🟢 ${src} (${devId}) · Realtime Live Telemetry`
+      : `📋 ${src} · ${soil?.recorded_date || 'Stored Test'}`;
+    npkEl.innerHTML = chips.join('') + `<div class="text-muted" style="flex-basis:100%;font-size:12px;margin-top:6px">${metaText}</div>`;
   } else {
     npkEl.innerHTML = `<p class="text-muted" style="font-size:13px;margin:0">${isTa ? 'மண் பரிசோதனை தரவு இல்லை.' : 'No soil data recorded for this farm yet.'}
       <a href="#soil-analysis" onclick="navigate('soil-analysis');return false" style="color:var(--green-400)">${isTa ? 'மண் பகுப்பாய்வைத் தொடங்குங்கள் →' : 'Run a Soil Analysis →'}</a></p>`;
@@ -217,16 +220,17 @@ function renderRecoveryChart(curve, plan) {
   if (recoveryChart) recoveryChart.destroy();
 
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
-  const labels = [isTa ? 'தற்போதைய நிலை' : 'Current', ...( plan || []).slice(0, curve.length - 1).map((c, i) => isTa ? `பருவம் ${i+1}: ${window.tCrop ? tCrop(c) : c}` : `S${i+1}: ${c}`)];
-  while (labels.length < curve.length) labels.push(isTa ? `பருவம் ${labels.length}` : `Season ${labels.length}`);
+  const cleanCurve = (curve || []).map(v => Math.min(100, Math.max(0, Math.round(Number(v)))));
+  const labels = [isTa ? 'தற்போதைய நிலை' : 'Current', ...(plan || []).slice(0, cleanCurve.length - 1).map((c, i) => isTa ? `பருவம் ${i+1}: ${window.tCrop ? tCrop(c) : c}` : `S${i+1}: ${c}`)];
+  while (labels.length < cleanCurve.length) labels.push(isTa ? `பருவம் ${labels.length}` : `Season ${labels.length}`);
 
   recoveryChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels.slice(0, curve.length),
+      labels: labels.slice(0, cleanCurve.length),
       datasets: [{
         label: isTa ? 'மண் வள குறியீடு' : 'Soil Health Score',
-        data: curve,
+        data: cleanCurve,
         borderColor: '#22c55e',
         backgroundColor: 'rgba(34,197,94,0.08)',
         fill: true,
@@ -234,12 +238,22 @@ function renderRecoveryChart(curve, plan) {
         pointBackgroundColor: '#22c55e',
         pointRadius: 6,
         pointHoverRadius: 8,
+        pointHitRadius: 12,
         borderWidth: 2.5,
+        clip: false,
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 14,
+          right: 14,
+          bottom: 6,
+          left: 6
+        }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -249,7 +263,7 @@ function renderRecoveryChart(curve, plan) {
           titleColor: '#f0fdf4',
           bodyColor: '#94a3b8',
           callbacks: {
-            label: ctx => ` ${isTa ? 'மண் வள குறியீடு' : 'Health Score'}: ${ctx.parsed.y}`,
+            label: ctx => ` ${isTa ? 'மண் வள குறியீடு' : 'Soil Health Score'}: ${ctx.parsed.y}/100`,
           }
         }
       },
@@ -259,7 +273,9 @@ function renderRecoveryChart(curve, plan) {
           ticks: { color: '#94a3b8', font: { size: 12 } }
         },
         y: {
-          min: 0, max: 100,
+          min: 0,
+          max: 100,
+          clip: false,
           grid: { color: 'rgba(255,255,255,0.04)' },
           ticks: { color: '#94a3b8', font: { size: 12 }, stepSize: 20 }
         }

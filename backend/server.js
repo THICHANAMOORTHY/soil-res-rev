@@ -179,12 +179,27 @@ app.get('*', (req, res) => {
 // ── Start ──────────────────────────────────────────────────
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
+  const os = require('os');
+  let lanIp = 'localhost';
+  try {
+    const interfaces = os.networkInterfaces();
+    for (const iface of Object.values(interfaces)) {
+      for (const alias of (iface || [])) {
+        if (alias.family === 'IPv4' && !alias.internal) {
+          lanIp = alias.address;
+          break;
+        }
+      }
+      if (lanIp !== 'localhost') break;
+    }
+  } catch (_) {}
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log('');
     console.log('  🌱  UZHAVU KAAPPAAN (உழவு காப்பான்) P025 API');
     console.log(`  🚀  Running on http://localhost:${PORT}`);
     console.log(`  📊  Dashboard → http://localhost:${PORT}`);
-    console.log(`  🔌  ESP32 Wi-Fi Ingestion URL → http://10.216.224.129:${PORT}/api/soil-sensor/ingest`);
+    console.log(`  🔌  ESP32 Wi-Fi Ingestion URL → http://${lanIp}:${PORT}/api/soil-sensor/ingest`);
     console.log('');
   });
 }
