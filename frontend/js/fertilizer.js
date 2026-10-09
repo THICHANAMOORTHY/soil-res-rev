@@ -5,7 +5,6 @@
 
 (function () {
   let fertState = {
-    source: 'sensor', // 'sensor' | 'manual'
     farm_id: 101,
     crop: 'Paddy',
     growth_stage: 'Basal / Sowing',
@@ -41,20 +40,13 @@
   }
 
   function initEventListeners() {
-    // Source toggle buttons
-    const btnSensor = document.getElementById('fert-src-sensor');
-    const btnManual = document.getElementById('fert-src-manual');
-    if (btnSensor && btnManual) {
-      btnSensor.onclick = () => setInputSource('sensor');
-      btnManual.onclick = () => setInputSource('manual');
-    }
-
-    // Refresh buttons
+    // Recalculate button
     const btnRecalc = document.getElementById('fert-btn-recalc');
     if (btnRecalc) {
       btnRecalc.onclick = () => runRecommendation();
     }
 
+    // Refresh fertilizer prices
     const btnRefreshPrices = document.getElementById('fert-btn-refresh-prices');
     if (btnRefreshPrices) {
       btnRefreshPrices.onclick = async () => {
@@ -69,14 +61,15 @@
       };
     }
 
-    const btnSyncSensor = document.getElementById('fert-btn-sync-sensor');
-    if (btnSyncSensor) {
-      btnSyncSensor.onclick = async () => {
-        btnSyncSensor.disabled = true;
-        btnSyncSensor.textContent = '📡 Polling Sensor...';
+    // ESP Live Server Sync button
+    const btnSyncServer = document.getElementById('fert-btn-sync-server');
+    if (btnSyncServer) {
+      btnSyncServer.onclick = async () => {
+        btnSyncServer.disabled = true;
+        btnSyncServer.textContent = '🔄 Syncing ESP Server...';
         await fetchSensorTelemetry(true);
-        btnSyncSensor.disabled = false;
-        btnSyncSensor.textContent = '📡 Fetch Latest Sensor Packet';
+        btnSyncServer.disabled = false;
+        btnSyncServer.textContent = '🔄 Sync ESP Live Server';
       };
     }
 
@@ -148,29 +141,6 @@
     });
   }
 
-  function setInputSource(source) {
-    fertState.source = source;
-    const btnSensor = document.getElementById('fert-src-sensor');
-    const btnManual = document.getElementById('fert-src-manual');
-    const manualFields = document.getElementById('fert-manual-inputs-wrap');
-
-    if (source === 'sensor') {
-      if (btnSensor) btnSensor.classList.add('active');
-      if (btnManual) btnManual.classList.remove('active');
-      if (manualFields) manualFields.style.opacity = '0.6';
-      fetchSensorTelemetry();
-    } else {
-      if (btnSensor) btnSensor.classList.remove('active');
-      if (btnManual) btnManual.classList.add('active');
-      if (manualFields) manualFields.style.opacity = '1.0';
-      const badge = document.getElementById('fert-telemetry-pill');
-      if (badge) {
-        badge.className = 'fert-telemetry-badge offline';
-        badge.innerHTML = '⚙️ Manual Calibration Fallback';
-      }
-    }
-  }
-
   async function fetchPrices(force = false) {
     try {
       const res = await apiGet('/fertilizer/prices');
@@ -225,35 +195,20 @@
   async function fetchSensorTelemetry(interactive = false) {
     try {
       const res = await apiGet(`/fertilizer/sensor-reading?farm_id=${fertState.farm_id}`);
-      const badge = document.getElementById('fert-telemetry-pill');
       const reading = res?.reading;
 
-      if (res?.connected && reading) {
-        fertState.sensorConnected = true;
-        if (badge) {
-          badge.className = 'fert-telemetry-badge';
-          badge.innerHTML = `🟢 ESP32 Live Telemetry Active (${res.device_id || 'esp32-irrigation-01'})`;
-        }
+      if (reading) {
+        fertState.sensorConnected = !!res?.connected;
         updateFormInputsFromReading(reading);
-        if (interactive && typeof showToast === 'function') {
-          showToast('Live telemetry packet loaded from ESP32 node.', 'success');
-        }
-      } else if (reading) {
-        fertState.sensorConnected = false;
-        if (badge) {
-          badge.className = 'fert-telemetry-badge offline';
-          badge.innerHTML = `🟡 ESP32 Offline · Using Last Soil Sample (${reading.recorded_date || 'Recent'})`;
-        }
-        updateFormInputsFromReading(reading);
-      } else {
-        fertState.sensorConnected = false;
-        if (badge) {
-          badge.className = 'fert-telemetry-badge offline';
-          badge.innerHTML = '⚙️ Sensor Telemetry Standby · Manual Fallback';
+        if (interactive) {
+          if (typeof showToast === 'function') {
+            showToast('Soil parameters synchronized with ESP live server stream.', 'success');
+          }
+          await runRecommendation();
         }
       }
     } catch (err) {
-      console.warn('[fertilizer] Error fetching sensor reading:', err);
+      console.warn('[fertilizer] Error fetching sensor reading from server:', err);
     }
   }
 
@@ -288,9 +243,22 @@
     if (resultsEl) resultsEl.style.opacity = '0.4';
 
     try {
+      // Read latest values from DOM inputs to ensure manual edits or synced values are included
+      const readVal = (id, fallback) => {
+        const el = document.getElementById(id);
+        const v = parseFloat(el ? el.value : fallback);
+        return isNaN(v) ? fallback : v;
+      };
+
+      fertState.soil.nitrogen = readVal('fert-manual-n', fertState.soil.nitrogen);
+      fertState.soil.phosphorus = readVal('fert-manual-p', fertState.soil.phosphorus);
+      fertState.soil.potassium = readVal('fert-manual-k', fertState.soil.potassium);
+      fertState.soil.ph = readVal('fert-manual-ph', fertState.soil.ph);
+      fertState.soil.moisture = readVal('fert-manual-moisture', fertState.soil.moisture);
+      fertState.soil.temperature = readVal('fert-manual-temperature', fertState.soil.temperature);
+
       const payload = {
         farm_id: fertState.farm_id,
-        source: fertState.source,
         crop: fertState.crop,
         growth_stage: fertState.growth_stage,
         soil_type: fertState.soil_type,
@@ -460,7 +428,10 @@
         <div>
           <div class="fert-card-header">
             <div class="fert-title-group">
-              <h3>${r.fertilizer_name}</h3>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <h3 style="margin:0">${r.fertilizer_name}</h3>
+                ${r.ml_badge ? `<span style="background:rgba(99,102,241,0.22);color:#a5b4fc;border:1px solid rgba(129,140,248,0.45);font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:0.3px">${r.ml_badge}</span>` : ''}
+              </div>
               <div style="font-size:12px;color:#94a3b8">Supplies: <b style="color:#cbd5e1">${r.nutrients_supplied}</b></div>
             </div>
             <span class="fert-grade-pill">${r.grade}</span>

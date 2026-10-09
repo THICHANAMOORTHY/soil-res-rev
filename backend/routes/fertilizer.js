@@ -115,57 +115,42 @@ router.post('/recommend', (req, res) => {
     } = req.body;
 
     const farmIdNum = parseInt(farm_id, 10) || 101;
-    let resolvedSoil = { ...soil };
-    let sensorConnected = false;
-    let sensorDeviceId = 'esp32-irrigation-01';
+    const liveStatus = db.live_sensor_status[farmIdNum];
+    const sensorConnected = !!(liveStatus && liveStatus.connected);
+    const sensorDeviceId = liveStatus?.device_id || 'esp32-irrigation-01';
+    const sensorReading = (liveStatus && liveStatus.last_reading)
+      ? liveStatus.last_reading
+      : (db.soil_data.filter(s => s.farm_id === farmIdNum).sort((a,b) => b.soil_id - a.soil_id)[0] || null);
 
-    if (source === 'sensor') {
-      const liveStatus = db.live_sensor_status[farmIdNum];
-      sensorConnected = Boolean(liveStatus && liveStatus.hardware_last_seen && (Date.now() - liveStatus.hardware_last_seen < 60000));
-      if (liveStatus?.device_id) sensorDeviceId = liveStatus.device_id;
-
-      let sensorReading = (liveStatus && liveStatus.last_reading) ? liveStatus.last_reading : null;
-      if (!sensorReading && (!soil || Object.keys(soil).length === 0)) {
-        const candidates = db.soil_data.filter(s => s.farm_id === farmIdNum);
-        if (candidates.length > 0) {
-          sensorReading = candidates.sort((a, b) => b.soil_id - a.soil_id)[0];
-        }
-      }
-
-      if (sensorReading) {
-        resolvedSoil = {
-          nitrogen: sensorReading.nitrogen ?? (resolvedSoil.nitrogen ?? 240),
-          phosphorus: sensorReading.phosphorus ?? (resolvedSoil.phosphorus ?? 18),
-          potassium: sensorReading.potassium ?? (resolvedSoil.potassium ?? 160),
-          ph: sensorReading.ph ?? (resolvedSoil.ph ?? 6.5),
-          moisture: sensorReading.soil_moisture ?? (resolvedSoil.moisture ?? 42),
-          temperature: sensorReading.air_temperature ?? (resolvedSoil.temperature ?? 28),
-          organic_carbon: sensorReading.organic_carbon ?? (resolvedSoil.organic_carbon ?? 0.55),
-          tds: sensorReading.tds ?? (resolvedSoil.tds ?? 320),
-          is_reliable: sensorReading.is_reliable !== undefined ? sensorReading.is_reliable : true,
-          reliability_note: sensorReading.reliability_note || 'Active ESP32 sensor telemetry',
-          source: 'esp32_sensor',
-        };
-      } else {
-        // Fallback to manual values or defaults
-        resolvedSoil = {
-          nitrogen: resolvedSoil.nitrogen ?? 235,
-          phosphorus: resolvedSoil.phosphorus ?? 18,
-          potassium: resolvedSoil.potassium ?? 175,
-          ph: resolvedSoil.ph ?? 6.5,
-          moisture: resolvedSoil.moisture ?? 45,
-          temperature: resolvedSoil.temperature ?? 28,
-          organic_carbon: resolvedSoil.organic_carbon ?? 0.55,
-          tds: resolvedSoil.tds ?? 310,
-          is_reliable: resolvedSoil.is_reliable !== undefined ? resolvedSoil.is_reliable : true,
-          reliability_note: resolvedSoil.reliability_note || 'Manual calibration entries',
-          source: 'manual_fallback',
-        };
-      }
-    } else {
-      resolvedSoil.source = 'manual';
-      if (resolvedSoil.is_reliable === undefined) resolvedSoil.is_reliable = true;
-    }
+    // Fuse inputs: manual entry takes precedence when provided; otherwise auto-populate from ESP live server
+    const resolvedSoil = {
+      nitrogen: (soil && soil.nitrogen !== undefined && soil.nitrogen !== null && soil.nitrogen !== '')
+        ? Number(soil.nitrogen)
+        : (sensorReading?.nitrogen ?? 210),
+      phosphorus: (soil && soil.phosphorus !== undefined && soil.phosphorus !== null && soil.phosphorus !== '')
+        ? Number(soil.phosphorus)
+        : (sensorReading?.phosphorus ?? 16),
+      potassium: (soil && soil.potassium !== undefined && soil.potassium !== null && soil.potassium !== '')
+        ? Number(soil.potassium)
+        : (sensorReading?.potassium ?? 145),
+      ph: (soil && soil.ph !== undefined && soil.ph !== null && soil.ph !== '')
+        ? Number(soil.ph)
+        : (sensorReading?.ph ?? 6.5),
+      moisture: (soil && soil.moisture !== undefined && soil.moisture !== null && soil.moisture !== '')
+        ? Number(soil.moisture)
+        : (sensorReading?.soil_moisture ?? 42),
+      temperature: (soil && soil.temperature !== undefined && soil.temperature !== null && soil.temperature !== '')
+        ? Number(soil.temperature)
+        : (sensorReading?.air_temperature ?? 28),
+      organic_carbon: (soil && soil.organic_carbon !== undefined && soil.organic_carbon !== null && soil.organic_carbon !== '')
+        ? Number(soil.organic_carbon)
+        : (sensorReading?.organic_carbon ?? 0.55),
+      tds: (soil && soil.tds !== undefined && soil.tds !== null && soil.tds !== '')
+        ? Number(soil.tds)
+        : (sensorReading?.tds ?? 320),
+      is_reliable: true,
+      reliability_note: 'Fused Soil Readings (ESP Live Server + Manual Calibration)',
+    };
 
     const recommendation = calculateFertilizerRecommendation({
       crop,

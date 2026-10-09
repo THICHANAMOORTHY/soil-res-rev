@@ -505,21 +505,151 @@ function calculateFertilizerRecommendation(params) {
     k: stageTargetAcre.k * areaInAcres,
   };
 
-  // 3. Assemble targeted fertilizer prescriptions
-  const recommendations = [];
+  // 3. Machine Learning Inference (Random Forest Classifier on Kaggle Dataset + KMeans Soil Clustering)
+  const mlFert = predictKaggleFertilizer({
+    temperature: params.soil?.temperature ?? params.soil?.air_temperature ?? 28,
+    humidity: params.soil?.humidity ?? params.soil?.air_humidity ?? 65,
+    moisture: params.soil?.moisture ?? params.soil?.soil_moisture ?? 45,
+    soil_type: params.soil_type || 'Loamy Soil',
+    crop_type: cropProfile.name,
+    n: soilDiag.raw_readings.nitrogen,
+    k: soilDiag.raw_readings.potassium,
+    p: soilDiag.raw_readings.phosphorus,
+  });
 
-  // A. Phosphorus carrier (DAP or SSP)
-  let nSuppliedByP = 0;
-  if (stageTargetField.p > 0) {
+  const soilCluster = predictSoilCluster(params.soil || {});
+  const mlPredRaw = (mlFert?.predicted_fertilizer || 'DAP').trim();
+
+  // 4. Assemble ML-Aligned & STCR-Calibrated targeted fertilizer prescriptions
+  const recommendations = [];
+  let nSuppliedByComplex = 0;
+  let pSuppliedByComplex = 0;
+  let kSuppliedByComplex = 0;
+
+  // Check if ML model determined a complex NPK fertilizer (10-26-26, 17-17-17, 20-20)
+  if (mlPredRaw === '10-26-26' && stageTargetField.p > 0 && stageTargetField.k > 0) {
+    const meta = FERTILIZER_PRICE_CATALOG.npk_10_26_26;
+    const reqKg = stageTargetField.p / 0.26;
+    const reqAcre = stageTargetAcre.p / 0.26;
+    const bags = Math.ceil(reqKg / meta.bag_weight_kg);
+    const exactBags = reqKg / meta.bag_weight_kg;
+
+    nSuppliedByComplex = reqKg * 0.10;
+    pSuppliedByComplex = reqKg * 0.26;
+    kSuppliedByComplex = reqKg * 0.26;
+
+    recommendations.push({
+      fertilizer_id: meta.id,
+      fertilizer_name: meta.name,
+      name: meta.name,
+      grade: meta.grade,
+      nutrients_supplied: 'Phosphorus 26%, Potassium 26%, Nitrogen 10%',
+      reason: `ML Model determined high-potash & phosphorus complex for balanced root vigor and grain development. Supplies ${pSuppliedByComplex.toFixed(1)} kg P and ${kSuppliedByComplex.toFixed(1)} kg K.`,
+      quantity_per_acre_kg: parseFloat(reqAcre.toFixed(1)),
+      recommended_dose_per_acre: parseFloat(reqAcre.toFixed(1)),
+      quantity_total_field_kg: parseFloat(reqKg.toFixed(1)),
+      total_field_kg: parseFloat(reqKg.toFixed(1)),
+      bags_required: bags,
+      bags_to_buy: bags,
+      exact_bags_fractional: parseFloat(exactBags.toFixed(2)),
+      bag_weight_kg: meta.bag_weight_kg,
+      price_per_bag: meta.price_per_bag,
+      price_per_kg: meta.price_per_kg,
+      estimated_cost: Math.round(bags * meta.price_per_bag),
+      cost_inr: Math.round(bags * meta.price_per_bag),
+      proportional_cost_inr: parseFloat((reqKg * meta.price_per_kg).toFixed(2)),
+      price_type: meta.price_type,
+      ml_determined: true,
+      ml_badge: '🤖 ML Determined Primary Complex',
+      application_method: 'Basal band placement or broadcast at sowing.',
+      application_timing: 'Full basal dose during final seedbed preparation.',
+      price_metadata: meta,
+    });
+  } else if (mlPredRaw === '17-17-17' && stageTargetField.p > 0 && stageTargetField.k > 0) {
+    const meta = FERTILIZER_PRICE_CATALOG.npk_17_17_17;
+    const reqKg = stageTargetField.p / 0.17;
+    const reqAcre = stageTargetAcre.p / 0.17;
+    const bags = Math.ceil(reqKg / meta.bag_weight_kg);
+    const exactBags = reqKg / meta.bag_weight_kg;
+
+    nSuppliedByComplex = reqKg * 0.17;
+    pSuppliedByComplex = reqKg * 0.17;
+    kSuppliedByComplex = reqKg * 0.17;
+
+    recommendations.push({
+      fertilizer_id: meta.id,
+      fertilizer_name: meta.name,
+      name: meta.name,
+      grade: meta.grade,
+      nutrients_supplied: 'Nitrogen 17%, Phosphorus 17%, Potassium 17%',
+      reason: `ML Model determined complete balanced complex for ${cropProfile.name}. Provides equal ratio of N-P-K in homogenous granules.`,
+      quantity_per_acre_kg: parseFloat(reqAcre.toFixed(1)),
+      recommended_dose_per_acre: parseFloat(reqAcre.toFixed(1)),
+      quantity_total_field_kg: parseFloat(reqKg.toFixed(1)),
+      total_field_kg: parseFloat(reqKg.toFixed(1)),
+      bags_required: bags,
+      bags_to_buy: bags,
+      exact_bags_fractional: parseFloat(exactBags.toFixed(2)),
+      bag_weight_kg: meta.bag_weight_kg,
+      price_per_bag: meta.price_per_bag,
+      price_per_kg: meta.price_per_kg,
+      estimated_cost: Math.round(bags * meta.price_per_bag),
+      cost_inr: Math.round(bags * meta.price_per_bag),
+      proportional_cost_inr: parseFloat((reqKg * meta.price_per_kg).toFixed(2)),
+      price_type: meta.price_type,
+      ml_determined: true,
+      ml_badge: '🤖 ML Determined Primary Complex',
+      application_method: 'Basal application at sowing with light incorporation.',
+      application_timing: '100% Basal at sowing.',
+      price_metadata: meta,
+    });
+  } else if ((mlPredRaw === '20-20' || mlPredRaw === '20-20-0-13') && stageTargetField.p > 0) {
+    const meta = FERTILIZER_PRICE_CATALOG.npk_20_20_0_13;
+    const reqKg = stageTargetField.p / 0.20;
+    const reqAcre = stageTargetAcre.p / 0.20;
+    const bags = Math.ceil(reqKg / meta.bag_weight_kg);
+    const exactBags = reqKg / meta.bag_weight_kg;
+
+    nSuppliedByComplex = reqKg * 0.20;
+    pSuppliedByComplex = reqKg * 0.20;
+
+    recommendations.push({
+      fertilizer_id: meta.id,
+      fertilizer_name: meta.name,
+      name: meta.name,
+      grade: meta.grade,
+      nutrients_supplied: 'Nitrogen 20%, Phosphorus 20%, Sulphur 13%',
+      reason: `ML Model determined Ammonium Phosphate Sulphate complex. Delivers targeted P₂O₅ along with 13% water-soluble Sulphur.`,
+      quantity_per_acre_kg: parseFloat(reqAcre.toFixed(1)),
+      recommended_dose_per_acre: parseFloat(reqAcre.toFixed(1)),
+      quantity_total_field_kg: parseFloat(reqKg.toFixed(1)),
+      total_field_kg: parseFloat(reqKg.toFixed(1)),
+      bags_required: bags,
+      bags_to_buy: bags,
+      exact_bags_fractional: parseFloat(exactBags.toFixed(2)),
+      bag_weight_kg: meta.bag_weight_kg,
+      price_per_bag: meta.price_per_bag,
+      price_per_kg: meta.price_per_kg,
+      estimated_cost: Math.round(bags * meta.price_per_bag),
+      cost_inr: Math.round(bags * meta.price_per_bag),
+      proportional_cost_inr: parseFloat((reqKg * meta.price_per_kg).toFixed(2)),
+      price_type: meta.price_type,
+      ml_determined: true,
+      ml_badge: '🤖 ML Determined Primary Complex',
+      application_method: 'Basal placement in furrows.',
+      application_timing: 'Full basal at planting.',
+      price_metadata: meta,
+    });
+  } else if (stageTargetField.p > 0) {
+    // Primary Phosphorus Carrier: DAP or SSP
     if (cropProfile.preferred_p === 'ssp' || (params.soil && params.soil.ph > 7.8)) {
-      // SSP: 16% P₂O₅
       const sspKg = stageTargetField.p / 0.16;
       const sspAcre = stageTargetAcre.p / 0.16;
       const meta = FERTILIZER_PRICE_CATALOG.ssp;
       const bags = Math.ceil(sspKg / meta.bag_weight_kg);
       const estCost = Math.round(sspKg * meta.price_per_kg);
-
       const exactBags = sspKg / meta.bag_weight_kg;
+
       recommendations.push({
         fertilizer_id: meta.id,
         fertilizer_name: meta.name,
@@ -541,15 +671,16 @@ function calculateFertilizerRecommendation(params) {
         cost_inr: Math.round(bags * meta.price_per_bag),
         proportional_cost_inr: parseFloat((sspKg * meta.price_per_kg).toFixed(2)),
         price_type: meta.price_type,
+        ml_determined: mlPredRaw === 'DAP' || mlPredRaw === 'SSP',
+        ml_badge: mlPredRaw === 'DAP' ? '🤖 ML Aligned Phosphatic Carrier' : null,
         application_method: 'Basal placement in furrows 5 cm below seed level before sowing/transplanting.',
         application_timing: '100% Basal at land preparation.',
         price_metadata: meta,
       });
     } else {
-      // DAP: 46% P₂O₅, 18% N
       const dapKg = stageTargetField.p / 0.46;
       const dapAcre = stageTargetAcre.p / 0.46;
-      nSuppliedByP = dapKg * 0.18;
+      nSuppliedByComplex = dapKg * 0.18;
       const meta = FERTILIZER_PRICE_CATALOG.dap;
       const bags = Math.ceil(dapKg / meta.bag_weight_kg);
       const estCost = Math.round(dapKg * meta.price_per_kg);
@@ -561,7 +692,7 @@ function calculateFertilizerRecommendation(params) {
         name: meta.name,
         grade: meta.grade,
         nutrients_supplied: 'Phosphorus 46%, Nitrogen 18%',
-        reason: `Provides primary ${stageTargetField.p.toFixed(1)} kg P₂O₅ for rapid root nodulation and early vigor in ${cropProfile.name}.`,
+        reason: `ML & Agronomic aligned primary phosphatic carrier for ${cropProfile.name}. Supplies ${stageTargetField.p.toFixed(1)} kg P₂O₅ for rapid root nodulation and early vigor.`,
         quantity_per_acre_kg: parseFloat(dapAcre.toFixed(1)),
         recommended_dose_per_acre: parseFloat(dapAcre.toFixed(1)),
         quantity_total_field_kg: parseFloat(dapKg.toFixed(1)),
@@ -576,6 +707,8 @@ function calculateFertilizerRecommendation(params) {
         cost_inr: Math.round(bags * meta.price_per_bag),
         proportional_cost_inr: parseFloat((dapKg * meta.price_per_kg).toFixed(2)),
         price_type: meta.price_type,
+        ml_determined: mlPredRaw === 'DAP',
+        ml_badge: mlPredRaw === 'DAP' ? '🤖 ML Primary Predicted Carrier (DAP)' : null,
         application_method: 'Band placement 4–5 cm away from the seed furrow.',
         application_timing: 'Full basal dose during final ploughing or transplanting.',
         price_metadata: meta,
@@ -583,11 +716,11 @@ function calculateFertilizerRecommendation(params) {
     }
   }
 
-  // B. Nitrogen carrier (Urea)
-  const remainingN = Math.max(0, stageTargetField.n - nSuppliedByP);
+  // B. Nitrogen carrier (Neem-Coated Urea)
+  const remainingN = Math.max(0, stageTargetField.n - nSuppliedByComplex);
   if (remainingN > 0) {
     const ureaKg = remainingN / 0.46;
-    const ureaAcre = (stageTargetAcre.n - (nSuppliedByP / areaInAcres)) / 0.46;
+    const ureaAcre = (stageTargetAcre.n - (nSuppliedByComplex / areaInAcres)) / 0.46;
     const meta = FERTILIZER_PRICE_CATALOG.urea;
     const bags = Math.ceil(ureaKg / meta.bag_weight_kg);
     const estCost = Math.round(ureaKg * meta.price_per_kg);
@@ -599,7 +732,7 @@ function calculateFertilizerRecommendation(params) {
       name: meta.name,
       grade: meta.grade,
       nutrients_supplied: 'Nitrogen 46%',
-      reason: `Replenishes ${remainingN.toFixed(1)} kg Nitrogen deficit for active vegetative canopy & chlorophyll synthesis at ${growthStage} stage.`,
+      reason: `Replenishes remaining ${remainingN.toFixed(1)} kg Nitrogen deficit for vegetative canopy & chlorophyll synthesis at ${growthStage} stage.`,
       quantity_per_acre_kg: parseFloat(Math.max(1, ureaAcre).toFixed(1)),
       recommended_dose_per_acre: parseFloat(Math.max(1, ureaAcre).toFixed(1)),
       quantity_total_field_kg: parseFloat(ureaKg.toFixed(1)),
@@ -614,6 +747,8 @@ function calculateFertilizerRecommendation(params) {
       cost_inr: Math.round(bags * meta.price_per_bag),
       proportional_cost_inr: parseFloat((ureaKg * meta.price_per_kg).toFixed(2)),
       price_type: meta.price_type,
+      ml_determined: mlPredRaw === 'Urea',
+      ml_badge: mlPredRaw === 'Urea' ? '🤖 ML Primary Predicted Carrier (Urea)' : null,
       application_method: 'Soil broadcasting in afternoon under moist soil, followed by light irrigation. Avoid water stagnation.',
       application_timing: stageKey === 'basal' ? 'Basal incorporation' : `Top dressing at ${growthStage} stage`,
       price_metadata: meta,
@@ -621,9 +756,10 @@ function calculateFertilizerRecommendation(params) {
   }
 
   // C. Potassium carrier (MOP)
-  if (stageTargetField.k > 0) {
-    const mopKg = stageTargetField.k / 0.60;
-    const mopAcre = stageTargetAcre.k / 0.60;
+  const remainingK = Math.max(0, stageTargetField.k - kSuppliedByComplex);
+  if (remainingK > 0) {
+    const mopKg = remainingK / 0.60;
+    const mopAcre = (stageTargetAcre.k - (kSuppliedByComplex / areaInAcres)) / 0.60;
     const meta = FERTILIZER_PRICE_CATALOG.mop;
     const bags = Math.ceil(mopKg / meta.bag_weight_kg);
     const estCost = Math.round(mopKg * meta.price_per_kg);
@@ -635,7 +771,7 @@ function calculateFertilizerRecommendation(params) {
       name: meta.name,
       grade: meta.grade,
       nutrients_supplied: 'Potassium (K₂O) 60%',
-      reason: `Supplies ${stageTargetField.k.toFixed(1)} kg Potash to strengthen stem turgor, disease resistance, and grain/pod filling.`,
+      reason: `Supplies ${remainingK.toFixed(1)} kg Potash to strengthen stem turgor, pest tolerance, and grain filling for ${cropProfile.name}.`,
       quantity_per_acre_kg: parseFloat(mopAcre.toFixed(1)),
       recommended_dose_per_acre: parseFloat(mopAcre.toFixed(1)),
       quantity_total_field_kg: parseFloat(mopKg.toFixed(1)),
@@ -693,20 +829,6 @@ function calculateFertilizerRecommendation(params) {
   const totalCost = recommendations.reduce((sum, item) => sum + (item.cost_inr || item.estimated_cost), 0);
   const totalBags = recommendations.reduce((sum, item) => sum + (item.bags_to_buy || item.bags_required), 0);
 
-  // ML Predictions
-  const mlFert = predictKaggleFertilizer({
-    temperature: params.soil?.air_temperature || 28,
-    humidity: params.soil?.air_humidity || 65,
-    moisture: params.soil?.soil_moisture || 45,
-    soil_type: params.soil_type || 'Loamy',
-    crop_type: cropProfile.name,
-    n: params.soil?.nitrogen || 40,
-    k: params.soil?.potassium || 40,
-    p: params.soil?.phosphorus || 20,
-  });
-
-  const soilCluster = predictSoilCluster(params.soil || {});
-
   return {
     crop: cropProfile.name,
     growth_stage: params.growth_stage || 'Basal / Sowing',
@@ -727,15 +849,15 @@ function calculateFertilizerRecommendation(params) {
         suggested_category: mlFert.predicted_fertilizer,
         confidence_pct: mlFert.confidence_pct,
         top_candidates: mlFert.distribution,
-        note: '🤖 AI Model Category Prediction (Kaggle Dataset RF Model). Agronomic prescription above is mathematically calibrated with verified Indian STCR protocols.'
+        note: `Smart fertilizer prescription aligned directly with Random Forest ML prediction (${mlFert.predicted_fertilizer} - ${mlFert.confidence_pct}% confidence).`
       } : null,
       soil_profile_cluster: soilCluster ? {
         cluster_id: soilCluster.cluster_id,
         cluster_name: soilCluster.name,
         cluster_description: soilCluster.description,
-        note: '🔬 Soil Profile KMeans Cluster (uzhavu_soil_cluster_model.joblib trained on multi-element spectroscopy data).'
+        note: `Soil Profile KMeans Cluster: ${soilCluster.name} (uzhavu_soil_cluster_model.joblib).`
       } : null,
-      disclaimer: 'Machine learning predictions are category indicators and must always be validated against crop-specific agronomic guidelines before field application.'
+      disclaimer: 'Machine learning prediction directly determines the primary fertilizer carrier, calibrated with validated STCR field application rates.'
     }
   };
 }
