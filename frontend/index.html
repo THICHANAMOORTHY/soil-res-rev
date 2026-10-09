@@ -206,18 +206,26 @@
 
     <!-- ══════════════════ VIEW: LANDING PAGE ══════════════════ -->
     <div id="view-landing" class="view">
-      <div class="landing-wrap">
-        <!-- High-Impact Industry Announcement Ribbon -->
-        <div class="landing-top-ticker">
-          <div class="landing-ticker-inner">
-            <span class="ticker-badge">LIVE FLEET INGEST</span>
-            <span class="ticker-text">
-              🚀 <strong>Active Telemetry Network:</strong> 420+ Edge IoT Nodes actively streaming NPK, pH & Microclimate across 18 Regional Clusters. Real-time soil health scoring online.
+      <!-- High-Impact Industry Announcement Ribbon -->
+      <div class="landing-top-ticker">
+        <div class="landing-ticker-inner">
+          <div class="ticker-content-cluster">
+            <span class="ticker-badge">
+              <span class="ticker-pulse-core"></span>
+              LIVE FLEET INGEST
             </span>
-            <a href="#flywheel" onclick="switchLandingFlywheelTab('agri');return false;" class="ticker-link">Inspect Live Stream &rarr;</a>
+            <span class="ticker-text">
+              🚀 <strong>Active Telemetry Network:</strong> 420+ Edge IoT Nodes actively streaming NPK, pH &amp; Microclimate across 18 Regional Clusters.
+            </span>
           </div>
+          <a href="#flywheel" onclick="switchLandingFlywheelTab('agri');return false;" class="ticker-pill-link">
+            <span>Inspect Live Stream</span>
+            <span class="ticker-arrow">→</span>
+          </a>
         </div>
+      </div>
 
+      <div class="landing-wrap">
         <!-- Floating Enterprise Header -->
         <header class="landing-nav-bar">
           <div class="landing-brand" onclick="navigate('landing')" style="cursor:pointer">
@@ -225,9 +233,9 @@
             <div>
               <div class="landing-brand-title">
                 UZHAVU KAAPPAAN
-                <span class="portal-badge badge-farmer" style="font-size:0.68rem;padding:2px 8px;letter-spacing:0.04em">ENTERPRISE AG-INTEL</span>
+                <span class="portal-badge badge-farmer landing-brand-badge">ENTERPRISE AG-INTEL</span>
               </div>
-              <div class="landing-brand-sub">உழவு காப்பான் · Agricultural Intelligence & Enterprise FPO Platform</div>
+              <div class="landing-brand-sub">உழவு காப்பான் · Agricultural Intelligence &amp; Enterprise FPO Platform</div>
             </div>
           </div>
 
@@ -243,16 +251,18 @@
 
           <div class="landing-nav-links">
             <div class="pulse-indicator">
-              <span class="pulse-dot"></span>
+              <span class="pulse-dot-wrap">
+                <span class="pulse-dot"></span>
+              </span>
               <span>420 Nodes Streaming</span>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="setLanguage(window.i18n && window.i18n.getLanguage() === 'ta' ? 'en' : 'ta')" style="padding:6px 12px;font-size:12px">
+            <button class="landing-lang-btn" onclick="setLanguage(window.i18n && window.i18n.getLanguage() === 'ta' ? 'en' : 'ta')">
               🌐 <span id="landing-lang-btn-text">தமிழ்</span>
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="navigate('login')" style="padding:6px 14px;font-size:12px;border-color:rgba(255,255,255,0.18)">
+            <button class="landing-signin-btn" onclick="navigate('login')">
               🔑 Sign In
             </button>
-            <button class="btn btn-primary btn-sm" onclick="enterFarmerPortal()" style="padding:6px 14px;font-size:12px">
+            <button class="landing-launch-btn" onclick="enterFarmerPortal()">
               🚀 Launch Platform
             </button>
           </div>

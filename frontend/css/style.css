@@ -4382,125 +4382,318 @@ body.mode-fullscreen .main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 28px;
+  padding: 12px 24px;
   border-radius: 20px;
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 40px;
+  background: rgba(11, 19, 32, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 36px;
   position: sticky;
   top: 16px;
   z-index: 100;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
 }
 
 .landing-brand {
   display: flex;
   align-items: center;
   gap: 14px;
+  text-decoration: none;
 }
 
 .landing-brand-logo {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+  font-size: 22px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.landing-brand:hover .landing-brand-logo {
+  transform: scale(1.05);
 }
 
 .landing-brand-title {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #fff;
+  letter-spacing: -0.015em;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1.2;
+}
+
+.landing-brand-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  text-transform: uppercase;
 }
 
 .landing-brand-sub {
-  font-size: 0.78rem;
-  color: #34d399;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  line-height: 1.25;
+  margin-top: 3px;
 }
 
 .landing-nav-menu {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 4px;
 }
 
 .landing-nav-item {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.84rem;
+  font-weight: 550;
   text-decoration: none;
-  transition: color 0.2s ease;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.18s ease;
   cursor: pointer;
 }
 
 .landing-nav-item:hover {
-  color: #34d399;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .landing-nav-links {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.pulse-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pulse-dot-wrap {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.pulse-dot-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #34d399;
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes radar-ping {
+  0% { transform: scale(0.8); opacity: 1; }
+  80%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+.landing-lang-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.landing-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.landing-signin-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.landing-signin-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.landing-launch-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #ffffff;
+  padding: 7px 18px;
+  border-radius: 9px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.landing-launch-btn:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+  color: #ffffff;
 }
 
 /* ── High-Impact Industry Announcement Ribbon ────────────── */
 .landing-top-ticker {
-  background: linear-gradient(90deg, #14572b 0%, #193822 50%, #16271c 100%);
-  border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+  background: linear-gradient(90deg, rgba(6, 44, 27, 0.75) 0%, rgba(10, 22, 38, 0.95) 50%, rgba(6, 44, 27, 0.75) 100%);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.16);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: #ffffff;
-  padding: 8px 16px;
-  font-size: 0.84rem;
-  margin-bottom: 14px;
+  padding: 8px 20px;
+  font-size: 0.8125rem;
+  position: relative;
+  z-index: 101;
 }
 
 .landing-ticker-inner {
-  max-width: 1240px;
+  max-width: 1360px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   text-align: center;
 }
 
+.ticker-content-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .ticker-badge {
-  background: #22c55e;
-  color: #042f14;
-  font-size: 0.7rem;
-  font-weight: 800;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  color: #34d399;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticker-pulse-core {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  animation: ticker-pulse 2s infinite;
+}
+
+@keyframes ticker-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
 }
 
 .ticker-text {
-  color: #e2e8f0;
+  color: #cbd5e1;
+  font-weight: 450;
+  letter-spacing: 0.01em;
 }
 
-.ticker-link {
-  color: #86efac;
-  font-weight: 700;
-  text-decoration: underline;
-  transition: color 0.2s;
+.ticker-text strong {
+  color: #f8fafc;
+  font-weight: 650;
 }
-.ticker-link:hover {
+
+.ticker-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  color: #a7f3d0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.ticker-pill-link:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(52, 211, 153, 0.5);
   color: #ffffff;
+  transform: translateX(2px);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+}
+
+.ticker-arrow {
+  transition: transform 0.2s ease;
+}
+
+.ticker-pill-link:hover .ticker-arrow {
+  transform: translateX(2px);
 }
 
 /* ── Trust Strip ─────────────────────────────────────────── */
