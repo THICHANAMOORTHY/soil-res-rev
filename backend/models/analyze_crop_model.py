@@ -112,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument("--p", type=float, default=42.0, help="Phosphorus (mg/kg)")
     parser.add_argument("--k", type=float, default=43.0, help="Potassium (mg/kg)")
     parser.add_argument("--temp", type=float, default=21.0, help="Temperature (°C)")
-    parser.add_argument("--hum", type=float, default=82.0, help="Humidity (%)")
+    parser.add_argument("--hum", type=float, default=82.0, help="Humidity (%%)")
     parser.add_argument("--ph", type=float, default=6.5, help="Soil pH")
     parser.add_argument("--rain", type=float, default=202.0, help="Rainfall (mm)")
 
