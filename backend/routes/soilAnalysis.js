@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const db = require('../data/seed');
 const { computeHealth } = require('../utils/soilScoring');
+const cropMlEngine = require('../services/cropMlEngine');
 
 // ── POST /api/soil-analysis ──────────────────────────────────
 router.post('/', (req, res) => {
-  const { farm_id = 101, nitrogen, phosphorus, potassium, ph, organic_carbon } = req.body;
+  const { farm_id = 101, nitrogen, phosphorus, potassium, ph, organic_carbon, source = 'manual' } = req.body;
 
   if ([nitrogen, phosphorus, potassium, ph, organic_carbon].some(v => v === undefined)) {
     return res.status(400).json({ error: 'All soil parameters required (N, P, K, ph, organic_carbon)' });
@@ -17,9 +18,21 @@ router.post('/', (req, res) => {
 
   const { score, deficiencies, adequate } = computeHealth({ nitrogen: n, phosphorus: p, potassium: k, ph: phVal, organic_carbon: oc });
 
-  // Append a new reading. Every "latest reading" lookup (dashboard, recommendation,
-  // rotation, simulation) picks the highest soil_id for the farm, so no older row
-  // needs to be touched — history stays intact.
+  const weather = db.weather_data.find(w => w.farm_id === Number(farm_id)) || {};
+  let mlPrediction = null;
+  try {
+    mlPrediction = cropMlEngine.predict({
+      n, p, k,
+      temperature: weather.avg_temp_c || 26,
+      humidity: weather.humidity_pct || 70,
+      ph: phVal,
+      rainfall: weather.rainfall_mm || 100
+    });
+  } catch (err) {
+    console.warn('[soilAnalysis] ML prediction failed:', err.message);
+  }
+
+  // Append a new reading.
   const entry = {
     soil_id: db.counters.soil_id++,
     farm_id: Number(farm_id),
@@ -27,7 +40,7 @@ router.post('/', (req, res) => {
     nitrogen: n, phosphorus: p, potassium: k, ph: phVal, organic_carbon: oc,
     soil_health_score: score,
     deficiencies,
-    source: 'manual',
+    source,
   };
   db.soil_data.push(entry);
 
@@ -36,6 +49,13 @@ router.post('/', (req, res) => {
     soil_health_score: score,
     deficiencies,
     adequate,
+    source,
+    ml_prediction: mlPrediction ? {
+      model_name: mlPrediction.model_name,
+      top_crop: mlPrediction.top_crop,
+      confidence: mlPrediction.confidence,
+      top_crops: mlPrediction.predictions.slice(0, 5)
+    } : null
   });
 });
 

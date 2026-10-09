@@ -2,46 +2,79 @@
 //  soilAnalysis.js — Soil Analysis view
 // ============================================================
 
-let soilDataMode = 'live'; // Defaults to 'live' so physical hardware view is immediate
+let soilDataMode = 'manual'; // Defaults to manual mode unless user selects live sensor
 try {
   const saved = localStorage.getItem('soilDataMode');
-  if (saved) soilDataMode = saved;
+  if (saved === 'live' || saved === 'manual') soilDataMode = saved;
 } catch(_) {}
 
 let sensorPollTimer = null;
 const SENSOR_POLL_MS = 4000;
 
+// Dedicated state for manual inputs — strictly isolated from live sensor telemetry
+let manualSoilState = {
+  nitrogen: 0,
+  phosphorus: 0,
+  potassium: 0,
+  ph: 7.0,
+  organic_carbon: 0.50
+};
+try {
+  const savedManual = localStorage.getItem('manualSoilState');
+  if (savedManual) manualSoilState = JSON.parse(savedManual);
+} catch(_) {}
+
+function saveManualStateFromSliders() {
+  if (soilDataMode !== 'manual') return;
+  const n = parseFloat(document.getElementById('n-slider')?.value) || 0;
+  const p = parseFloat(document.getElementById('p-slider')?.value) || 0;
+  const k = parseFloat(document.getElementById('k-slider')?.value) || 0;
+  const ph = (parseFloat(document.getElementById('ph-slider')?.value) || 70) / 10;
+  const oc = (parseFloat(document.getElementById('oc-slider')?.value) || 50) / 100;
+  manualSoilState = { nitrogen: n, phosphorus: p, potassium: k, ph, organic_carbon: oc };
+  try { localStorage.setItem('manualSoilState', JSON.stringify(manualSoilState)); } catch(_) {}
+}
+
+function applyManualSliders() {
+  setSlider('n-slider', manualSoilState.nitrogen, 'n-val');
+  setSlider('p-slider', manualSoilState.phosphorus, 'p-val');
+  setSlider('k-slider', manualSoilState.potassium, 'k-val');
+  setSlider('ph-slider', Math.round(manualSoilState.ph * 10), 'ph-val', v => (v/10).toFixed(1));
+  setSlider('oc-slider', Math.round(manualSoilState.organic_carbon * 100), 'oc-val', v => (v/100).toFixed(2));
+}
+
 function resetSlidersToDefault() {
-  setSlider('n-slider', 0, 'n-val');
-  setSlider('p-slider', 0, 'p-val');
-  setSlider('k-slider', 0, 'k-val');
-  setSlider('ph-slider', 70, 'ph-val', v => (v/10).toFixed(1));
-  setSlider('oc-slider', 50, 'oc-val', v => (v/100).toFixed(2));
+  manualSoilState = { nitrogen: 0, phosphorus: 0, potassium: 0, ph: 7.0, organic_carbon: 0.50 };
+  applyManualSliders();
 }
 window.resetSlidersToDefault = resetSlidersToDefault;
 
 VIEW_LOADERS['soil-analysis'] = async function loadSoilAnalysis() {
-  let savedMode = 'live';
+  let savedMode = 'manual';
   try {
-    savedMode = localStorage.getItem('soilDataMode') || 'live';
+    savedMode = localStorage.getItem('soilDataMode') || 'manual';
   } catch(_) {}
   setSoilDataMode(savedMode);
 
   if (savedMode === 'live') {
-    // In live mode, poll genuine hardware; sliders stay locked/cleared until live packet arrives
     await pollSensorOnce();
   } else {
-    // Only pre-fill manual sliders from a REAL PRIOR MANUAL entry, never from ESP32 or lab demo
-    try {
-      const soil = await apiGet(`/soil-analysis?farm_id=${state.farm_id}&source=manual`);
-      if (soil && soil.source === 'manual') {
-        prefillSliders(soil);
-      } else {
-        resetSlidersToDefault();
-      }
-    } catch(_) {
-      resetSlidersToDefault();
+    // In manual mode: restore farmer's manual values (never live hardware packets)
+    if (manualSoilState.nitrogen === 0 && manualSoilState.phosphorus === 0 && manualSoilState.potassium === 0) {
+      try {
+        const soil = await apiGet(`/soil-analysis?farm_id=${state.farm_id}&source=manual`);
+        if (soil && soil.source === 'manual') {
+          manualSoilState = {
+            nitrogen: soil.nitrogen || 0,
+            phosphorus: soil.phosphorus || 0,
+            potassium: soil.potassium || 0,
+            ph: soil.ph || 7.0,
+            organic_carbon: soil.organic_carbon || 0.50
+          };
+        }
+      } catch(_) {}
     }
+    applyManualSliders();
   }
 };
 
@@ -55,6 +88,7 @@ function setSoilDataMode(mode) {
   const banner = document.getElementById('sensor-live-banner');
   const predictBanner = document.getElementById('sensor-predict-banner');
   const npkGrid = document.getElementById('sensor-npk-live-grid');
+  const extraTiles = document.getElementById('sensor-extra-readings');
   const sliderIds = ['n-slider', 'p-slider', 'k-slider', 'ph-slider', 'oc-slider'];
 
   if (mode === 'live') {
@@ -63,23 +97,28 @@ function setSoilDataMode(mode) {
     if (banner) banner.style.display = 'flex';
     if (predictBanner) predictBanner.style.display = 'block';
     if (npkGrid) npkGrid.style.display = 'grid';
+    if (extraTiles) extraTiles.style.display = 'grid';
     sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
 
     // Instantly clear live telemetry cards until verified live packet arrives
     clearLiveSensorReadings();
     startSensorPolling();
   } else {
+    // ── STRICT MANUAL ISOLATION: stop polling and hide ALL live sensor cards ──
+    stopSensorPolling();
     liveBtn?.classList.remove('active');
     manualBtn?.classList.add('active');
     if (banner) banner.style.display = 'none';
     if (predictBanner) predictBanner.style.display = 'none';
     if (npkGrid) npkGrid.style.display = 'none';
-    const extraTiles = document.getElementById('sensor-extra-readings');
     if (extraTiles) extraTiles.style.display = 'none';
+    sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
+    
     const soilResult = document.getElementById('soil-result');
     if (soilResult) soilResult.style.display = 'none';
-    sliderIds.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
-    stopSensorPolling();
+
+    // Strictly restore the user's manual entry values — never sensor readings
+    applyManualSliders();
   }
 }
 window.setSoilDataMode = setSoilDataMode;
@@ -91,6 +130,7 @@ window.stopSensorPolling = stopSensorPolling;
 
 function startSensorPolling() {
   stopSensorPolling();
+  if (soilDataMode !== 'live') return;
   pollSensorOnce(); // immediate check
   sensorPollTimer = setInterval(() => {
     const viewActive = document.getElementById('view-soil-analysis')?.classList.contains('active');
@@ -98,6 +138,7 @@ function startSensorPolling() {
     pollSensorOnce();
   }, SENSOR_POLL_MS);
 }
+
 
 function clearLiveSensorReadings() {
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
@@ -209,11 +250,13 @@ function clearLiveSensorReadings() {
 window.clearLiveSensorReadings = clearLiveSensorReadings;
 
 async function pollSensorOnce() {
+  if (soilDataMode !== 'live') return;
   const dot = document.getElementById('sensor-live-dot');
   const text = document.getElementById('sensor-live-status-text');
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
   try {
     const data = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
+    if (soilDataMode !== 'live') return; // Exit if user switched mode during network request
     
     // Strict Hardware Check: ONLY show Live / ON if hardware is actively transmitting within 15s
     if (data.connected && data.reading) {
@@ -223,7 +266,8 @@ async function pollSensorOnce() {
           ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
           : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
       }
-      prefillSliders(data.reading);
+      // ONLY update live telemetry display — NEVER pollute manual sliders
+      updateLiveSensorDisplay(data.reading);
     } else {
       // Physical hardware is OFF / disconnected
       if (dot) dot.className = 'sensor-live-dot offline';
@@ -236,6 +280,7 @@ async function pollSensorOnce() {
       clearLiveSensorReadings();
     }
   } catch (err) {
+    if (soilDataMode !== 'live') return;
     if (dot) dot.className = 'sensor-live-dot error';
     if (text) {
       text.textContent = isTa
@@ -246,29 +291,22 @@ async function pollSensorOnce() {
   }
 }
 
+function updateLiveSensorDisplay(soil) {
+  if (soilDataMode !== 'live') {
+    const npkGrid = document.getElementById('sensor-npk-live-grid');
+    const wrap = document.getElementById('sensor-extra-readings');
+    const predictBanner = document.getElementById('sensor-predict-banner');
+    if (npkGrid) npkGrid.style.display = 'none';
+    if (wrap) wrap.style.display = 'none';
+    if (predictBanner) predictBanner.style.display = 'none';
+    return;
+  }
 
-function prefillSliders(soil) {
-  if (soil.nitrogen       !== undefined && soil.nitrogen       !== null) setSlider('n-slider',  soil.nitrogen,  'n-val');
-  if (soil.phosphorus     !== undefined && soil.phosphorus     !== null) setSlider('p-slider',  soil.phosphorus,'p-val');
-  if (soil.potassium      !== undefined && soil.potassium      !== null) setSlider('k-slider',  soil.potassium, 'k-val');
-  if (soil.ph              !== undefined && soil.ph             !== null) setSlider('ph-slider', Math.round(soil.ph * 10),   'ph-val', v => (v/10).toFixed(1));
-  if (soil.organic_carbon !== undefined && soil.organic_carbon !== null) setSlider('oc-slider', Math.round(soil.organic_carbon * 100), 'oc-val', v => (v/100).toFixed(2));
-
-  updateSensorExtraTiles(soil);
-}
-
-function updateSensorExtraTiles(soil) {
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
 
   // ── 1. Update Realtime NPK Telemetry Cards Direct from Sensor ──
   const npkGrid = document.getElementById('sensor-npk-live-grid');
-  const hasNpk = (soil.nitrogen !== undefined && soil.nitrogen !== null) ||
-                 (soil.phosphorus !== undefined && soil.phosphorus !== null) ||
-                 (soil.potassium !== undefined && soil.potassium !== null);
-
-  if (npkGrid && (soilDataMode === 'live' || hasNpk)) {
-    npkGrid.style.display = 'grid';
-  }
+  if (npkGrid) npkGrid.style.display = 'grid';
 
   const nVal = (soil.nitrogen !== undefined && soil.nitrogen !== null) ? Number(soil.nitrogen) : null;
   const pVal = (soil.phosphorus !== undefined && soil.phosphorus !== null) ? Number(soil.phosphorus) : null;
@@ -393,12 +431,12 @@ function updateSensorExtraTiles(soil) {
 
   const hasAnyEnvField = ['air_temperature', 'soil_moisture', 'tds', 'conductivity', 'light', 'is_reliable', 'ph']
     .some(k => soil[k] !== undefined && soil[k] !== null);
-  wrap.style.display = hasAnyEnvField ? 'grid' : 'none';
+  wrap.style.display = (soilDataMode === 'live' && hasAnyEnvField) ? 'grid' : 'none';
 
   const predictBanner = document.getElementById('sensor-predict-banner');
-  if (predictBanner && soilDataMode === 'live') predictBanner.style.display = 'block';
+  if (predictBanner) predictBanner.style.display = (soilDataMode === 'live') ? 'block' : 'none';
 
-  if (!hasAnyEnvField) return;
+  if (!hasAnyEnvField || soilDataMode !== 'live') return;
 
   const tempEl = document.getElementById('sensor-temp-val');
   const moistEl = document.getElementById('sensor-soil-moisture-val');
@@ -542,7 +580,10 @@ async function predictCropsFromSensor() {
           <div class="flex items-center gap-12">
             <span style="font-size:32px">${cropIcon(top?.crop)}</span>
             <div>
-              <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--green-400)">${isTa ? '🥇 சென்சார் பரிந்துரைக்கும் முதன்மைப் பயிர்' : '🥇 #1 Recommended Crop from Sensor'}</div>
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--green-400)">
+                ${isTa ? '🥇 சென்சார் பரிந்துரைக்கும் முதன்மைப் பயிர்' : '🥇 #1 Recommended Crop from Sensor'}
+                ${data.ml_prediction ? `<span class="chip success" style="margin-left:6px;font-size:11px">🤖 300-Tree ML: ${data.ml_prediction.confidence}%</span>` : ''}
+              </div>
               <div style="font-size:20px;font-weight:700;color:var(--text-primary)">${topName} (${famDisplay})</div>
               <div style="font-size:12px;color:var(--text-secondary)">${isTa ? 'எதிர்பார்க்கப்படும் மகசூல்' : 'Est. Yield'}: ${top?.predicted_yield || 0} ${isTa ? 'கிலோ/ஏக்கர்' : 'kg/acre'} · ${isTa ? 'லாபம்' : 'Est. Profit'}: ₹${(top?.predicted_profit || 0).toLocaleString('en-IN')} / ${isTa ? 'ஏக்கர்' : 'acre'}</div>
             </div>
@@ -599,6 +640,160 @@ async function predictCropsFromSensor() {
 }
 window.predictCropsFromSensor = predictCropsFromSensor;
 
+// ── Instant ML Prediction Handler (Works for BOTH Manual & Live Modes) ──────
+async function runInstantMlPrediction() {
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  const btn = document.getElementById('btn-predict-ml');
+  const container = document.getElementById('soil-result');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>⏳</span> <span>${isTa ? 'கணிக்கிறது…' : 'Predicting…'}</span>`;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="loading-wrap p-24" style="background:var(--bg-card);border-radius:12px;margin-top:20px">
+      <div class="spinner"></div>
+      <p class="loading-text">${isTa ? '300-மரங்கள் யந்திரக் கற்றல் மாதிரி மூலம் பயிர் கணிக்கப்படுகிறது…' : 'Running 300-Tree Random Forest ML Model Inference…'}</p>
+    </div>
+  `;
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  try {
+    let payload = {};
+    if (soilDataMode === 'live') {
+      const latestCheck = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`).catch(() => ({ connected: false }));
+      if (latestCheck.connected && latestCheck.reading) {
+        payload = {
+          n: latestCheck.reading.nitrogen,
+          p: latestCheck.reading.phosphorus,
+          k: latestCheck.reading.potassium,
+          temperature: latestCheck.reading.air_temperature,
+          humidity: latestCheck.reading.soil_moisture,
+          ph: latestCheck.reading.ph,
+          farm_id: state.farm_id
+        };
+      } else {
+        payload = { farm_id: state.farm_id };
+      }
+    } else {
+      payload = {
+        n: parseFloat(document.getElementById('n-slider')?.value) || 0,
+        p: parseFloat(document.getElementById('p-slider')?.value) || 0,
+        k: parseFloat(document.getElementById('k-slider')?.value) || 0,
+        ph: (parseFloat(document.getElementById('ph-slider')?.value) || 70) / 10,
+        farm_id: state.farm_id
+      };
+    }
+
+    const data = await apiPost('/crop-evaluation/ml-predict', payload);
+    if (!data.success) throw new Error(data.error || 'ML prediction failed');
+
+    renderMlPredictionResult(data);
+  } catch (err) {
+    container.innerHTML = `
+      <div class="alert-banner warning mt-24">
+        <span>⚠</span>
+        <div><b>${isTa ? 'பிழை:' : 'Error:'}</b> ${err.message}</div>
+      </div>
+    `;
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<span>🤖</span> <span>${isTa ? 'பயிர் கணிப்பு (ML மாதிரி)' : 'Predict Crop (ML Model)'}</span>`;
+    }
+  }
+}
+window.runInstantMlPrediction = runInstantMlPrediction;
+
+function renderMlPredictionResult(data) {
+  const container = document.getElementById('soil-result');
+  if (!container) return;
+  container.style.display = 'block';
+
+  const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+  const topCropName = data.top_crop_tamil && isTa ? data.top_crop_tamil : (window.tCrop ? tCrop(data.top_crop) : data.top_crop);
+  const conf = data.confidence || 0;
+  const confColor = conf >= 80 ? '#22c55e' : conf >= 50 ? '#38bdf8' : '#f59e0b';
+  const feat = data.input_features || {};
+
+  container.innerHTML = `
+    <div class="glass-card mt-24" id="soil-ml-result-card" style="border:1px solid rgba(52,211,153,0.35);box-shadow:0 8px 32px rgba(16,185,129,0.12)">
+      <div class="flex items-center justify-between mb-16" style="flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:14px">
+        <div class="flex items-center gap-12">
+          <span style="font-size:36px">${cropIcon(data.top_crop)}</span>
+          <div>
+            <div style="font-size:11px;font-weight:750;color:#34d399;text-transform:uppercase;letter-spacing:0.06em">
+              ${isTa ? 'யந்திரக் கற்றல் மாதிரி முன்னறிவிப்பு (ரேண்டம் ஃபாரஸ்ட் - 300 மரங்கள்)' : 'Random Forest ML Model Prediction (300 Decision Trees)'}
+            </div>
+            <div style="font-size:24px;font-weight:800;color:#f8fafc">
+              ${topCropName.toUpperCase()}
+              <span class="chip success" style="margin-left:8px;font-size:13px;vertical-align:middle;color:${confColor};border-color:${confColor}">
+                ${conf}% ${isTa ? 'நம்பகத்தன்மை' : 'Confidence'}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <span class="chip info" style="font-size:11px;padding:4px 10px">
+            ${soilDataMode === 'live' ? (isTa ? 'நேரலை சென்சார் உள்ளீடு' : 'Live Sensor Telemetry') : (isTa ? 'கைமுறை உள்ளீடு' : 'Manual Entry Input')}
+          </span>
+        </div>
+      </div>
+
+      <!-- Feature Vector Summary -->
+      <div style="background:var(--bg-elevated);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px">
+        <span style="color:var(--text-secondary);font-weight:600">${isTa ? 'மதிப்பாய்வு செய்யப்பட்ட அளவுருக்கள்:' : 'Evaluated Feature Vector:'}</span>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;color:var(--text-primary)">
+          <span><b>N:</b> ${feat.n ?? '—'}</span>
+          <span><b>P:</b> ${feat.p ?? '—'}</span>
+          <span><b>K:</b> ${feat.k ?? '—'}</span>
+          <span><b>pH:</b> ${feat.ph ?? '—'}</span>
+          <span><b>Temp:</b> ${feat.temperature ?? '—'}°C</span>
+          <span><b>Moist/Hum:</b> ${feat.humidity ?? '—'}%</span>
+          <span><b>Rain:</b> ${feat.rainfall ?? '—'}mm</span>
+        </div>
+      </div>
+
+      <!-- Alternative Crop Fits -->
+      <div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">
+        ${isTa ? 'மாதிரியின் மாற்றுப் பயிர் சாத்தியக்கூறுகள்:' : 'Alternative Crop Candidates Predicted by Ensemble:'}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:18px">
+        ${(data.predictions || []).slice(0, 4).map(p => {
+          const pName = isTa && p.tamil_name ? p.tamil_name : (window.tCrop ? tCrop(p.display_name || p.crop) : (p.display_name || p.crop));
+          const pConf = p.confidence_pct || (p.probability * 100).toFixed(1);
+          return `
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+              <div class="flex items-center gap-8">
+                <span style="font-size:22px">${cropIcon(p.crop)}</span>
+                <div>
+                  <div style="font-weight:700;font-size:13px">${pName}</div>
+                  <div style="font-size:11px;color:var(--text-muted)">${p.crop_family || 'Agronomic'}</div>
+                </div>
+              </div>
+              <span style="font-weight:800;color:#34d399;font-size:14px">${pConf}%</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-12" style="justify-content:flex-end;flex-wrap:wrap">
+        <button type="button" class="btn btn-secondary" onclick="navigate('evaluation')" style="font-size:13px">
+          ${isTa ? 'முழு பயிர் மதிப்பீட்டு பட்டியல் →' : 'View Crop Evaluation →'}
+        </button>
+        <button type="button" class="btn btn-primary" onclick="navigate('rotation')" style="font-size:13px">
+          ${isTa ? 'பயிர் சுழற்சி திட்டத்தை உருவாக்கு →' : 'Generate Crop Rotation Plan →'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.renderMlPredictionResult = renderMlPredictionResult;
+
 function setSlider(sliderId, value, valId, formatter) {
   const slider = document.getElementById(sliderId);
   const valEl  = document.getElementById(valId);
@@ -620,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', () => {
       document.getElementById(out).textContent = fmt(el.value);
+      saveManualStateFromSliders();
     });
   });
 
@@ -735,6 +931,38 @@ function renderSoilResult(result) {
           <span>✓</span>
           <div>${isTa ? '<b>சிறந்த மண் வளம்!</b> உங்கள் நிலம் நல்ல சமநிலையில் உள்ளது, பயிர் சாகுபடிக்கு உகந்தது.' : '<b>Excellent Soil Health!</b> Your farm is well-balanced and ready for optimal planting.'}</div>
         </div>`}
+
+      ${result.ml_prediction ? `
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:16px 20px;margin-top:20px">
+          <div class="flex items-center justify-between mb-8" style="flex-wrap:wrap;gap:10px">
+            <div class="flex items-center gap-8">
+              <span style="font-size:24px">🤖</span>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:0.06em">
+                  ${isTa ? 'யந்திரக் கற்றல் மாதிரி பரிந்துரை (300 மரங்கள் ரேண்டம் ஃபாரஸ்ட்)' : 'ML Model Crop Recommendation (300-Tree Random Forest)'}
+                </div>
+                <div style="font-size:18px;font-weight:800;color:#f8fafc">
+                  ${cropIcon(result.ml_prediction.top_crop)} ${(window.tCrop ? tCrop(result.ml_prediction.top_crop) : result.ml_prediction.top_crop).toUpperCase()}
+                  <span class="chip success" style="margin-left:8px;font-size:12px">${result.ml_prediction.confidence}% ${isTa ? 'நம்பகத்தன்மை' : 'Confidence'}</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="navigate('evaluation')" style="font-size:12px">
+              ${isTa ? 'முழு பயிர் மதிப்பீடு →' : 'Full Evaluation →'}
+            </button>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">
+            ${isTa ? 'இந்த மண் நிலைக்கு மாதிரியின் மாற்றுப் பயிர் தேர்வுகள்:' : 'Alternative Candidate Crops Predicted by ML Model:'}
+          </div>
+          <div class="flex items-center gap-8" style="flex-wrap:wrap">
+            ${(result.ml_prediction.top_crops || []).slice(1, 4).map(c => `
+              <span class="chip info" style="font-size:11px;padding:4px 10px">
+                ${cropIcon(c.crop)} ${window.tCrop ? tCrop(c.crop).split(' (')[0] : c.crop}: ${c.confidence_pct}%
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
 
       <div class="mt-20 flex items-center gap-12" style="flex-wrap:wrap">
         <button type="button" class="btn btn-primary" onclick="exportFarmerReportPDF()">

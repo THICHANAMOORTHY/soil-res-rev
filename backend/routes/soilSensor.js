@@ -8,6 +8,7 @@
 const router = require('express').Router();
 const db = require('../data/seed');
 const { computeHealth } = require('../utils/soilScoring');
+const cropMlEngine = require('../services/cropMlEngine');
 
 // A reading counts as "live" (device actively connected) if it
 // arrived within this window; otherwise it's shown as offline/disconnected.
@@ -324,6 +325,22 @@ router.get('/predict', (req, res) => {
         ph: 6.5, nitrogen: 50, phosphorus: 40, potassium: 60, soil_health_score: 58
       });
 
+  const weather = db.weather_data.find(w => w.farm_id === farm_id) || {};
+  let mlPrediction = null;
+  try {
+    mlPrediction = cropMlEngine.predict({
+      n: soilReading.nitrogen !== undefined ? soilReading.nitrogen : 50,
+      p: soilReading.phosphorus !== undefined ? soilReading.phosphorus : 40,
+      k: soilReading.potassium !== undefined ? soilReading.potassium : 60,
+      temperature: soilReading.air_temperature || weather.avg_temp_c || 26,
+      humidity: soilReading.soil_moisture || weather.humidity_pct || 70,
+      ph: soilReading.ph !== undefined ? soilReading.ph : 6.5,
+      rainfall: weather.rainfall_mm || 100
+    });
+  } catch (err) {
+    console.warn('[soilSensor] ML predict failed:', err.message);
+  }
+
   const predictions = evaluateCropsFromReading(soilReading, farm_id, season);
 
   res.json({
@@ -334,7 +351,8 @@ router.get('/predict', (req, res) => {
     sensor_reading: soilReading,
     is_reliable: soilReading.is_reliable !== undefined ? soilReading.is_reliable : true,
     reliability_note: soilReading.reliability_note || 'Reading recorded',
-    top_predicted_crop: predictions[0]?.crop || 'Millets',
+    top_predicted_crop: mlPrediction?.top_crop || predictions[0]?.crop || 'Millets',
+    ml_prediction: mlPrediction,
     predictions: predictions.slice(0, 6),
   });
 });
