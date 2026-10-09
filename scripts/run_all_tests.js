@@ -11,7 +11,6 @@ const rootDir = path.resolve(__dirname, '..');
 const testSuites = [
   { name: 'Uzhavu Crop ML Model & Decision Trees (300 Trees)', cmd: 'python', args: ['-u', 'test_ml_model_integration.py'] },
   { name: 'B2B FPO Command Center (Registered Farms)', cmd: 'python', args: ['-u', 'test_b2b_apis.py'] },
-  { name: 'DairyFeed AI & Silage Integration Suite', cmd: 'python', args: ['-u', 'test_dairyfeed_integration.py'] },
   { name: 'Full System 17-Endpoint Health Check', cmd: 'python', args: ['-u', 'test_full_system.py'] },
   { name: 'Auth & Password Reset OTP Suite', cmd: 'python', args: ['-u', 'test_auth_otp_suite.py'] },
   { name: 'Farmer Soil Health Action Plan PDF Dynamics', cmd: 'python', args: ['-u', 'test_pdf_content.py'] },

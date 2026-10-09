@@ -92,11 +92,6 @@
         <span class="nav-icon">🛰️</span> <span data-i18n="navGpsZones">GPS Zone Allocation</span>
         <span class="nav-badge" style="background:#8b5cf6" data-i18n="navPrecisionBadge">PRECISION</span>
       </div>
-
-      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navLivestock">Livestock & Feed (IFS)</p>
-      <div class="nav-link" data-view="dairyfeed">
-        <span class="nav-icon">🐄</span> <span data-i18n="navDairyFeed">Dairy & Silage Feeder</span>
-        <span class="nav-badge" style="background:#059669" data-i18n="navIfsBadge">NEW · IFS</span>
       </div>
 
       <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navFertilizerSection">Fertilizer & Nutrition</p>
@@ -385,9 +380,6 @@
               <button type="button" class="flywheel-tab" id="flywheel-tab-fin" onclick="switchLandingFlywheelTab('fin')" role="tab" aria-selected="false">
                 <span>🏢</span> Enterprise FPO & Cooperative Fleet
               </button>
-              <button type="button" class="flywheel-tab" id="flywheel-tab-ifs" onclick="switchLandingFlywheelTab('ifs')" role="tab" aria-selected="false">
-                <span>🐄</span> Closed-Loop Bio-Economy (IFS)
-              </button>
               <button type="button" class="flywheel-tab" id="flywheel-tab-risk" onclick="switchLandingFlywheelTab('risk')" role="tab" aria-selected="false">
                 <span>💳</span> YieldRank™ Agro-Credit & Risk
               </button>
@@ -554,47 +546,7 @@
               </div>
             </div>
 
-            <!-- Panel 3: Closed-Loop Bio-Economy (IFS) -->
-            <div class="flywheel-panel" id="flywheel-panel-ifs" role="tabpanel" hidden style="display:none">
-              <div class="landing-flywheel-showcase">
-                <div style="text-align:center;max-width:760px;margin:0 auto 28px">
-                  <span class="chip teal mb-8" style="font-size:11px">INTEGRATED FARMING SYSTEM (IFS)</span>
-                  <h3 style="font-size:1.6rem;color:#fff;margin:6px 0">Zero-Waste Circular Bio-Economy</h3>
-                  <p style="color:#94a3b8;font-size:0.95rem">
-                    How UZHAVU KAAPPAAN connects restorative legume/cereal rotations directly to high-protein dairy herd silage rations, cycling organic manure back into degraded soil.
-                  </p>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;text-align:center">
-                  <div class="ifs-stage-card">
-                    <div class="ifs-stage-icon">🌱</div>
-                    <div class="ifs-stage-title">1. Precision Crops</div>
-                    <div class="ifs-stage-desc">Nitrogen-fixing pulses & restorative millets rejuvenate depleted soil micro-nutrients.</div>
-                  </div>
-                  <div class="ifs-stage-card">
-                    <div class="ifs-stage-icon">🌾</div>
-                    <div class="ifs-stage-title">2. Silage & Forage</div>
-                    <div class="ifs-stage-desc">Post-harvest crop residues are converted into nutritive anaerobic silage rations.</div>
-                  </div>
-                  <div class="ifs-stage-card">
-                    <div class="ifs-stage-icon">🐄</div>
-                    <div class="ifs-stage-title">3. Dairy Herd Health</div>
-                    <div class="ifs-stage-desc">Algorithmic feed formulation optimizes milk yield, protein content, and animal vitality.</div>
-                  </div>
-                  <div class="ifs-stage-card">
-                    <div class="ifs-stage-icon">♻️</div>
-                    <div class="ifs-stage-title">4. Bio-Manure Loop</div>
-                    <div class="ifs-stage-desc">Composted manure returns high-potency organic carbon back to the active field.</div>
-                  </div>
-                </div>
-                <div style="text-align:center;margin-top:24px">
-                  <button class="btn btn-primary" onclick="navigate('dairyfeed')" style="background:linear-gradient(135deg, #059669, #10b981)">
-                    <span>🐄</span> Open Dairy & Silage Feeder
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Panel 4: YieldRank™ Agro-Credit & Risk Infrastructure -->
+            <!-- Panel 3: YieldRank™ Agro-Credit & Risk Infrastructure -->
             <div class="flywheel-panel" id="flywheel-panel-risk" role="tabpanel" hidden style="display:none">
               <div class="landing-flywheel-showcase">
                 <div class="flywheel-showcase-grid">
@@ -1009,7 +961,7 @@
               <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:0.86rem">
                 <li><a href="#soil-analysis" onclick="navigate('soil-analysis');return false;" style="color:#94a3b8;text-decoration:none">Real-Time NPK Soil Analysis</a></li>
                 <li><a href="#rotation" onclick="navigate('rotation');return false;" style="color:#94a3b8;text-decoration:none">26-Crop Rotation Optimizer</a></li>
-                <li><a href="#dairyfeed" onclick="navigate('dairyfeed');return false;" style="color:#94a3b8;text-decoration:none">IFS Dairy & Silage Balancer</a></li>
+                <li><a href="#fertilizer" onclick="navigate('fertilizer');return false;" style="color:#94a3b8;text-decoration:none">Smart Fertilizer Recommendation</a></li>
                 <li><a href="#gps-zones" onclick="navigate('gps-zones');return false;" style="color:#94a3b8;text-decoration:none">GPS Precision Zone Allocation</a></li>
               </ul>
             </div>
@@ -2243,434 +2195,6 @@
       <div id="gps-zones-container"></div>
     </div>
 
-    <!-- ── VIEW: DAIRY & SILAGE FEEDER (IFS) ───────────── -->
-    <div id="view-dairyfeed" class="view">
-      <div class="view-header">
-        <div>
-          <h1 data-i18n="dairyFeedTitle">Dairy Feeder & Silage Quality Hub</h1>
-          <p class="view-subtitle" data-i18n="dairyFeedSubtitle">Precision Silage Fermentation Screening, IoT Telemetry, Herd Feed Planning & Soil Nutrient Recycling</p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-secondary" onclick="loadDairyFeedView()">
-            <span data-i18n="dairyRefreshBtn">🔄 Refresh Telemetry</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Top Row: 4 Metric Cards -->
-      <div class="df-kpi-grid">
-        <div class="df-kpi-card">
-          <div class="df-kpi-header">
-            <span class="df-kpi-title" data-i18n="cardFermentationScore">Fermentation Index</span>
-            <span class="df-kpi-icon">⚗️</span>
-          </div>
-          <div class="df-kpi-value"><span id="df-stat-score">—</span><small style="font-size:16px;color:var(--text-muted)">/100</small></div>
-          <div class="df-kpi-sub" id="df-stat-count" data-i18n="dfNoBatches">0 batches recorded</div>
-        </div>
-
-        <div class="df-kpi-card">
-          <div class="df-kpi-header">
-            <span class="df-kpi-title" data-i18n="cardSilageQuality">Silage Quality Tier</span>
-            <span class="df-kpi-icon">🌿</span>
-          </div>
-          <div class="df-kpi-value" id="df-stat-quality"><span class="text-muted" data-i18n="dfAwaitingTest">Awaiting Test</span></div>
-          <div class="df-kpi-sub" data-i18n="dairySubScreening">Run screening probe</div>
-        </div>
-
-        <div class="df-kpi-card">
-          <div class="df-kpi-header">
-            <span class="df-kpi-title" data-i18n="cardSpoilageRisk">Spoilage & Mould Risk</span>
-            <span class="df-kpi-icon">🛡️</span>
-          </div>
-          <div class="df-kpi-value" id="df-stat-risk"><span class="chip" style="font-size:13px;background:rgba(255,255,255,0.06)" data-i18n="dfNoTestData">No Test Data</span></div>
-          <div class="df-kpi-sub" data-i18n="dairySubMonitoringIdle">Sensor monitoring idle</div>
-        </div>
-
-        <div class="df-kpi-card">
-          <div class="df-kpi-header">
-            <span class="df-kpi-title" data-i18n="cardHerdMilkImpact">Herd Milk Impact</span>
-            <span class="df-kpi-icon">🥛</span>
-          </div>
-          <div class="df-kpi-value text-green" id="df-milk-gain-val">—</div>
-          <div class="df-kpi-sub" id="df-revenue-gain-val" data-i18n="dairySubCalcRation">Calculated from herd ration</div>
-        </div>
-      </div>
-
-      <!-- Integrated Farming System (IFS) Closed-Loop Synergy Card -->
-      <div class="df-loop-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-          <div>
-            <span class="chip teal" style="margin-bottom:6px" data-i18n="dfIfsBadge">🔄 INTEGRATED FARMING SYSTEM (IFS)</span>
-            <h2 style="font-size:18px;margin:4px 0;color:#f0fdf4" data-i18n="dfIfsTitle">Farm Rotation ↔ Dairy Feed & Soil Restorer Loop</h2>
-            <p style="font-size:12.5px;color:#cbd5e1;max-width:720px;margin:0" data-i18n="dfIfsDesc">
-              Crop rotation produces high-energy fodder biomass. Silage quality screening protects cattle health, maximizing daily milk yield. Cattle produce Farmyard Manure (FYM) that restores Nitrogen and Organic Carbon back to the soil for the next rotation cycle!
-            </p>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1)">
-            <div>
-              <label style="font-size:11px;color:var(--text-muted);display:block" data-i18n="dfHerdSize">Dairy Herd Size</label>
-              <input type="number" id="df-input-cows" value="" placeholder="0" min="0" max="100" style="width:65px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text-muted);display:block" data-i18n="dfLactatingCows">Lactating Cows</label>
-              <input type="number" id="df-input-lactating" value="" placeholder="0" min="0" max="100" style="width:65px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text-muted);display:block" data-i18n="dfRotationFodder">Rotation Fodder</label>
-              <select id="df-select-crop" style="padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
-                <option value="" data-i18n="dfSelectFodder">Select fodder...</option>
-                <option value="Maize">Maize (மக்காச்சோளம்)</option>
-                <option value="Sorghum">Sorghum (சோளம்)</option>
-                <option value="Napier">Napier Grass (நேப்பியர்)</option>
-                <option value="Green Gram">Green Gram Residue (பயறு)</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text-muted);display:block" data-i18n="dairyFarmAreaLabel">Farm Area (ac)</label>
-              <input type="number" id="df-input-acres" value="4.5" step="0.5" style="width:60px;padding:4px 8px;font-size:13px" onchange="recalculateCattlePlan()">
-            </div>
-          </div>
-        </div>
-
-        <!-- 4 Step Closed-Loop Visual -->
-        <div class="df-flow-steps">
-          <div class="df-step-box">
-            <span class="df-step-num" data-i18n="dairyStep1Badge">Step 1 · Rotation Biomass</span>
-            <span class="df-step-title" data-i18n="dairyStep1Title">🌾 Fodder Harvest</span>
-            <div class="df-step-val" id="df-biomass-val">-- Tonnes</div>
-            <div class="df-step-desc" data-i18n="dairyStep1Desc">Ensiled fodder biomass from rotation</div>
-          </div>
-          <div class="df-step-box">
-            <span class="df-step-num" data-i18n="dairyStep2Badge">Step 2 · Herd Ration</span>
-            <span class="df-step-title" data-i18n="dairyStep2Title">🐄 Feed Security</span>
-            <div class="df-step-val" id="df-security-val">-- Months</div>
-            <div class="df-step-desc" id="df-daily-feed-val" data-i18n="dairyStep2Desc">Daily herd silage ration</div>
-          </div>
-          <div class="df-step-box">
-            <span class="df-step-num" data-i18n="dairyStep3Badge">Step 3 · Dairy Output</span>
-            <span class="df-step-title" data-i18n="dairyStep3Title">🥛 Milk Yield Boost</span>
-            <div class="df-step-val" style="color:var(--green-400)" id="df-step-revenue-gain">--</div>
-            <div class="df-step-desc" data-i18n="dairyStep3Desc">Projected herd milk yield revenue gain</div>
-          </div>
-          <div class="df-step-box">
-            <span class="df-step-num" data-i18n="dairyStep4Badge">Step 4 · Soil Restorer</span>
-            <span class="df-step-title" data-i18n="dairyStep4Title">🌱 Recycled Dung (FYM)</span>
-            <div class="df-step-val" style="color:#a78bfa" id="df-soc-boost-val">-- Carbon</div>
-            <div class="df-step-desc" id="df-npk-recycle-val" data-i18n="dairyStep4Desc">Organic nutrients recycled to soil</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Interactive Grid: Silage Scanner & Diagnostics Form -->
-      <div class="df-grid-2">
-        <!-- Silage Test Card -->
-        <div class="card" style="padding:22px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-            <div>
-              <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px" data-i18n="dairyScreenerTitle">
-                <span>🔬</span> Rapid Silage Quality Screener
-              </h3>
-              <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)" data-i18n="dairyScreenerSubtitle">Supports Manual Data Entry & Live IoT ESP32 Sensor Telemetry</p>
-            </div>
-            <span id="df-node-status-chip" class="chip info" style="font-size:11px" data-i18n="dairyHardwareOnline">Hardware Node: Online</span>
-          </div>
-
-          <!-- Entry Mode Switcher Tabs -->
-          <div class="df-mode-switcher">
-            <button type="button" id="df-tab-manual" class="df-mode-btn active" onclick="switchDairyEntryMode('manual')" data-i18n="dairyTabManual">
-              <span>✍️</span> <span>Manual Data Entry (கைமுறை பதிவு)</span>
-            </button>
-            <button type="button" id="df-tab-esp" class="df-mode-btn" onclick="switchDairyEntryMode('esp')" data-i18n="dairyTabEsp">
-              <span>⚡</span> <span>Live ESP32 Telemetry (ESP32 நேரலை)</span>
-            </button>
-          </div>
-
-          <!-- ══════ PANEL 1: MANUAL ENTRY ══════ -->
-          <div id="df-panel-manual">
-            <!-- Quick Presets -->
-            <div class="df-presets-bar">
-              <span style="font-size:11px;font-weight:600;color:var(--text-muted)" data-i18n="dairyQuickPresets">Quick Presets:</span>
-              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('good')" data-i18n="dairyPresetGood">
-                🟢 Optimal Silage (Good)
-              </button>
-              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('moderate')" data-i18n="dairyPresetMod">
-                🟡 Heating Pit (Moderate)
-              </button>
-              <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="applySilagePreset('poor')" data-i18n="dairyPresetPoor">
-                🔴 Spoiled / High Moisture (Poor)
-              </button>
-            </div>
-
-            <form id="df-silage-form" onsubmit="submitSilageTest(event)">
-              <div class="grid-2" style="gap:14px;margin-bottom:14px">
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px" data-i18n="dairyTargetNode">Target Silage Node</label>
-                  <select id="df-in-device" style="width:100%">
-                    <option value="DF01">DF01 — Main Bunk Pit Sensor</option>
-                    <option value="DF02" selected>DF02 — Silo Tower Probe Node</option>
-                  </select>
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px" data-i18n="dairyForageCrop">Forage Crop Type</label>
-                  <select id="df-in-feedtype" style="width:100%">
-                    <option value="maize_silage">🌽 Maize Silage (மக்காச்சோளம்)</option>
-                    <option value="sorghum_silage">🌾 Sorghum Silage (சோளம்)</option>
-                    <option value="napier_silage">🌱 Co-4 Napier Grass (நேப்பியர்)</option>
-                    <option value="alfalfa_silage">🌿 Alfalfa / Lucerne (குதிரை மசால்)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="grid-2" style="gap:14px;margin-bottom:14px">
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
-                    <span data-i18n="dairyPhSensor">Silage pH Sensor</span>
-                    <span style="color:var(--green-400);font-size:11px" data-i18n="dairyIdealPh">Ideal: 3.8 – 4.4</span>
-                  </label>
-                  <input type="number" id="df-in-ph" step="0.01" placeholder="e.g. 4.10" min="3.0" max="7.0" style="width:100%" required>
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
-                    <span data-i18n="dairyMoisture">Moisture %</span>
-                    <span style="color:#38bdf8;font-size:11px" data-i18n="dairyIdealMoisture">Ideal: 60% – 70%</span>
-                  </label>
-                  <input type="number" id="df-in-moisture" step="0.1" placeholder="e.g. 65.0" min="40" max="85" style="width:100%" required>
-                </div>
-              </div>
-
-              <div class="grid-2" style="gap:14px;margin-bottom:14px">
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
-                    <span data-i18n="dairyCoreTemp">Internal Core Temp (°C)</span>
-                    <span style="color:#fbbf24;font-size:11px" data-i18n="dairyProbeDs18">Probe DS18B20</span>
-                  </label>
-                  <input type="number" id="df-in-temp" step="0.1" placeholder="e.g. 28.0" style="width:100%" required>
-                </div>
-                <div>
-                  <label style="font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;margin-bottom:4px">
-                    <span data-i18n="dairyAmbientTemp">Ambient Shed Temp (°C)</span>
-                    <span style="color:var(--text-muted);font-size:11px" data-i18n="dairyAirBaseline">Air Baseline</span>
-                  </label>
-                  <input type="number" id="df-in-ambient" step="0.1" placeholder="e.g. 26.0" style="width:100%" required>
-                </div>
-              </div>
-
-              <!-- TCS3200 RGB Sensor inputs & Swatch -->
-              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px;margin-bottom:14px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                  <span style="font-size:12px;font-weight:600;color:var(--text-secondary)" data-i18n="dairyColorSensor">TCS3200 Optical Color Sensor (RGB Spectrum)</span>
-                  <div class="df-swatch-box" id="df-color-swatch" style="background-color:rgb(145, 140, 52)" title="Live TCS3200 Color Spectrum"></div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:10px;align-items:center">
-                  <div>
-                    <label style="font-size:10px;color:var(--text-muted);display:block" data-i18n="dairyRed">Red (R)</label>
-                    <input type="number" id="df-in-r" placeholder="140" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
-                  </div>
-                  <div>
-                    <label style="font-size:10px;color:var(--text-muted);display:block" data-i18n="dairyGreen">Green (G)</label>
-                    <input type="number" id="df-in-g" placeholder="135" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
-                  </div>
-                  <div>
-                    <label style="font-size:10px;color:var(--text-muted);display:block" data-i18n="dairyBlue">Blue (B)</label>
-                    <input type="number" id="df-in-b" placeholder="50" min="0" max="255" style="width:100%;padding:4px 8px;font-size:12px" oninput="updateColorSwatch()">
-                  </div>
-                  <div>
-                    <label style="font-size:10px;color:var(--text-muted);display:block" data-i18n="dairyMouldCheck">Mould Check</label>
-                    <select id="df-in-mould" style="width:100%;padding:4px 8px;font-size:12px">
-                      <option value="Low">Clean (No Mould)</option>
-                      <option value="High">Visible Mould</option>
-                      <option value="Unknown" selected>Sensor-Only</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" id="df-btn-submit-test" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;font-weight:600" data-i18n="dairyBtnSubmit">
-                <span>💾</span> Save & Evaluate Manual Batch
-              </button>
-            </form>
-          </div>
-
-          <!-- ══════ PANEL 2: LIVE ESP32 TELEMETRY ══════ -->
-          <div id="df-panel-esp" style="display:none">
-            <!-- Hardware Stream Status Bar -->
-            <div class="df-live-header">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span id="df-esp-pulse" class="df-pulse-dot"></span>
-                <div>
-                  <div style="font-size:13px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px">
-                    <span id="df-esp-device-title" data-i18n="dairyEspProbeDF01">ESP32 Silage Probe (DF01)</span>
-                    <span id="df-esp-badge" class="chip success" style="font-size:10px;padding:2px 6px" data-i18n="dairyEspOnline">ONLINE</span>
-                  </div>
-                  <div style="font-size:11px;color:var(--text-muted)" id="df-esp-last-seen" data-i18n="dairyEspBroadcasting">Broadcasting telemetry live</div>
-                </div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="chip" style="font-size:11px;background:rgba(255,255,255,0.06)" id="df-esp-rssi">📶 -58 dBm</span>
-                <span class="chip" style="font-size:11px;background:rgba(255,255,255,0.06)" id="df-esp-battery">🔋 95%</span>
-              </div>
-            </div>
-
-            <!-- Quick Simulator Controls for Demo / Testing -->
-            <div class="df-presets-bar" style="justify-content:space-between">
-              <span style="font-size:11px;font-weight:600;color:var(--text-muted)" data-i18n="dairySimulateIngestion">Simulate ESP32 Ingestion:</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('good')" data-i18n="dairySimGood">
-                  ⚡ Good Stream
-                </button>
-                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('heating')" data-i18n="dairySimHeating">
-                  ⚡ Heating Stream
-                </button>
-                <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 8px" onclick="simulateLiveESPPacket('sour')" data-i18n="dairySimSour">
-                  ⚡ Sour Stream
-                </button>
-              </div>
-            </div>
-
-            <!-- Live Digital Telemetry Meters -->
-            <div class="df-live-meters">
-              <div class="df-live-meter-card" id="df-card-ph">
-                <div style="font-size:11px;color:var(--text-muted)" data-i18n="dairyMeterPh">⚗️ SILAGE pH</div>
-                <div class="df-meter-val" style="color:var(--green-400)" id="df-live-val-ph">--</div>
-                <div class="df-meter-sub" id="df-live-status-ph" data-i18n="dairyAwaitingTelemetry">Awaiting Telemetry</div>
-              </div>
-              <div class="df-live-meter-card" id="df-card-moist">
-                <div style="font-size:11px;color:var(--text-muted)" data-i18n="dairyMeterMoisture">💧 MOISTURE</div>
-                <div class="df-meter-val" style="color:#38bdf8" id="df-live-val-moist">--%</div>
-                <div class="df-meter-sub" id="df-live-status-moist" data-i18n="dairyIdeal6070">Ideal 60–70%</div>
-              </div>
-              <div class="df-live-meter-card" id="df-card-temp">
-                <div style="font-size:11px;color:var(--text-muted)" data-i18n="dairyMeterTemp">🌡️ CORE TEMP</div>
-                <div class="df-meter-val" style="color:#fbbf24" id="df-live-val-temp">--°C</div>
-                <div class="df-meter-sub" id="df-live-status-temp" data-i18n="dairyProbeDs18">Probe DS18B20</div>
-              </div>
-              <div class="df-live-meter-card" id="df-card-color">
-                <div style="font-size:11px;color:var(--text-muted)" data-i18n="dairyMeterColor">🎨 TCS3200 RGB</div>
-                <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px">
-                  <div id="df-live-color-swatch" style="width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.3)"></div>
-                  <div style="font-size:12px;font-weight:700" id="df-live-val-rgb">--</div>
-                </div>
-                <div class="df-meter-sub" data-i18n="dairyOpticalSensor">Optical Sensor</div>
-              </div>
-            </div>
-
-            <!-- Ingestion Parameters -->
-            <div class="grid-2" style="gap:14px;margin-bottom:14px">
-              <div>
-                <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px" data-i18n="dairyActiveIoTNode">Active IoT Node</label>
-                <select id="df-esp-select-device" style="width:100%" onchange="changeLiveDevice(this.value)">
-                  <option value="DF01" selected>DF01 — ESP32 Bunk Pit Probe</option>
-                  <option value="DF02">DF02 — ESP32 Silo Tower Node</option>
-                </select>
-              </div>
-              <div>
-                <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px" data-i18n="dairyForageCropBatch">Forage Crop Batch</label>
-                <select id="df-esp-select-crop" style="width:100%">
-                  <option value="maize_silage">🌽 Maize Silage (மக்காச்சோளம்)</option>
-                  <option value="sorghum_silage">🌾 Sorghum Silage (சோளம்)</option>
-                  <option value="napier_silage">🌱 Co-4 Napier Grass (நேப்பியர்)</option>
-                  <option value="alfalfa_silage">🌿 Alfalfa / Lucerne (குதிரை மசால்)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Primary Action -->
-            <button type="button" id="df-btn-capture-esp" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;font-weight:600" onclick="captureLiveESPReading()" data-i18n="dairyBtnCaptureEsp">
-              <span>📥</span> Capture & Evaluate Live ESP Reading
-            </button>
-
-            <!-- Hardware Ingestion Endpoint Tip -->
-            <div style="margin-top:14px;padding:10px 14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid rgba(255,255,255,0.06);font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center">
-              <span>🔌 ESP32 Wi-Fi Endpoint: <code style="color:#86efac;font-size:11.5px">POST /api/dairyfeed/ingest</code></span>
-              <span class="chip" style="font-size:10px;background:rgba(34,197,94,0.15);color:#86efac" data-i18n="dairyPort3000Ready">Port 3000 Ready</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Side: Diagnostics & Instant Result -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <!-- Real-time Result Box (Hidden until user submits a test) -->
-          <div id="df-instant-result" class="card" style="display:none;padding:20px;border-color:rgba(34, 197, 94, 0.4);background:rgba(6, 78, 59, 0.15)">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green-400)" data-i18n="dairyTestDiagResult">Test Diagnostics Result</span>
-              <span id="df-res-score" style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--green-400)">—</span>
-            </div>
-            <div style="margin-bottom:12px">
-              <span id="df-res-quality" class="chip success" style="font-size:12px">—</span>
-            </div>
-            <div id="df-res-breakdown" style="margin-bottom:14px"></div>
-            <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;border-left:3px solid var(--green-400)">
-              <div style="font-size:11px;font-weight:700;color:var(--green-300);margin-bottom:4px" data-i18n="dairyVetAdvisory">🌾 Veterinary & Agronomic Advisory</div>
-              <div id="df-res-advisory" style="font-size:12.5px;line-height:1.5;color:var(--text-primary)"></div>
-            </div>
-          </div>
-
-          <!-- Silage Quality Benchmarks Guide -->
-          <div class="card" style="padding:18px">
-            <h4 style="margin:0 0 10px;font-size:13px;display:flex;align-items:center;gap:6px" data-i18n="dairyBenchmarksTitle">
-              <span>📖</span> Silage Agronomic Benchmarks
-            </h4>
-            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
-              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
-                <span style="color:var(--text-secondary)" data-i18n="dairyBenchIdealPh">Ideal Silage pH:</span>
-                <b style="color:var(--green-400)">3.8 – 4.4</b>
-              </div>
-              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
-                <span style="color:var(--text-secondary)" data-i18n="dairyBenchIdealMoist">Ideal Moisture Range:</span>
-                <b style="color:#38bdf8">60% – 70%</b>
-              </div>
-              <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:5px">
-                <span style="color:var(--text-secondary)" data-i18n="dairyBenchMaxTemp">Max Core Temp Rise (ΔT):</span>
-                <b style="color:#fbbf24" data-i18n="dairyBenchTempDesc">&lt; 3.0°C over ambient</b>
-              </div>
-              <div style="display:flex;justify-content:space-between">
-                <span style="color:var(--text-secondary)" data-i18n="dairyBenchColor">Optimal Olive Green RGB:</span>
-                <b style="color:#86efac" data-i18n="dairyBenchColorDesc">R:130-150 · G:125-145 · B:40-60</b>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 3: Telemetry Log & Batch History -->
-      <div class="card" style="padding:22px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-          <div>
-            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px" data-i18n="dairyBatchLogTitle">
-              <span>📋</span> Silage Batch Log & Sensor Telemetry
-            </h3>
-            <p style="margin:2px 0 0;font-size:12px;color:var(--text-muted)" data-i18n="dairyBatchLogSubtitle">Live historical tests synced from ESP32 Sensor & Camera nodes</p>
-          </div>
-          <button class="btn btn-secondary" style="font-size:11px" onclick="loadDairyFeedView()">
-            <span data-i18n="dairyRefreshBtn">🔄 Refresh Telemetry</span>
-          </button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th data-i18n="dairyThSampleId">Sample ID</th>
-                <th data-i18n="dairyThNode">Node</th>
-                <th data-i18n="dairyThCrop">Silage Crop</th>
-                <th data-i18n="dairyThPh">pH</th>
-                <th data-i18n="dairyThMoisture">Moisture</th>
-                <th data-i18n="dairyThTempRise">Temp Rise</th>
-                <th data-i18n="dairyThScore">Score</th>
-                <th data-i18n="dairyThTier">Quality Tier</th>
-                <th data-i18n="dairyThAction">Action</th>
-              </tr>
-            </thead>
-            <tbody id="df-history-tbody">
-              <tr>
-                <td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)" data-i18n="dairyLoadingTelemetry">Loading telemetry data…</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
     <!-- ── VIEW: B2B ENTERPRISE & FPO COMMAND CENTER ─────────────────── -->
     <div id="view-b2b" class="view">
 
@@ -3540,9 +3064,9 @@
       <span class="mb-icon">♻️</span>
       <span class="mb-label" data-i18n="mbNavRotation">Rotation</span>
     </button>
-    <button class="mb-nav-item" data-view="dairyfeed" onclick="navigate('dairyfeed')">
-      <span class="mb-icon">🐄</span>
-      <span class="mb-label" data-i18n="mbNavDairy">Dairy</span>
+    <button class="mb-nav-item" data-view="fertilizer" onclick="navigate('fertilizer')">
+      <span class="mb-icon">🌱</span>
+      <span class="mb-label" data-i18n="navFertilizer">Fertilizer</span>
     </button>
     <button class="mb-nav-item" data-view="b2b" id="mb-nav-b2b" onclick="navigate('b2b')" style="display:none">
       <span class="mb-icon">🏢</span>
@@ -3567,7 +3091,6 @@
 <script src="js/fertilizer.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/gpsZones.js"></script>
-<script src="js/dairyfeed.js"></script>
 <script src="js/b2b.js"></script>
 <script src="js/reportPdf.js"></script>
 <script src="js/chatbot.js"></script>

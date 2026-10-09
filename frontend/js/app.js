@@ -389,7 +389,7 @@ function selectLoginTab(type) {
     if (emailInput && (!emailInput.value || emailInput.value === 'admin@kovaifpo.org')) {
       emailInput.value = 'farmer@uzhavukaappaan.in';
     }
-    if (subEl) subEl.textContent = 'Individual Farm Precision · Soil Sensing · Crop Rotation & Dairy Feeder';
+    if (subEl) subEl.textContent = 'Individual Farm Precision · Soil Sensing · Crop Rotation & Smart Fertilizer';
   } else {
     if (tabFarmer) tabFarmer.className = 'portal-toggle-btn tab-farmer';
     if (tabEnt) tabEnt.className = 'portal-toggle-btn active tab-enterprise';

@@ -1066,11 +1066,10 @@ IOT FLEET ASSET STATUS:
 - Offline: ${d.iot_fleet.offline}
 - Maintenance: ${d.iot_fleet.maintenance || 8}
 
-LIVESTOCK SILAGE & INTEGRATED FARMING SYSTEM:
-- Silage Batches Tested: ${d.dairyfeed_silage_telemetry.total_batches_tested}
-- Active Pit Probes: ${d.dairyfeed_silage_telemetry.active_silage_probes}
-- Monthly Fodder Yield Capacity: ${d.dairyfeed_silage_telemetry.estimated_monthly_fodder_yield_tons} Tons
-- FYM Manure Soil Replenishment: ${d.dairyfeed_silage_telemetry.fym_manure_return_tons || 4800} Tons / mo
+FERTILIZER & NUTRITION MANAGEMENT:
+- Recommended STCR Formulations: Active
+- Precision NPK Replenishment: Real-Time Synced
+- Soil Health Status: ${d.soil_health_distribution.healthy_pct}% Optimal
 =============================================================
 UZHAVU KAAPPAAN — Agriculture Intelligence & FPO Command Center
 `;
