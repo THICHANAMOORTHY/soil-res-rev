@@ -658,7 +658,6 @@
   // Register in global scope
   window.loadFertilizerView = loadFertilizerView;
   window.fertilizerModule = {
-    setInputSource,
     fetchPrices,
     fetchSensorTelemetry,
     runRecommendation,
