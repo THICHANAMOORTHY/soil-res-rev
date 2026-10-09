@@ -11,6 +11,7 @@
     soil_type: 'Loamy Soil',
     field_area: 2.5,
     area_unit: 'acres',
+    cropUserSelected: false,
     soil: {
       nitrogen: 210,
       phosphorus: 16,
@@ -35,8 +36,7 @@
     initEventListeners();
     await fetchPrices();
     await fetchSupportedCrops();
-    await fetchSensorTelemetry();
-    await runRecommendation();
+    await syncConnectedSoilSenseData();
   }
 
   function initEventListeners() {
@@ -61,84 +61,198 @@
       };
     }
 
-    // ESP Live Server Sync button
-    const btnSyncServer = document.getElementById('fert-btn-sync-server');
-    if (btnSyncServer) {
-      btnSyncServer.onclick = async () => {
-        btnSyncServer.disabled = true;
-        btnSyncServer.textContent = '🔄 Syncing ESP Server...';
-        await fetchSensorTelemetry(true);
-        btnSyncServer.disabled = false;
-        btnSyncServer.textContent = '🔄 Sync ESP Live Server';
+    // Sync Soil Sense button
+    const btnRefreshSense = document.getElementById('fert-btn-refresh-soil-sense');
+    if (btnRefreshSense) {
+      btnRefreshSense.onclick = async () => {
+        btnRefreshSense.disabled = true;
+        btnRefreshSense.textContent = '🔄 Syncing...';
+        await syncConnectedSoilSenseData(true);
+        btnRefreshSense.disabled = false;
+        btnRefreshSense.textContent = '🔄 Sync Soil Sense';
       };
     }
 
-    // Interactive Field Area slider and input
-    const areaInput = document.getElementById('fert-input-area');
+    // Interactive Field Area slider in cost calculator card
     const areaSlider = document.getElementById('fert-slider-area');
-    if (areaInput && areaSlider) {
-      areaInput.oninput = (e) => {
-        const val = parseFloat(e.target.value) || 1;
-        areaSlider.value = Math.min(val, 25);
-        fertState.field_area = val;
-        recalculateFieldCosts();
-      };
+    if (areaSlider) {
       areaSlider.oninput = (e) => {
         const val = parseFloat(e.target.value) || 1;
-        areaInput.value = val;
         fertState.field_area = val;
         recalculateFieldCosts();
       };
     }
 
-    // Crop, Growth stage, Soil type dropdowns
+    // Crop dropdown in connected context bar
     const selectCrop = document.getElementById('fert-select-crop');
     if (selectCrop) {
       selectCrop.onchange = (e) => {
         fertState.crop = e.target.value;
+        fertState.cropUserSelected = true;
         updateGrowthStageOptions(fertState.crop);
-      };
-    }
-
-    const selectStage = document.getElementById('fert-select-stage');
-    if (selectStage) {
-      selectStage.onchange = (e) => {
-        fertState.growth_stage = e.target.value;
-      };
-    }
-
-    const selectSoil = document.getElementById('fert-select-soil');
-    if (selectSoil) {
-      selectSoil.onchange = (e) => {
-        fertState.soil_type = e.target.value;
-      };
-    }
-
-    const selectUnit = document.getElementById('fert-select-unit');
-    if (selectUnit) {
-      selectUnit.onchange = (e) => {
-        fertState.area_unit = e.target.value;
-        const lbl = document.getElementById('fert-area-unit-label');
-        if (lbl) lbl.textContent = fertState.area_unit;
+        const summaryEl = document.getElementById('fert-farm-summary-label');
+        if (summaryEl) {
+          summaryEl.textContent = `Farm #${fertState.farm_id} · ${fertState.crop} (${fertState.soil_type}) · ${fertState.field_area} Acres`;
+        }
         runRecommendation();
       };
     }
 
-    // Manual sensor inputs
-    ['n', 'p', 'k', 'ph', 'moisture', 'temperature'].forEach(param => {
-      const el = document.getElementById(`fert-manual-${param}`);
-      if (el) {
-        el.oninput = (e) => {
-          const val = parseFloat(e.target.value);
-          if (param === 'n') fertState.soil.nitrogen = val;
-          if (param === 'p') fertState.soil.phosphorus = val;
-          if (param === 'k') fertState.soil.potassium = val;
-          if (param === 'ph') fertState.soil.ph = val;
-          if (param === 'moisture') fertState.soil.moisture = val;
-          if (param === 'temperature') fertState.soil.temperature = val;
-        };
+    // Growth Stage dropdown in connected context bar
+    const selectStage = document.getElementById('fert-select-stage');
+    if (selectStage) {
+      selectStage.onchange = (e) => {
+        fertState.growth_stage = e.target.value;
+        runRecommendation();
+      };
+    }
+  }
+
+  /**
+   * Synchronize soil parameters directly from active Soil Analysis workspace (manual entry or live ESP32)
+   */
+  async function syncConnectedSoilSenseData(interactive = false) {
+    const farmId = fertState.farm_id;
+    const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
+
+    // 1. Detect active Soil Analysis mode
+    let activeMode = 'manual';
+    try {
+      activeMode = localStorage.getItem('soilDataMode') || 'manual';
+    } catch (_) {}
+
+    // 2. Fetch farm metadata (active crop, area, soil type)
+    try {
+      const dash = window.state?.dashboard || await apiGet(`/dashboard?farm_id=${farmId}`);
+      if (dash && dash.farm) {
+        fertState.field_area = dash.farm.area_acres || fertState.field_area || 2.5;
+        fertState.soil_type = dash.farm.soil_type || fertState.soil_type || 'Loamy Soil';
+        if (!fertState.cropUserSelected) {
+          if (dash.recommended_crop?.name) {
+            fertState.crop = dash.recommended_crop.name;
+          } else if (dash.farm.current_crop) {
+            fertState.crop = dash.farm.current_crop;
+          }
+        }
       }
-    });
+    } catch (e) {
+      console.warn('[fertilizer] Could not load dashboard farm info:', e);
+    }
+
+    // 3. Retrieve sensed soil data from active sources
+    let sensorPacket = null;
+    let manualData = null;
+    let isLiveConnected = false;
+
+    // Check ESP32 live hardware reading
+    try {
+      const liveRes = await apiGet(`/soil-sensor/latest?farm_id=${farmId}`);
+      if (liveRes && liveRes.reading) {
+        sensorPacket = liveRes.reading;
+        isLiveConnected = !!liveRes.connected;
+      }
+    } catch (_) {}
+
+    // Check manual soil card / laboratory analysis
+    try {
+      const manualRes = await apiGet(`/soil-analysis?farm_id=${farmId}&source=manual`);
+      if (manualRes) {
+        manualData = manualRes;
+      }
+    } catch (_) {}
+
+    // Also check DOM sliders from Soil Analysis if currently present in memory
+    const nSlider = document.getElementById('n-slider');
+    const pSlider = document.getElementById('p-slider');
+    const kSlider = document.getElementById('k-slider');
+    const phSlider = document.getElementById('ph-slider');
+    if (activeMode === 'manual' && nSlider && pSlider && kSlider && phSlider) {
+      manualData = {
+        nitrogen: parseFloat(nSlider.value) || 210,
+        phosphorus: parseFloat(pSlider.value) || 16,
+        potassium: parseFloat(kSlider.value) || 145,
+        ph: (parseFloat(phSlider.value) || 65) / 10,
+        organic_carbon: (parseFloat(document.getElementById('oc-slider')?.value) || 55) / 100,
+      };
+    }
+
+    // Prioritize activeMode:
+    let resolved = null;
+    let modeLabel = '';
+    let badgeClass = 'chip success';
+
+    if (activeMode === 'live' && sensorPacket) {
+      resolved = sensorPacket;
+      modeLabel = isLiveConnected
+        ? (isTa ? '🟢 நேரலை ESP32 சென்சார் இணைக்கப்பட்டுள்ளது' : '🟢 Live ESP32 Hardware Telemetry Connected')
+        : (isTa ? '🟡 ESP32 சென்சார் ஆஃப்லைன் (கடைசி அளவீடு)' : '🟡 ESP32 Telemetry Standby (Recent Edge Packet)');
+      badgeClass = isLiveConnected ? 'chip success' : 'chip warning';
+      fertState.sensorConnected = isLiveConnected;
+    } else if (manualData) {
+      resolved = manualData;
+      modeLabel = isTa
+        ? '⚙️ மண் பரிசோதனை அட்டை (கைமுறை உள்ளீடு)'
+        : '⚙️ Calibrated Soil Test Card (Manual Entry)';
+      badgeClass = 'chip info';
+      fertState.sensorConnected = false;
+    } else if (sensorPacket) {
+      resolved = sensorPacket;
+      modeLabel = '🟢 Live ESP32 Hardware Telemetry Connected';
+      badgeClass = 'chip success';
+      fertState.sensorConnected = isLiveConnected;
+    }
+
+    if (resolved) {
+      if (resolved.nitrogen !== undefined) fertState.soil.nitrogen = Number(resolved.nitrogen);
+      if (resolved.phosphorus !== undefined) fertState.soil.phosphorus = Number(resolved.phosphorus);
+      if (resolved.potassium !== undefined) fertState.soil.potassium = Number(resolved.potassium);
+      if (resolved.ph !== undefined) fertState.soil.ph = Number(resolved.ph);
+      if (resolved.soil_moisture !== undefined) fertState.soil.moisture = Number(resolved.soil_moisture);
+      if (resolved.air_temperature !== undefined) fertState.soil.temperature = Number(resolved.air_temperature);
+      if (resolved.organic_carbon !== undefined) fertState.soil.organic_carbon = Number(resolved.organic_carbon);
+    }
+
+    // 4. Update Connected Context Bar UI
+    const badgeEl = document.getElementById('fert-source-mode-badge');
+    const summaryEl = document.getElementById('fert-farm-summary-label');
+    const previewEl = document.getElementById('fert-sensed-values-preview');
+    const cropSelect = document.getElementById('fert-select-crop');
+    const stageSelect = document.getElementById('fert-select-stage');
+    const sliderArea = document.getElementById('fert-slider-area');
+
+    if (badgeEl) {
+      badgeEl.className = badgeClass;
+      badgeEl.textContent = modeLabel || '🧪 Sensed Soil Data Synchronized';
+    }
+
+    if (summaryEl) {
+      summaryEl.textContent = `Farm #${farmId} · ${fertState.crop} (${fertState.soil_type}) · ${fertState.field_area} Acres`;
+    }
+
+    if (previewEl) {
+      previewEl.innerHTML = `Sensed Soil Chemistry: Nitrogen: <b style="color:#818cf8">${fertState.soil.nitrogen} kg/ha</b> · Phosphorus: <b style="color:#c084fc">${fertState.soil.phosphorus} kg/ha</b> · Potassium: <b style="color:#fbbf24">${fertState.soil.potassium} kg/ha</b> · pH: <b style="color:#22d3ee">${fertState.soil.ph}</b> · Moisture: <b style="color:#38bdf8">${fertState.soil.moisture}%</b> · Temp: <b style="color:#fb923c">${fertState.soil.temperature}°C</b>`;
+    }
+
+    if (cropSelect && fertState.crop) {
+      // Find matching option
+      const matchingOpt = Array.from(cropSelect.options).find(o => o.value.toLowerCase() === fertState.crop.toLowerCase());
+      if (matchingOpt) cropSelect.value = matchingOpt.value;
+    }
+
+    if (stageSelect && fertState.growth_stage) {
+      stageSelect.value = fertState.growth_stage;
+    }
+
+    if (sliderArea && fertState.field_area) {
+      sliderArea.value = Math.min(25, Math.max(0.5, fertState.field_area));
+    }
+
+    if (interactive && typeof showToast === 'function') {
+      showToast('Soil sense data refreshed from ' + (activeMode === 'live' ? 'live ESP32 sensor' : 'calibrated manual soil card') + '.', 'success');
+    }
+
+    // 5. Automatically compute recommendations and dosages
+    await runRecommendation();
   }
 
   async function fetchPrices(force = false) {
@@ -192,47 +306,6 @@
     `).join('');
   }
 
-  async function fetchSensorTelemetry(interactive = false) {
-    try {
-      const res = await apiGet(`/fertilizer/sensor-reading?farm_id=${fertState.farm_id}`);
-      const reading = res?.reading;
-
-      if (reading) {
-        fertState.sensorConnected = !!res?.connected;
-        updateFormInputsFromReading(reading);
-        if (interactive) {
-          if (typeof showToast === 'function') {
-            showToast('Soil parameters synchronized with ESP live server stream.', 'success');
-          }
-          await runRecommendation();
-        }
-      }
-    } catch (err) {
-      console.warn('[fertilizer] Error fetching sensor reading from server:', err);
-    }
-  }
-
-  function updateFormInputsFromReading(r) {
-    if (r.nitrogen !== undefined) fertState.soil.nitrogen = Number(r.nitrogen);
-    if (r.phosphorus !== undefined) fertState.soil.phosphorus = Number(r.phosphorus);
-    if (r.potassium !== undefined) fertState.soil.potassium = Number(r.potassium);
-    if (r.ph !== undefined) fertState.soil.ph = Number(r.ph);
-    if (r.soil_moisture !== undefined) fertState.soil.moisture = Number(r.soil_moisture);
-    if (r.air_temperature !== undefined) fertState.soil.temperature = Number(r.air_temperature);
-
-    const setVal = (id, val) => {
-      const el = document.getElementById(id);
-      if (el && val !== undefined) el.value = val;
-    };
-
-    setVal('fert-manual-n', fertState.soil.nitrogen);
-    setVal('fert-manual-p', fertState.soil.phosphorus);
-    setVal('fert-manual-k', fertState.soil.potassium);
-    setVal('fert-manual-ph', fertState.soil.ph);
-    setVal('fert-manual-moisture', fertState.soil.moisture);
-    setVal('fert-manual-temperature', fertState.soil.temperature);
-  }
-
   /**
    * Run recommendation calculation
    */
@@ -243,20 +316,6 @@
     if (resultsEl) resultsEl.style.opacity = '0.4';
 
     try {
-      // Read latest values from DOM inputs to ensure manual edits or synced values are included
-      const readVal = (id, fallback) => {
-        const el = document.getElementById(id);
-        const v = parseFloat(el ? el.value : fallback);
-        return isNaN(v) ? fallback : v;
-      };
-
-      fertState.soil.nitrogen = readVal('fert-manual-n', fertState.soil.nitrogen);
-      fertState.soil.phosphorus = readVal('fert-manual-p', fertState.soil.phosphorus);
-      fertState.soil.potassium = readVal('fert-manual-k', fertState.soil.potassium);
-      fertState.soil.ph = readVal('fert-manual-ph', fertState.soil.ph);
-      fertState.soil.moisture = readVal('fert-manual-moisture', fertState.soil.moisture);
-      fertState.soil.temperature = readVal('fert-manual-temperature', fertState.soil.temperature);
-
       const payload = {
         farm_id: fertState.farm_id,
         crop: fertState.crop,
@@ -659,7 +718,7 @@
   window.loadFertilizerView = loadFertilizerView;
   window.fertilizerModule = {
     fetchPrices,
-    fetchSensorTelemetry,
+    syncConnectedSoilSenseData,
     runRecommendation,
     recalculateFieldCosts,
   };

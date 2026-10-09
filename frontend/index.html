@@ -2011,18 +2011,27 @@
         </div>
       </div>
 
-      <!-- Input & Calibration Section -->
-      <div class="fert-grid-2">
-        <!-- Crop & Field Specifications Card -->
-        <div class="glass-card">
-          <div class="card-title mb-16" style="display:flex;align-items:center;gap:8px">
-            <span>🌾</span> <span>1. Crop & Field Parameters</span>
+      <!-- Connected Soil Sense & Agronomic Context -->
+      <div class="glass-card mb-24" id="fert-connected-bar" style="background:linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(99, 102, 241, 0.07) 100%);border:1px solid rgba(16, 185, 129, 0.25);padding:18px 24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+              <span id="fert-source-mode-badge" class="chip success" style="font-size:12px;font-weight:700">
+                🟢 Live ESP32 Hardware Telemetry Connected
+              </span>
+              <span style="font-size:14px;color:#f1f5f9;font-weight:700" id="fert-farm-summary-label">
+                Farm #101 · Paddy (Loamy Soil) · 2.5 Acres
+              </span>
+            </div>
+            <div style="font-size:13px;color:#cbd5e1" id="fert-sensed-values-preview">
+              Sensed Soil Chemistry: Nitrogen: <b style="color:#818cf8">-- kg/ha</b> · Phosphorus: <b style="color:#c084fc">-- kg/ha</b> · Potassium: <b style="color:#fbbf24">-- kg/ha</b> · pH: <b style="color:#22d3ee">--</b> · Moisture: <b style="color:#38bdf8">--%</b> · Temp: <b style="color:#fb923c">--°C</b>
+            </div>
           </div>
-
-          <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-            <div class="form-group">
-              <label class="form-label">Crop Name</label>
-              <select id="fert-select-crop" class="form-select">
+          
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px">
+              <label class="form-label" style="margin:0;font-size:12px;color:#94a3b8">Crop:</label>
+              <select id="fert-select-crop" class="form-select" style="font-size:13px;padding:6px 12px;width:auto;min-width:145px">
                 <option value="Paddy">Paddy (நெல்)</option>
                 <option value="Maize">Maize (மக்காச்சோளம்)</option>
                 <option value="Sugarcane">Sugarcane (கரும்பு)</option>
@@ -2033,10 +2042,9 @@
                 <option value="Millets">Millets (தினை/கேழ்வரகு)</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Crop Growth Stage</label>
-              <select id="fert-select-stage" class="form-select">
+            <div style="display:flex;align-items:center;gap:8px">
+              <label class="form-label" style="margin:0;font-size:12px;color:#94a3b8">Stage:</label>
+              <select id="fert-select-stage" class="form-select" style="font-size:13px;padding:6px 12px;width:auto;min-width:145px">
                 <option value="Basal / Sowing">Basal / Sowing (விதைப்பு)</option>
                 <option value="Vegetative">Vegetative (வளர்ச்சிப் பருவம்)</option>
                 <option value="Tillering / Flowering">Tillering / Flowering (பூக்கும் பருவம்)</option>
@@ -2044,83 +2052,12 @@
                 <option value="Full Crop Cycle">Full Crop Cycle (முழு பருவம்)</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Soil Type</label>
-              <select id="fert-select-soil" class="form-select">
-                <option value="Loamy Soil">Loamy Soil (வண்டல் மண்)</option>
-                <option value="Clayey Soil">Clayey Soil (களிமண்)</option>
-                <option value="Black Cotton Soil">Black Cotton Soil (கரிசல் மண்)</option>
-                <option value="Red Sandy Loam">Red Sandy Loam (செம்மண்)</option>
-                <option value="Alluvial Soil">Alluvial Soil (ஆற்றுப் படுகை)</option>
-                <option value="Laterite Soil">Laterite Soil (செம்பொறை மண்)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Field Area & Unit</label>
-              <div style="display:flex;gap:6px">
-                <input type="number" id="fert-input-area" class="form-input" value="2.5" step="0.1" min="0.1" style="flex:1" />
-                <select id="fert-select-unit" class="form-select" style="width:105px">
-                  <option value="acres" selected>Acres</option>
-                  <option value="hectares">Hectares</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:18px">
-            <button class="btn btn-primary" onclick="fertilizerModule.runRecommendation()" style="width:100%">
-              <span>⚡</span> Calculate Fertilizer Prescription & Costs
+            <button class="btn btn-secondary" id="fert-btn-refresh-soil-sense" style="font-size:12px;padding:6px 14px">
+              🔄 Sync Soil Sense
             </button>
-          </div>
-        </div>
-
-        <!-- Soil Nutrient Telemetry & Sensor Readings Card -->
-        <div class="glass-card">
-          <div class="card-title mb-16" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-            <span style="display:flex;align-items:center;gap:8px">
-              <span>🧪</span> <span>2. Soil Parameters (Manual Entry & ESP Live Server)</span>
-            </span>
-            <button class="btn btn-secondary" id="fert-btn-sync-server" style="font-size:12px;padding:4px 12px">
-              🔄 Sync ESP Live Server
+            <button class="btn btn-secondary" onclick="navigate('soil-analysis')" style="font-size:12px;padding:6px 14px">
+              🧪 Soil Analysis Workspace →
             </button>
-          </div>
-
-          <div id="fert-manual-inputs-wrap">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-              <div class="form-group">
-                <label class="form-label" style="color:var(--nutrient-n)">Nitrogen (N) kg/ha</label>
-                <input type="number" id="fert-manual-n" class="form-input" value="210" min="10" max="800" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="color:var(--nutrient-p)">Phosphorus (P) kg/ha</label>
-                <input type="number" id="fert-manual-p" class="form-input" value="16" min="2" max="150" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="color:var(--nutrient-k)">Potassium (K) kg/ha</label>
-                <input type="number" id="fert-manual-k" class="form-input" value="145" min="20" max="800" />
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-              <div class="form-group">
-                <label class="form-label" style="color:var(--nutrient-ph)">Soil pH</label>
-                <input type="number" id="fert-manual-ph" class="form-input" value="6.5" step="0.1" min="3.5" max="10.5" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="color:#38bdf8">Soil Moisture %</label>
-                <input type="number" id="fert-manual-moisture" class="form-input" value="42" min="5" max="100" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="color:#fb923c">Temperature °C</label>
-                <input type="number" id="fert-manual-temperature" class="form-input" value="28" min="5" max="55" />
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;font-size:12px;color:#94a3b8;line-height:1.5">
-            💡 <b>Data Fusion & ML Alignment:</b> Real-time readings from the ESP live server stream into these inputs on startup. Farmers can adjust any value manually or click "Sync ESP Live Server" to refresh live readings. The machine learning models immediately analyze both manual edits and live server readings to determine optimal fertilizers.
           </div>
         </div>
       </div>
