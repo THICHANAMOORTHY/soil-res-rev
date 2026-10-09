@@ -26,13 +26,29 @@ async function exportFarmerReportPDF() {
     const farmId = window.state?.farm_id || 101;
     const fileName = `UZHAVU_KAAPPAAN_Farmer_Soil_Health_Action_Plan_${farmId}.pdf`;
 
+    // Detect active soil mode (live vs manual)
+    let activeMode = 'auto';
+    try {
+      activeMode = localStorage.getItem('soilDataMode') || window.soilDataMode || 'auto';
+    } catch (_) {}
+
+    let queryParams = `farm_id=${farmId}&mode=${activeMode}&t=${Date.now()}`;
+    if (activeMode === 'manual') {
+      const n = document.getElementById('n-slider')?.value;
+      const p = document.getElementById('p-slider')?.value;
+      const k = document.getElementById('k-slider')?.value;
+      const ph = document.getElementById('ph-slider')?.value ? (parseFloat(document.getElementById('ph-slider').value) / 10).toFixed(1) : undefined;
+      const oc = document.getElementById('oc-slider')?.value ? (parseFloat(document.getElementById('oc-slider').value) / 100).toFixed(2) : undefined;
+      if (n !== undefined) queryParams += `&n=${n}&p=${p}&k=${k}&ph=${ph}&oc=${oc}`;
+    }
+
     // Strategy 1: Fetch PDF as Blob from server endpoint
     let downloaded = false;
     try {
       const downloadEndpoints = [
-        `/download/farmer-plan-pdf?farm_id=${farmId}&t=${Date.now()}`,
-        `/download/uzhavu-kaappaan-pdf?farm_id=${farmId}&t=${Date.now()}`,
-        `/api/report/pdf?farm_id=${farmId}&t=${Date.now()}`,
+        `/download/farmer-plan-pdf?${queryParams}`,
+        `/download/uzhavu-kaappaan-pdf?${queryParams}`,
+        `/api/report/pdf?${queryParams}`,
         '/downloads/UZHAVU_KAAPPAAN_Farmer_Soil_Health_Action_Plan.pdf',
         '/downloads/CropSmart_Farmer_Soil_Health_Action_Plan.pdf'
       ];

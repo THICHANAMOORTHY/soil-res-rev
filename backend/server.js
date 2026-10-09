@@ -55,14 +55,22 @@ const fs = require('fs');
 app.use('/downloads', express.static(path.join(__dirname, '..', 'downloads')));
 
 app.get(['/download/farmer-plan-pdf', '/download/uzhavu-kaappaan-pdf', '/api/report/pdf'], (req, res) => {
-  const farmId = parseInt(req.query.farm_id, 10) || 101;
+  const mode = req.query.mode || 'auto';
   const fileName = `UZHAVU_KAAPPAAN_Farmer_Soil_Health_Action_Plan_Farm_${farmId}.pdf`;
   const tempOutPath = path.join(__dirname, '..', 'downloads', fileName);
 
   try {
     const { execSync } = require('child_process');
     const pyBin = process.env.PYTHON_BIN || (process.platform === 'win32' ? 'python' : 'python3');
-    execSync(`${pyBin} generate_farmer_pdf.py --farm-id ${farmId} --out "${tempOutPath}"`, {
+    const port = process.env.PORT || 3000;
+    const extraArgs = [`--mode ${mode}`, `--api-port ${port}`];
+    if (req.query.n !== undefined) extraArgs.push(`--manual-n ${Number(req.query.n)}`);
+    if (req.query.p !== undefined) extraArgs.push(`--manual-p ${Number(req.query.p)}`);
+    if (req.query.k !== undefined) extraArgs.push(`--manual-k ${Number(req.query.k)}`);
+    if (req.query.ph !== undefined) extraArgs.push(`--manual-ph ${Number(req.query.ph)}`);
+    if (req.query.oc !== undefined) extraArgs.push(`--manual-oc ${Number(req.query.oc)}`);
+
+    execSync(`${pyBin} generate_farmer_pdf.py --farm-id ${farmId} ${extraArgs.join(' ')} --out "${tempOutPath}"`, {
       cwd: path.join(__dirname, '..'),
       timeout: 10000,
     });

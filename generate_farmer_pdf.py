@@ -134,10 +134,10 @@ FALLBACK_FARMS = {
     }
 }
 
-def fetch_live_farm_data(farm_id=101, api_base="http://localhost:3000/api"):
+def fetch_live_farm_data(farm_id=101, mode="auto", api_port=3000):
     """Fetches real-time dashboard and sensor data from the active Node.js server."""
     try:
-        url = f"{api_base}/dashboard?farm_id={farm_id}"
+        url = f"http://localhost:{api_port}/api/dashboard?farm_id={farm_id}&mode={mode}"
         req = urllib.request.Request(url, headers={"User-Agent": "UK-PDF-Generator/1.0"})
         with urllib.request.urlopen(req, timeout=3) as res:
             if res.status == 200:
@@ -147,7 +147,18 @@ def fetch_live_farm_data(farm_id=101, api_base="http://localhost:3000/api"):
         print(f"[PDF-Gen] Live API fetch note: {e}, using local profile fallback for farm #{farm_id}.")
     return None
 
-def build_pdf_data(raw_data=None, farm_id=101):
+def compute_manual_health_score(n, p, k, ph, oc):
+    """Computes standard 0-100 soil health score from N, P, K, pH, OC."""
+    score = 0
+    score += min(20, max(0, (n / 120.0) * 20))
+    score += min(20, max(0, (p / 45.0) * 20))
+    score += min(20, max(0, (k / 90.0) * 20))
+    ph_diff = abs(ph - 7.0)
+    score += max(5, 20 - (ph_diff * 7))
+    score += min(20, max(0, (oc / 0.8) * 20))
+    return int(min(100, max(20, round(score))))
+
+def build_pdf_data(raw_data=None, farm_id=101, mode="auto", manual_overrides=None):
     """Normalizes and prepares complete real-time agronomic data for PDF generation."""
     data = raw_data or {}
     farm = data.get("farm") or {}
@@ -165,23 +176,56 @@ def build_pdf_data(raw_data=None, farm_id=101):
     soil = data.get("soil_data") or {}
     sensor = data.get("sensor_data") or {}
 
-    # Real-time Soil Scout probe readings with fallback to specific farm baseline
-    n_val = float(soil.get("nitrogen") if soil.get("nitrogen") is not None else farm_info["n"])
-    p_val = float(soil.get("phosphorus") if soil.get("phosphorus") is not None else farm_info["p"])
-    k_val = float(soil.get("potassium") if soil.get("potassium") is not None else farm_info["k"])
-    ph_val = float(soil.get("ph") if soil.get("ph") is not None else farm_info["ph"])
-    oc_val = float(soil.get("organic_carbon") if soil.get("organic_carbon") is not None else farm_info["oc"])
+    # Determine report mode: live, manual, or auto
+    overrides = manual_overrides or {}
+    has_manual_overrides = any(k in overrides and overrides[k] is not None for k in ["n", "p", "k", "ph", "oc"])
 
-    # Microclimate & IoT probe attributes
-    temp_val = sensor.get("temperature") or soil.get("temperature") or soil.get("air_temperature") or 31.5
-    moist_val = sensor.get("moisture") or soil.get("moisture") or soil.get("soil_moisture") or 45
-    tds_val = sensor.get("tds") or soil.get("tds") or 420
-    light_val = sensor.get("light") or soil.get("light") or data.get("light") or 74
-    is_reliable = sensor.get("is_reliable", soil.get("is_reliable", True))
-    device_id = sensor.get("device_id") or f"soil-scout-{farm_id_val % 100:02d}"
-    source = soil.get("source") or ("esp32" if sensor else "lab_report")
+    if mode == "manual" or has_manual_overrides:
+        source = "manual"
+        device_id = "Manual-Lab-Test"
+        n_val = float(overrides.get("n") if overrides.get("n") is not None else (soil.get("nitrogen") if soil.get("nitrogen") is not None else farm_info["n"]))
+        p_val = float(overrides.get("p") if overrides.get("p") is not None else (soil.get("phosphorus") if soil.get("phosphorus") is not None else farm_info["p"]))
+        k_val = float(overrides.get("k") if overrides.get("k") is not None else (soil.get("potassium") if soil.get("potassium") is not None else farm_info["k"]))
+        ph_val = float(overrides.get("ph") if overrides.get("ph") is not None else (soil.get("ph") if soil.get("ph") is not None else farm_info["ph"]))
+        oc_val = float(overrides.get("oc") if overrides.get("oc") is not None else (soil.get("organic_carbon") if soil.get("organic_carbon") is not None else farm_info["oc"]))
+        health_score = compute_manual_health_score(n_val, p_val, k_val, ph_val, oc_val)
+        temp_val = 28.0
+        moist_val = 50.0
+        tds_val = 350.0
+        light_val = 80.0
+        is_reliable = True
+        is_live = False
+    elif mode == "live" or (sensor and len(sensor) > 0) or soil.get("source") == "esp32":
+        source = "esp32"
+        device_id = sensor.get("device_id") or "esp32-irrigation-01"
+        is_live = sensor.get("is_live", True)
+        temp_val = float(sensor.get("temperature") if sensor.get("temperature") is not None else (soil.get("temperature") if soil.get("temperature") is not None else 31.0))
+        moist_val = float(sensor.get("moisture") if sensor.get("moisture") is not None else (soil.get("moisture") if soil.get("moisture") is not None else 45.0))
+        tds_val = float(sensor.get("tds") if sensor.get("tds") is not None else (soil.get("tds") if soil.get("tds") is not None else 420.0))
+        light_val = float(sensor.get("light") if sensor.get("light") is not None else (soil.get("light") if soil.get("light") is not None else 100.0))
+        is_reliable = bool(sensor.get("is_reliable", soil.get("is_reliable", True)))
+        n_val = float(sensor.get("nitrogen") if sensor.get("nitrogen") is not None else (soil.get("nitrogen") if soil.get("nitrogen") is not None else farm_info["n"]))
+        p_val = float(sensor.get("phosphorus") if sensor.get("phosphorus") is not None else (soil.get("phosphorus") if soil.get("phosphorus") is not None else farm_info["p"]))
+        k_val = float(sensor.get("potassium") if sensor.get("potassium") is not None else (soil.get("potassium") if soil.get("potassium") is not None else farm_info["k"]))
+        ph_val = float(sensor.get("ph") if sensor.get("ph") is not None else (soil.get("ph") if soil.get("ph") is not None else farm_info["ph"]))
+        oc_val = float(sensor.get("organic_carbon") if sensor.get("organic_carbon") is not None else (soil.get("organic_carbon") if soil.get("organic_carbon") is not None else farm_info["oc"]))
+        health_score = int(data.get("farm_health") if data.get("farm_health") is not None else compute_manual_health_score(n_val, p_val, k_val, ph_val, oc_val))
+    else:
+        source = soil.get("source") or "lab_report"
+        device_id = f"soil-scout-{farm_id_val % 100:02d}"
+        is_live = False
+        n_val = float(soil.get("nitrogen") if soil.get("nitrogen") is not None else farm_info["n"])
+        p_val = float(soil.get("phosphorus") if soil.get("phosphorus") is not None else farm_info["p"])
+        k_val = float(soil.get("potassium") if soil.get("potassium") is not None else farm_info["k"])
+        ph_val = float(soil.get("ph") if soil.get("ph") is not None else farm_info["ph"])
+        oc_val = float(soil.get("organic_carbon") if soil.get("organic_carbon") is not None else farm_info["oc"])
+        temp_val = 31.0
+        moist_val = 45.0
+        tds_val = 420.0
+        light_val = 75.0
+        is_reliable = True
+        health_score = int(data.get("farm_health") or farm_info["health"])
 
-    health_score = int(data.get("farm_health") or farm_info["health"])
     rec_crop = data.get("recommended_crop") or {}
     rec_crop_name = rec_crop.get("name") or farm_info.get("rec_crop", "Green Gram")
     rec_crop_score = float(rec_crop.get("score") or 88.5)
@@ -212,6 +256,7 @@ def build_pdf_data(raw_data=None, farm_id=101):
         "tds_val": float(tds_val),
         "light_val": float(light_val),
         "is_reliable": bool(is_reliable),
+        "is_live": bool(is_live),
         "device_id": device_id,
         "source": source,
         "health_score": health_score,
@@ -305,17 +350,60 @@ def generate_pdf_from_data(pdf_path, pdata):
     crop_lookup = load_crop_lookup()
 
     # ── 1. HEADER (Brand & Farmer Metadata) ─────────────────────
-    source_badge = "🟢 Live IoT Soil Scout Probe" if pdata["source"] == "esp32" else "📋 Verified Lab Ingestion"
+    is_manual = (pdata["source"] == "manual")
+    if is_manual:
+        source_badge = "📋 Verified Soil Health Card & Lab Entry"
+        data_mode_desc = f"<b>Data Mode:</b> {source_badge} · Certified P025 Model"
+        live_status_str = "Lab Certified Ingestion"
+        sec1_title = "<b>1. Soil Laboratory Test Assessment & Nutrient Deficit Diagnostics</b>"
+        box_data = [
+            [
+                Paragraph("<b>🧪 Lab pH Value</b>", table_cell_bold),
+                Paragraph("<b>🌱 Organic Carbon</b>", table_cell_bold),
+                Paragraph("<b>⚖️ N:P:K Ratio</b>", table_cell_bold),
+                Paragraph("<b>🏆 Soil Health Score</b>", table_cell_bold),
+                Paragraph("<b>📋 Diagnostic Source</b>", table_cell_bold),
+            ],
+            [
+                Paragraph(f"<font size=10 color='#0284c7'><b>{pdata['ph_val']:.2f}</b></font><br/><font color='#64748b' size=6.5>{'Optimal pH' if 6.0 <= pdata['ph_val'] <= 7.5 else 'Needs amendment'}</font>", table_cell),
+                Paragraph(f"<font size=10 color='#16a34a'><b>{pdata['oc_val']:.2f}%</b></font><br/><font color='#64748b' size=6.5>{'Sufficient' if pdata['oc_val'] >= 0.75 else 'Low Organic Matter'}</font>", table_cell),
+                Paragraph(f"<font size=9.5 color='#7c3aed'><b>{pdata['n_val']:.0f}:{pdata['p_val']:.0f}:{pdata['k_val']:.0f}</b></font><br/><font color='#64748b' size=6.5>kg/ha ratio</font>", table_cell),
+                Paragraph(f"<font size=10 color='{'#16a34a' if pdata['health_score'] >= 65 else '#ca8a04'}'><b>{pdata['health_score']}/100</b></font><br/><font color='#64748b' size=6.5>{'Good fertility' if pdata['health_score'] >= 65 else 'Deficiencies detected'}</font>", table_cell),
+                Paragraph("<font size=9 color='#065f46'><b>Farmer Lab Entry</b></font><br/><font color='#64748b' size=6.5>Soil Health Card</font>", table_cell),
+            ]
+        ]
+    else:
+        source_badge = f"🟢 Live IoT Telemetry Mode (Device: {pdata['device_id']})"
+        data_mode_desc = f"<b>Data Mode:</b> {source_badge} · Certified P025 Model"
+        live_status_str = "Active & Calibrated" if pdata["is_reliable"] else "Moisture Stabilizing"
+        sec1_title = "<b>1. Live Sensor Diagnostic & Rhizosphere Telemetry</b>"
+        box_data = [
+            [
+                Paragraph("<b>☀️ Sunlight / Light</b>", table_cell_bold),
+                Paragraph("<b>💧 Soil Moisture</b>", table_cell_bold),
+                Paragraph("<b>🌡️ Temperature</b>", table_cell_bold),
+                Paragraph("<b>🧪 TDS Minerals</b>", table_cell_bold),
+                Paragraph("<b>📡 Probe Reliability</b>", table_cell_bold),
+            ],
+            [
+                Paragraph(f"<font size=10 color='#ca8a04'><b>{pdata['light_val']:.0f}%</b></font><br/><font color='#64748b' size=6.5>Optimal photoperiod</font>", table_cell),
+                Paragraph(f"<font size=10 color='#0284c7'><b>{pdata['moist_val']:.1f}%</b></font><br/><font color='#64748b' size=6.5>Rhizosphere moisture</font>", table_cell),
+                Paragraph(f"<font size=10 color='#0f172a'><b>{pdata['temp_val']:.1f} °C</b></font><br/><font color='#64748b' size=6.5>Soil probe sensor</font>", table_cell),
+                Paragraph(f"<font size=10 color='#7c3aed'><b>{pdata['tds_val']:.0f} ppm</b></font><br/><font color='#64748b' size=6.5>Conductivity & salts</font>", table_cell),
+                Paragraph(f"<font size=9.5 color='{'#16a34a' if pdata['is_reliable'] else '#d97706'}'><b>{'🟢 Live Online' if pdata.get('is_live', True) else '🟡 Standby'}</b></font><br/><font color='#64748b' size=6.5>{pdata['device_id']}</font>", table_cell),
+            ]
+        ]
+
     header_left = [
         Paragraph("<b>🌱 UZHAVU KAAPPAAN (உழவு காப்பான்)</b>", title_style),
         Paragraph("<b>Smart Crop Rotation & Farmer Soil Feeding Action Plan</b>", subtitle_style),
-        Paragraph(f"<b>Data Mode:</b> {source_badge} (Device: {pdata['device_id']}) · Certified P025 Model", subtitle_style)
+        Paragraph(data_mode_desc, subtitle_style)
     ]
     header_right = [
         Paragraph(f"<b>Farmer:</b> {pdata['farmer_name']} | <b>Land Area:</b> {pdata['area_acres']:.1f} Acres", meta_style),
         Paragraph(f"<b>Location:</b> {pdata['farm_loc']} ({pdata['coords']}) | <b>Irrigation:</b> {pdata['irrigation']}", meta_style),
         Paragraph(f"<b>Plan Ref ID:</b> #UK-P025-FARM-{pdata['farm_id']} | <b>Report Date:</b> {pdata['timestamp']}", meta_style),
-        Paragraph(f"<b>Live Reading:</b> {'Active & Calibrated' if pdata['is_reliable'] else 'Moisture Stabilizing'}", meta_style),
+        Paragraph(f"<b>Live Reading:</b> {live_status_str}", meta_style),
     ]
 
     header_table = Table([[header_left, header_right]], colWidths=[290, 261])
@@ -326,27 +414,10 @@ def generate_pdf_from_data(pdf_path, pdata):
     story.append(header_table)
     story.append(HRFlowable(width="100%", thickness=1.2, color=colors.HexColor('#10b981'), spaceBefore=2, spaceAfter=4))
 
-    # ── 2. SECTION 1: REAL-TIME SOIL DIAGNOSTIC & IOT TELEMETRY ────────
-    story.append(Paragraph("<b>1. Live Sensor Diagnostic & Soil Fertility Telemetry</b>", section_heading))
+    # ── 2. SECTION 1: REAL-TIME SOIL DIAGNOSTIC & TELEMETRY ────────
+    story.append(Paragraph(sec1_title, section_heading))
 
-    # Real-time IoT Probe Telemetry Box
-    probe_box_data = [
-        [
-            Paragraph("<b>☀️ Sunlight / Light</b>", table_cell_bold),
-            Paragraph("<b>💧 Soil Moisture</b>", table_cell_bold),
-            Paragraph("<b>🌡️ Temperature</b>", table_cell_bold),
-            Paragraph("<b>🧪 TDS Minerals</b>", table_cell_bold),
-            Paragraph("<b>📡 Probe Reliability</b>", table_cell_bold),
-        ],
-        [
-            Paragraph(f"<font size=10 color='#ca8a04'><b>{pdata['light_val']:.0f}%</b></font><br/><font color='#64748b' size=6.5>Optimal photoperiod</font>", table_cell),
-            Paragraph(f"<font size=10 color='#0284c7'><b>{pdata['moist_val']:.0f}%</b></font><br/><font color='#64748b' size=6.5>Rhizosphere moisture</font>", table_cell),
-            Paragraph(f"<font size=10 color='#0f172a'><b>{pdata['temp_val']:.1f} °C</b></font><br/><font color='#64748b' size=6.5>Soil probe sensor</font>", table_cell),
-            Paragraph(f"<font size=10 color='#7c3aed'><b>{pdata['tds_val']:.0f} ppm</b></font><br/><font color='#64748b' size=6.5>Conductivity & salts</font>", table_cell),
-            Paragraph(f"<font size=9.5 color='{'#16a34a' if pdata['is_reliable'] else '#d97706'}'><b>{'🟢 Reliable' if pdata['is_reliable'] else '🟡 Standby'}</b></font><br/><font color='#64748b' size=6.5>Soil Scout v2</font>", table_cell),
-        ]
-    ]
-    t_probe = Table(probe_box_data, colWidths=[110, 110, 110, 110, 111])
+    t_probe = Table(box_data, colWidths=[110, 110, 110, 110, 111])
     t_probe.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8fafc')),
         ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#ffffff')),
@@ -588,6 +659,13 @@ def generate_pdf_from_data(pdf_path, pdata):
 def main():
     parser = argparse.ArgumentParser(description="Generate Farmer Soil Health Action Plan PDF")
     parser.add_argument("--farm-id", type=int, default=101, help="Farm ID to generate for")
+    parser.add_argument("--mode", type=str, default="auto", choices=["auto", "live", "manual"], help="Report mode (live sensor vs manual lab entry)")
+    parser.add_argument("--api-port", type=int, default=3000, help="Local API port")
+    parser.add_argument("--manual-n", type=float, default=None, help="Manual Nitrogen override")
+    parser.add_argument("--manual-p", type=float, default=None, help="Manual Phosphorus override")
+    parser.add_argument("--manual-k", type=float, default=None, help="Manual Potassium override")
+    parser.add_argument("--manual-ph", type=float, default=None, help="Manual pH override")
+    parser.add_argument("--manual-oc", type=float, default=None, help="Manual Organic Carbon override")
     parser.add_argument("--json-file", type=str, default="", help="Path to JSON file containing live dashboard data")
     parser.add_argument("--json-data", type=str, default="", help="JSON string of live dashboard data")
     parser.add_argument("--out", type=str, default="", help="Output PDF file path")
@@ -607,9 +685,16 @@ def main():
             print(f"Error reading json-file: {e}", file=sys.stderr)
 
     if not raw_data:
-        raw_data = fetch_live_farm_data(farm_id=args.farm_id)
+        raw_data = fetch_live_farm_data(farm_id=args.farm_id, mode=args.mode, api_port=args.api_port)
 
-    pdata = build_pdf_data(raw_data, farm_id=args.farm_id)
+    manual_overrides = {
+        "n": args.manual_n,
+        "p": args.manual_p,
+        "k": args.manual_k,
+        "ph": args.manual_ph,
+        "oc": args.manual_oc
+    }
+    pdata = build_pdf_data(raw_data, farm_id=args.farm_id, mode=args.mode, manual_overrides=manual_overrides)
 
     downloads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads")
     os.makedirs(downloads_dir, exist_ok=True)

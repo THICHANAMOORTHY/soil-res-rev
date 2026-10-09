@@ -9,16 +9,21 @@ router.get('/', (req, res) => {
   const farm    = db.farms.find(f => f.farm_id === farm_id);
   const farmer  = farm ? db.farmers.find(f => f.farmer_id === farm.farmer_id) : null;
 
-  // Latest soil data — null when the farm has never had a soil test. Nothing is
-  // invented for that case; the client shows a "run a soil analysis" prompt.
-  const soil = [...db.soil_data]
-    .filter(s => s.farm_id === farm_id)
-    .sort((a, b) => b.soil_id - a.soil_id)[0] || null;
+  const mode = req.query.mode; // 'live' | 'manual' | undefined
+  const reqSource = mode === 'manual' ? 'manual' : (mode === 'live' ? 'esp32' : null);
+
+  let matchingSoil = [...db.soil_data].filter(s => s.farm_id === farm_id);
+  if (reqSource) {
+    const bySource = matchingSoil.filter(s => s.source === reqSource);
+    if (bySource.length) matchingSoil = bySource;
+  }
+  const soil = matchingSoil.sort((a, b) => b.soil_id - a.soil_id)[0] || null;
 
   // Latest sensor status & reading from the sensor table
   const sensorStatus = db.live_sensor_status[farm_id];
-  const isHardwareLive = Boolean(sensorStatus && sensorStatus.hardware_last_seen && (Date.now() - sensorStatus.hardware_last_seen <= 15000));
-  const liveSensor = isHardwareLive ? sensorStatus.last_reading : null;
+  const sensorAgeMs = sensorStatus?.hardware_last_seen ? (Date.now() - sensorStatus.hardware_last_seen) : null;
+  const isHardwareLive = Boolean(sensorAgeMs !== null && sensorAgeMs <= 60000);
+  const liveSensor = sensorStatus?.last_reading || null;
 
   // Direct sensor light value from sensor table
   const sensorLight = (liveSensor && liveSensor.light !== undefined && liveSensor.light !== null)
@@ -129,8 +134,8 @@ router.get('/', (req, res) => {
     farm_health:            soil ? soil.soil_health_score : null,
     soil_alerts:            soil ? (soil.deficiencies || []) : [],
     light:                  sensorLight,
-    sensor_data: isHardwareLive && liveSensor ? {
-      device_id:      sensorStatus.device_id || 'Soil-Scout-01',
+    sensor_data: liveSensor ? {
+      device_id:      sensorStatus?.device_id || 'esp32-irrigation-01',
       light:          sensorLight,
       nitrogen:       liveSensor.nitrogen,
       phosphorus:     liveSensor.phosphorus,
@@ -141,8 +146,9 @@ router.get('/', (req, res) => {
       tds:            liveSensor.tds,
       ph:             liveSensor.ph,
       is_reliable:    liveSensor.is_reliable,
-      last_seen:      sensorStatus.hardware_last_seen,
-      is_live:        true
+      last_seen:      sensorStatus?.hardware_last_seen,
+      seconds_ago:    sensorAgeMs ? Math.round(sensorAgeMs / 1000) : null,
+      is_live:        isHardwareLive
     } : null,
     soil_data: soil ? {
       nitrogen:      soil.nitrogen,

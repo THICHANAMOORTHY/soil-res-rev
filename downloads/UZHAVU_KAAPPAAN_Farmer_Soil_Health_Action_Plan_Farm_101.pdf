@@ -42,7 +42,7 @@ endobj
 endobj
 8 0 obj
 <<
-/Author (\(anonymous\)) /CreationDate (D:20261009223933+05'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261009223933+05'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+/Author (\(anonymous\)) /CreationDate (D:20261009230258+05'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261009230258+05'00') /Producer (ReportLab PDF Library - \(opensource\)) 
   /Subject (\(unspecified\)) /Title (\(anonymous\)) /Trapped /False
 >>
 endobj
@@ -53,7 +53,7 @@ endobj
 endobj
 10 0 obj
 <<
-/Length 22736
+/Length 22735
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -78,7 +78,7 @@ Q
 q
 1 0 0 1 6 1 cm
 q
-BT 1 0 0 1 0 12 Tm 10 TL /F2 8 Tf .278431 .333333 .411765 rg (Data Mode:) Tj /F1 8 Tf ( ) Tj /F3 8 Tf 10 TL (n) Tj /F1 8 Tf 10 TL ( Verified Lab Ingestion \(Device: soil-scout-01\) \267 Certified P025) Tj T* (Model) Tj T* ET
+BT 1 0 0 1 0 12 Tm 10 TL /F2 8 Tf .278431 .333333 .411765 rg (Data Mode:) Tj /F1 8 Tf ( ) Tj /F3 8 Tf 10 TL (n) Tj /F1 8 Tf 10 TL ( Live IoT Telemetry Mode \(Device: soil-scout-01\) \267 Certified) Tj T* (P025 Model) Tj T* ET
 Q
 Q
 q
@@ -96,7 +96,7 @@ Q
 q
 1 0 0 1 296 17 cm
 q
-BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Plan Ref ID:) Tj /F1 7.5 Tf ( #UK-P025-FARM-101 | ) Tj /F2 7.5 Tf (Report Date:) Tj /F1 7.5 Tf ( 09 Oct 2026, 10:39 PM) Tj T* (IST) Tj T* ET
+BT 1 0 0 1 0 12.5 Tm 10 TL /F2 7.5 Tf .2 .254902 .333333 rg (Plan Ref ID:) Tj /F1 7.5 Tf ( #UK-P025-FARM-101 | ) Tj /F2 7.5 Tf (Report Date:) Tj /F1 7.5 Tf ( 09 Oct 2026, 11:02 PM) Tj T* (IST) Tj T* ET
 Q
 Q
 q
@@ -121,7 +121,7 @@ Q
 q
 1 0 0 1 28 728.6898 cm
 q
-BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (1. Live Sensor Diagnostic & Soil Fertility Telemetry) Tj T* ET
+BT 1 0 0 1 0 2.5 Tm 12 TL /F2 9.5 Tf .058824 .090196 .164706 rg (1. Live Sensor Diagnostic & Rhizosphere Telemetry) Tj T* ET
 Q
 Q
 q
@@ -171,19 +171,19 @@ Q
 q
 1 0 0 1 6 3 cm
 q
-BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .792157 .541176 .015686 rg (74%) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Optimal photoperiod) Tj T* ET
+BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .792157 .541176 .015686 rg (75%) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Optimal photoperiod) Tj T* ET
 Q
 Q
 q
 1 0 0 1 116 3 cm
 q
-BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .007843 .517647 .780392 rg (45%) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Rhizosphere moisture) Tj T* ET
+BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .007843 .517647 .780392 rg (45.0%) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Rhizosphere moisture) Tj T* ET
 Q
 Q
 q
 1 0 0 1 226 3 cm
 q
-BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .058824 .090196 .164706 rg (31.5 \260C) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Soil probe sensor) Tj T* ET
+BT 1 0 0 1 0 8 Tm 9 TL /F2 10 Tf .058824 .090196 .164706 rg (31.0 \260C) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Soil probe sensor) Tj T* ET
 Q
 Q
 q
@@ -195,7 +195,7 @@ Q
 q
 1 0 0 1 446 3 cm
 q
-BT 1 0 0 1 0 8.5 Tm 9 TL /F2 9.5 Tf .086275 .639216 .290196 rg /F3 9.5 Tf 9 TL (n) Tj /F2 9.5 Tf 9 TL ( Reliable) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (Soil Scout v2) Tj T* ET
+BT 1 0 0 1 0 8.5 Tm 9 TL /F2 9.5 Tf .086275 .639216 .290196 rg /F3 9.5 Tf 9 TL (n) Tj /F2 9.5 Tf 9 TL ( Standby) Tj /F1 7.2 Tf .117647 .160784 .231373 rg  T* /F1 6.5 Tf .392157 .454902 .545098 rg (soil-scout-01) Tj T* ET
 Q
 Q
 q
@@ -1127,7 +1127,7 @@ xref
 trailer
 <<
 /ID 
-[<f092a79c7e85250a01d62f8fdca04a07><f092a79c7e85250a01d62f8fdca04a07>]
+[<bf85f266027522910087a7ce323ebe18><bf85f266027522910087a7ce323ebe18>]
 % ReportLab generated PDF document -- digest (opensource)
 
 /Info 8 0 R
@@ -1135,5 +1135,5 @@ trailer
 /Size 11
 >>
 startxref
-23939
+23938
 %%EOF
