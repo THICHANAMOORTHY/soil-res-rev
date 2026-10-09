@@ -14,7 +14,8 @@ const testSuites = [
   { name: 'Full System 17-Endpoint Health Check', cmd: 'python', args: ['-u', 'test_full_system.py'] },
   { name: 'Auth & Password Reset OTP Suite', cmd: 'python', args: ['-u', 'test_auth_otp_suite.py'] },
   { name: 'Farmer Soil Health Action Plan PDF Dynamics', cmd: 'python', args: ['-u', 'test_pdf_content.py'] },
-  { name: 'AI Precision Agronomist Chatbot Suite (11 Cases)', cmd: 'python', args: ['-u', 'test_chatbot_suite.py'] }
+  { name: 'AI Precision Agronomist Chatbot Suite (11 Cases)', cmd: 'python', args: ['-u', 'test_chatbot_suite.py'] },
+  { name: 'Smart Fertilizer Recommendation & ML Suite', cmd: 'python', args: ['-u', 'test_fertilizer_feature.py'] }
 ];
 
 console.log('\n' + '='.repeat(70));
