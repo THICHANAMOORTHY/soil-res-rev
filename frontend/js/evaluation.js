@@ -138,6 +138,41 @@ function renderEvaluationResults(result) {
 
   const isTa = (window.i18n && window.i18n.getLanguage() === 'ta');
 
+  // Render ML Model Insights Banner if available
+  const mlBox = document.getElementById('eval-ml-box');
+  if (mlBox) {
+    if (result.ml_model) {
+      const topCropDisplay = window.tCrop ? tCrop(result.ml_model.top_crop) : result.ml_model.top_crop;
+      mlBox.innerHTML = `
+        <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(52,211,153,0.35);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:26px">🤖</span>
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#34d399;font-weight:750">
+                ${isTa ? 'யந்திரக் கற்றல் மாதிரி (ரேண்டம் ஃபாரஸ்ட் - 300 மரங்கள்)' : 'Uzhavu Kaappaan ML Model (300-Tree Random Forest)'}
+              </div>
+              <div style="font-size:15px;font-weight:700;color:#f8fafc">
+                ${isTa ? 'முன்னணி மாதிரி கணிப்பு:' : 'ML Top Recommendation:'} <span style="color:#10b981;font-weight:800">${topCropDisplay.toUpperCase()}</span> 
+                <span class="chip success" style="margin-left:6px;font-size:11px">${result.ml_model.confidence}% ${isTa ? 'நம்பகத்தன்மை' : 'Confidence'}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:11px;color:#94a3b8;margin-right:4px">${isTa ? 'அடுத்த தேர்வுகள்:' : 'Alternative Fits:'}</span>
+            ${(result.ml_model.top_predictions || []).slice(1, 4).map(p => `
+              <span class="chip info" style="font-size:11px;padding:3px 9px">
+                ${window.tCrop ? tCrop(p.crop).split(' (')[0] : p.crop}: ${p.confidence_pct}%
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      mlBox.style.display = '';
+    } else {
+      mlBox.style.display = 'none';
+    }
+  }
+
   // Leaderboard table
   const tbody = document.getElementById('eval-tbody');
   tbody.innerHTML = result.results.map(r => `

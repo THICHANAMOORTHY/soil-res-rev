@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const db = require('../data/seed');
+const cropMlEngine = require('../services/cropMlEngine');
 
 // ── GET /api/recommendation?farm_id=101 ─────────────────────
 router.get('/', (req, res) => {
@@ -48,8 +49,28 @@ router.get('/', (req, res) => {
     soil_recovery.push(...curve.slice(soil_recovery.length - 1));
   }
 
+  // ML Model Inference (uzhavu_crop_model.joblib)
+  let mlResult = null;
+  try {
+    const weather = db.weather_data.find(w => w.farm_id === farm_id) || {};
+    mlResult = cropMlEngine.predict({
+      n: soil.nitrogen || 50,
+      p: soil.phosphorus || 40,
+      k: soil.potassium || 60,
+      temperature: weather.avg_temp_c || 26,
+      humidity: weather.humidity_pct || 70,
+      ph: soil.ph || 6.5,
+      rainfall: weather.rainfall_mm || 100
+    });
+  } catch (e) {
+    console.warn('[recommendation] ML model inference bypassed:', e.message);
+  }
+
   // Build reasoning
   const reasoning = [];
+  if (mlResult && mlResult.top_crop) {
+    reasoning.push(`300-Tree ML Model predicts highest agronomic suitability for ${mlResult.top_crop.toUpperCase()} (${mlResult.confidence}% confidence)`);
+  }
   if (bestCrop?.is_nitrogen_fixer)        reasoning.push('Improves nitrogen balance through biological fixation');
   if (rotation_plan.length > 1)           reasoning.push('Breaks repeated cultivation cycle');
   if (bestCrop?.water_requirement === 'Low') reasoning.push('Low water requirement suits current irrigation');
@@ -80,6 +101,12 @@ router.get('/', (req, res) => {
     water_requirement:         bestCrop?.water_requirement || 'Low',
     crop_family:               bestCrop?.crop_family || 'Legume',
     is_nitrogen_fixer:         bestCrop?.is_nitrogen_fixer || true,
+    ml_prediction:             mlResult ? {
+      model_name: mlResult.model_name,
+      top_crop: mlResult.top_crop,
+      confidence: mlResult.confidence,
+      top_3: mlResult.predictions.slice(0, 3)
+    } : null
   });
 });
 

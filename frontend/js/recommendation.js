@@ -43,9 +43,15 @@ function renderRecommendation(d) {
   document.getElementById('rec-family').textContent  = familyName;
 
   const nfixEl = document.getElementById('rec-nfix');
-  if (nfixEl) nfixEl.innerHTML = d.is_nitrogen_fixer
-    ? chipTeal('✓ ' + (window.t ? t('nitrogenFixer', 'Nitrogen Fixer') : 'Nitrogen Fixer'))
-    : chipWarning(isTa ? 'தழைச்சத்து நிலைநிறுத்தாது' : 'No N-Fix');
+  if (nfixEl) {
+    let chipsHtml = d.is_nitrogen_fixer
+      ? chipTeal('✓ ' + (window.t ? t('nitrogenFixer', 'Nitrogen Fixer') : 'Nitrogen Fixer'))
+      : chipWarning(isTa ? 'தழைச்சத்து நிலைநிறுத்தாது' : 'No N-Fix');
+    if (d.ml_prediction) {
+      chipsHtml += ` <span class="chip info" style="background:rgba(16,185,129,0.18);border:1px solid rgba(52,211,153,0.38);color:#34d399;font-weight:700">🤖 ML Model: ${d.ml_prediction.confidence}% (${d.ml_prediction.top_crop.toUpperCase()})</span>`;
+    }
+    nfixEl.innerHTML = chipsHtml;
+  }
 
   // Reasoning
   const reasonEl = document.getElementById('rec-reasoning');

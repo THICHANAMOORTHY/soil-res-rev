@@ -1,5 +1,42 @@
 const router = require('express').Router();
 const db = require('../data/seed');
+const cropMlEngine = require('../services/cropMlEngine');
+
+// Mapping between ML model class names and DB crop names/aliases
+const ML_CROP_ALIASES = {
+  'rice': ['Rice', 'Paddy'],
+  'maize': ['Maize', 'Corn'],
+  'chickpea': ['Chickpea', 'Bengal Gram'],
+  'kidneybeans': ['Kidney Beans', 'Rajma'],
+  'pigeonpeas': ['Pigeon Pea', 'Red Gram', 'Tur'],
+  'mothbeans': ['Moth Beans'],
+  'mungbean': ['Green Gram', 'Mung Bean', 'Moong'],
+  'blackgram': ['Black Gram', 'Urad'],
+  'lentil': ['Red Lentil', 'Lentil', 'Masur'],
+  'pomegranate': ['Pomegranate'],
+  'banana': ['Banana'],
+  'mango': ['Mango'],
+  'grapes': ['Grapes'],
+  'watermelon': ['Watermelon'],
+  'muskmelon': ['Muskmelon'],
+  'apple': ['Apple'],
+  'orange': ['Orange'],
+  'papaya': ['Papaya'],
+  'coconut': ['Coconut'],
+  'cotton': ['Cotton'],
+  'jute': ['Jute'],
+  'coffee': ['Coffee']
+};
+
+function matchDbCrop(mlCropName) {
+  const norm = (mlCropName || '').toLowerCase().trim();
+  const aliases = ML_CROP_ALIASES[norm] || [norm];
+  for (const alias of aliases) {
+    const found = db.crops.find(c => c.name.toLowerCase() === alias.toLowerCase() || (c.tamil_name && c.tamil_name.includes(alias)));
+    if (found) return found;
+  }
+  return db.crops.find(c => c.name.toLowerCase().includes(norm)) || null;
+}
 
 function clamp(v, lo = 0, hi = 100) { return Math.min(hi, Math.max(lo, v)); }
 
@@ -294,8 +331,110 @@ router.post('/', (req, res) => {
     });
   });
 
-  res.json({ run_id, results });
+  // Run ML Random Forest prediction for this farm context
+  let mlContext = null;
+  try {
+    const mlInput = {
+      n: soil.nitrogen || 50,
+      p: soil.phosphorus || 40,
+      k: soil.potassium || 60,
+      temperature: weather?.avg_temp_c || 26,
+      humidity: weather?.humidity_pct || 70,
+      ph: soil.ph || 6.5,
+      rainfall: weather?.rainfall_mm || 100
+    };
+    mlContext = cropMlEngine.predict(mlInput);
+  } catch (err) {
+    console.warn('[cropEvaluation] ML prediction failed:', err.message);
+  }
+
+  // Enrich results with ML confidence if matching
+  const enrichedResults = results.map(r => {
+    let mlMatch = null;
+    if (mlContext && mlContext.predictions) {
+      mlMatch = mlContext.predictions.find(p => {
+        const matchedCrop = matchDbCrop(p.crop);
+        return matchedCrop && matchedCrop.crop_id === r.crop_id;
+      });
+    }
+    return {
+      ...r,
+      ml_confidence_pct: mlMatch ? mlMatch.confidence_pct : null,
+      ml_probability: mlMatch ? mlMatch.probability : null,
+      ml_recommended: mlContext && mlContext.top_crop && matchDbCrop(mlContext.top_crop)?.crop_id === r.crop_id
+    };
+  });
+
+  res.json({
+    run_id,
+    results: enrichedResults,
+    ml_model: mlContext ? {
+      algorithm: mlContext.algorithm,
+      n_trees: mlContext.n_trees,
+      top_crop: mlContext.top_crop,
+      confidence: mlContext.confidence,
+      top_predictions: mlContext.predictions.slice(0, 5)
+    } : null
+  });
+});
+
+// ── GET & POST /api/crop-evaluation/ml-predict ─────────────────
+router.all('/ml-predict', (req, res) => {
+  const farm_id = parseInt(req.query.farm_id || req.body.farm_id, 10) || 101;
+  const soil = [...db.soil_data].filter(s => s.farm_id === farm_id).sort((a,b) => b.soil_id - a.soil_id)[0] || {
+    nitrogen: 50, phosphorus: 40, potassium: 60, ph: 6.5
+  };
+  const weather = db.weather_data.find(w => w.farm_id === farm_id) || {
+    avg_temp_c: 26, humidity_pct: 70, rainfall_mm: 100
+  };
+
+  const input = {
+    n: req.query.n !== undefined ? Number(req.query.n) : (req.body.n !== undefined ? Number(req.body.n) : soil.nitrogen),
+    p: req.query.p !== undefined ? Number(req.query.p) : (req.body.p !== undefined ? Number(req.body.p) : soil.phosphorus),
+    k: req.query.k !== undefined ? Number(req.query.k) : (req.body.k !== undefined ? Number(req.body.k) : soil.potassium),
+    temperature: req.query.temp !== undefined ? Number(req.query.temp) : (req.body.temperature !== undefined ? Number(req.body.temperature) : weather.avg_temp_c),
+    humidity: req.query.hum !== undefined ? Number(req.query.hum) : (req.body.humidity !== undefined ? Number(req.body.humidity) : weather.humidity_pct),
+    ph: req.query.ph !== undefined ? Number(req.query.ph) : (req.body.ph !== undefined ? Number(req.body.ph) : soil.ph),
+    rainfall: req.query.rain !== undefined ? Number(req.query.rain) : (req.body.rainfall !== undefined ? Number(req.body.rainfall) : weather.rainfall_mm),
+  };
+
+  try {
+    const prediction = cropMlEngine.predict(input);
+    
+    // Map classes to rich DB crop metadata
+    const enrichedPredictions = prediction.predictions.map(p => {
+      const dbCrop = matchDbCrop(p.crop);
+      return {
+        ...p,
+        crop_id: dbCrop?.crop_id || null,
+        display_name: dbCrop?.name || (p.crop.charAt(0).toUpperCase() + p.crop.slice(1)),
+        tamil_name: dbCrop?.tamil_name || null,
+        crop_family: dbCrop?.crop_family || null,
+        water_requirement: dbCrop?.water_requirement || null,
+        avg_market_price: dbCrop?.avg_market_price || null,
+        avg_yield_per_acre: dbCrop?.avg_yield_per_acre || null
+      };
+    });
+
+    const topDbCrop = matchDbCrop(prediction.top_crop);
+
+    res.json({
+      success: true,
+      model_name: "Uzhavu Kaappaan ML Engine (uzhavu_crop_model.joblib)",
+      algorithm: prediction.algorithm,
+      n_trees: prediction.n_trees,
+      input_features: prediction.input_features,
+      top_crop: topDbCrop?.name || prediction.top_crop,
+      top_crop_tamil: topDbCrop?.tamil_name || null,
+      top_crop_id: topDbCrop?.crop_id || null,
+      confidence: prediction.confidence,
+      predictions: enrichedPredictions
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 router.scoreCrop = scoreCrop;
 module.exports = router;
+
