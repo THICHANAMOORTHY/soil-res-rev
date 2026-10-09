@@ -95,6 +95,42 @@ def test_express_api_endpoints():
     assert out["status"] == "ALL_PASSED"
     print(f"[PASS] 4. Express REST API endpoints verified (/ml-predict, /recommendation, /crop-evaluation with {out['d3_trees']} trees)")
 
+def test_client_side_browser_ml():
+    compiled_path = os.path.join("frontend", "models", "uzhavu_crop_model_compiled.json")
+    assert os.path.exists(compiled_path), f"Compiled client model missing at {compiled_path}"
+    with open(compiled_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data.get("trees", [])) == 300, f"Expected 300 trees, got {len(data.get('trees', []))}"
+    assert len(data.get("classes", [])) == 22, f"Expected 22 classes, got {len(data.get('classes', []))}"
+    
+    code = """
+    const fs = require('fs');
+    const model = JSON.parse(fs.readFileSync('frontend/models/uzhavu_crop_model_compiled.json', 'utf8'));
+    const input = [90, 42, 43, 20.8, 82.0, 6.5, 202.9];
+    const nClasses = model.classes.length;
+    const scores = new Float64Array(nClasses);
+    for (const tree of model.trees) {
+      let node = 0;
+      while (tree.l[node] !== -1) {
+        if (input[tree.f[node]] <= tree.t[node]) { node = tree.l[node]; }
+        else { node = tree.r[node]; }
+      }
+      const leaf = tree.v[String(node)];
+      if (leaf) { for (const [c, p] of Object.entries(leaf)) scores[Number(c)] += p; }
+    }
+    let max = -1, best = -1;
+    for (let c = 0; c < nClasses; c++) {
+      const prob = scores[c] / model.trees.length;
+      if (prob > max) { max = prob; best = c; }
+    }
+    console.log(JSON.stringify({ crop: model.classes[best], conf: (max * 100).toFixed(2) }));
+    """
+    res = subprocess.run(["node", "-e", code], capture_output=True, text=True, check=True)
+    out = json.loads(res.stdout.strip())
+    assert out["crop"].lower() == "rice", f"Expected rice, got {out['crop']}"
+    assert float(out["conf"]) >= 94.0, f"Expected >=94%, got {out['conf']}"
+    print(f"[PASS] 5. In-Browser Client-side ML Model compiled JSON verified (300 trees, 22 classes, Rice @ {out['conf']}%)")
+
 if __name__ == "__main__":
     print("=" * 60)
     print("RUNNING UZHAVU CROP MODEL INTEGRATION TEST SUITE")
@@ -103,6 +139,7 @@ if __name__ == "__main__":
     test_python_cli_predict()
     test_node_crop_ml_engine()
     test_express_api_endpoints()
+    test_client_side_browser_ml()
     print("=" * 60)
     print("ALL TESTS PASSED WITH 100% SUCCESS!")
     print("=" * 60)

@@ -691,8 +691,13 @@ async function runInstantMlPrediction() {
       };
     }
 
-    const data = await apiPost('/crop-evaluation/ml-predict', payload);
-    if (!data.success) throw new Error(data.error || 'ML prediction failed');
+    let data;
+    if (window.cropMlClient && typeof window.cropMlClient.predictCropHybrid === 'function') {
+      data = await window.cropMlClient.predictCropHybrid(payload);
+    } else {
+      data = await apiPost('/crop-evaluation/ml-predict', payload);
+    }
+    if (!data || !data.success) throw new Error(data?.error || 'ML prediction failed');
 
     renderMlPredictionResult(data);
   } catch (err) {
@@ -739,7 +744,10 @@ function renderMlPredictionResult(data) {
             </div>
           </div>
         </div>
-        <div style="text-align:right">
+        <div style="text-align:right;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip info" style="font-size:11px;padding:4px 10px">
+            ${data.is_client_side ? (isTa ? '⚡ உலாவி விளிம்பு ML' : '⚡ In-Browser Edge ML') : (isTa ? '☁️ சர்வர் கிளவுட் ML' : '☁️ Server Cloud ML')}
+          </span>
           <span class="chip info" style="font-size:11px;padding:4px 10px">
             ${soilDataMode === 'live' ? (isTa ? 'நேரலை சென்சார் உள்ளீடு' : 'Live Sensor Telemetry') : (isTa ? 'கைமுறை உள்ளீடு' : 'Manual Entry Input')}
           </span>
