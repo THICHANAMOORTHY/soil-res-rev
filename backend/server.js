@@ -20,7 +20,7 @@ const KNOWN_API_ROUTES = [
   'soil-analysis', 'crop-history', 'candidate-crops', 'crop-evaluation',
   'optimize-rotation', 'soil-simulation', 'recommendation', 'dashboard',
   'weather', 'report', 'chat', 'gps-zones', 'crops', 'farms', 'seasons',
-  'farmers', 'health', 'db-status', 'auth', 'soil-sensor', 'sensor-data', 'dairyfeed', 'silage', 'orgs'
+  'farmers', 'health', 'db-status', 'auth', 'soil-sensor', 'sensor-data', 'dairyfeed', 'silage', 'orgs', 'fertilizer'
 ];
 
 app.use((req, res, next) => {
@@ -49,6 +49,7 @@ app.use(['/api/soil-sensor', '/api/sensor-data'], require('./routes/soilSensor')
 app.use('/api/dairyfeed',        require('./routes/dairyFeed'));
 app.use('/api/silage',           require('./routes/dairyFeed'));
 app.use('/api/orgs',             require('./routes/orgs'));
+app.use('/api/fertilizer',       require('./routes/fertilizer'));
 
 // ── Downloadable Assets & Export Routes ────────────────────
 const fs = require('fs');

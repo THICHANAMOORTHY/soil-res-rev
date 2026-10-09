@@ -99,6 +99,12 @@
         <span class="nav-badge" style="background:#059669" data-i18n="navIfsBadge">NEW · IFS</span>
       </div>
 
+      <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navFertilizerSection">Fertilizer & Nutrition</p>
+      <div class="nav-link" data-view="fertilizer" onclick="navigate('fertilizer')">
+        <span class="nav-icon">🌱</span> <span data-i18n="navFertilizer">Smart Fertilizer</span>
+        <span class="nav-badge" style="background:#10b981" data-i18n="navSmartBadge">SMART</span>
+      </div>
+
       <p class="sidebar-section-label" style="margin-top:8px" data-i18n="navOutput">Output</p>
       <div class="nav-link" data-view="recommendation">
         <span class="nav-icon">⭐</span> <span data-i18n="navRecommendation">Recommendation</span>
@@ -1979,8 +1985,336 @@
           <button class="btn btn-primary" onclick="exportFarmerReportPDF()">
             <span>📄</span> <span data-i18n="btnDownloadPlanPdf">Download Farmer Action Plan (PDF)</span>
           </button>
+          <button class="btn btn-secondary" onclick="navigate('fertilizer')">
+            <span>🌱</span> <span>Smart Fertilizer Prescription →</span>
+          </button>
           <button class="btn btn-secondary" onclick="navigate('dashboard')" data-i18n="btnBackDashboard">📊 Back to Dashboard</button>
           <button class="btn btn-secondary" onclick="navigate('soil-analysis')" data-i18n="btnReanalyseSoil">🔬 Re-analyse Soil</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: SMART FERTILIZER RECOMMENDATION & COST CALCULATOR ── -->
+    <div id="view-fertilizer" class="view">
+      <div class="view-header">
+        <div>
+          <h1 data-i18n="fertTitle">Smart Fertilizer Recommendation & Cost Calculator</h1>
+          <p class="view-subtitle" data-i18n="fertSubtitle">Calibrated agronomic STCR dosage, ESP32 IoT sensor telemetry, dual machine learning validation, and official Indian market prices.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" id="fert-btn-refresh-prices">
+            <span data-i18n="fertPricesBtn">🔄 Refresh Fertilizer Prices</span>
+          </button>
+          <button class="btn btn-primary" id="fert-btn-recalc">
+            <span>⚡</span> <span data-i18n="fertRecalcBtn">Recalculate Recommendation</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry Hero Banner -->
+      <div class="fert-hero-banner">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+            <span id="fert-telemetry-pill" class="fert-telemetry-badge">
+              🟢 ESP32 Live Telemetry Active (esp32-irrigation-01)
+            </span>
+            <span style="font-size:12px;color:#94a3b8" id="fert-telemetry-farm-label">Farm #101 · ICAR & TNAU Benchmarked</span>
+          </div>
+          <div style="font-size:14px;color:#e2e8f0;max-width:680px">
+            Continuous soil multi-nutrient readings synchronized directly from edge IoT probes. When sensors are offline, field calibration sliders provide agronomic manual fallback.
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary" id="fert-btn-sync-sensor" style="font-size:13px;padding:8px 14px">
+            📡 Fetch Latest Sensor Packet
+          </button>
+          <button class="btn btn-secondary" onclick="navigate('soil-analysis')" style="font-size:13px;padding:8px 14px">
+            🧪 Inspect Soil Probe
+          </button>
+        </div>
+      </div>
+
+      <!-- Input & Calibration Section -->
+      <div class="fert-grid-2">
+        <!-- Crop & Field Specifications Card -->
+        <div class="glass-card">
+          <div class="card-title mb-16" style="display:flex;align-items:center;gap:8px">
+            <span>🌾</span> <span>1. Crop & Field Parameters</span>
+          </div>
+
+          <div class="fert-source-toggle">
+            <button class="fert-source-btn active" id="fert-src-sensor">
+              <span>📡</span> ESP32 Live Sensor Mode
+            </button>
+            <button class="fert-source-btn" id="fert-src-manual">
+              <span>⚙️</span> Manual Calibration Entry
+            </button>
+          </div>
+
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-group">
+              <label class="form-label">Crop Name</label>
+              <select id="fert-select-crop" class="form-select">
+                <option value="Paddy">Paddy (நெல்)</option>
+                <option value="Maize">Maize (மக்காச்சோளம்)</option>
+                <option value="Sugarcane">Sugarcane (கரும்பு)</option>
+                <option value="Tomato">Tomato (தக்காளி)</option>
+                <option value="Groundnut">Groundnut (நிலக்கடலை)</option>
+                <option value="Cotton">Cotton (பருத்தி)</option>
+                <option value="Banana">Banana (வாழை)</option>
+                <option value="Millets">Millets (தினை/கேழ்வரகு)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Crop Growth Stage</label>
+              <select id="fert-select-stage" class="form-select">
+                <option value="Basal / Sowing">Basal / Sowing (விதைப்பு)</option>
+                <option value="Vegetative">Vegetative (வளர்ச்சிப் பருவம்)</option>
+                <option value="Tillering / Flowering">Tillering / Flowering (பூக்கும் பருவம்)</option>
+                <option value="Grain / Pod Formation">Grain / Pod Formation (கதிர்/காய் பருவம்)</option>
+                <option value="Full Crop Cycle">Full Crop Cycle (முழு பருவம்)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Soil Type</label>
+              <select id="fert-select-soil" class="form-select">
+                <option value="Loamy Soil">Loamy Soil (வண்டல் மண்)</option>
+                <option value="Clayey Soil">Clayey Soil (களிமண்)</option>
+                <option value="Black Cotton Soil">Black Cotton Soil (கரிசல் மண்)</option>
+                <option value="Red Sandy Loam">Red Sandy Loam (செம்மண்)</option>
+                <option value="Alluvial Soil">Alluvial Soil (ஆற்றுப் படுகை)</option>
+                <option value="Laterite Soil">Laterite Soil (செம்பொறை மண்)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Field Area & Unit</label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="fert-input-area" class="form-input" value="2.5" step="0.1" min="0.1" style="flex:1" />
+                <select id="fert-select-unit" class="form-select" style="width:105px">
+                  <option value="acres" selected>Acres</option>
+                  <option value="hectares">Hectares</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px">
+            <button class="btn btn-primary" onclick="fertilizerModule.runRecommendation()" style="width:100%">
+              <span>⚡</span> Calculate Fertilizer Prescription & Costs
+            </button>
+          </div>
+        </div>
+
+        <!-- Soil Nutrient Telemetry & Sensor Readings Card -->
+        <div class="glass-card">
+          <div class="card-title mb-16" style="display:flex;justify-content:space-between;align-items:center">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span>🧪</span> <span>2. Soil Sensor Readings & Test Values</span>
+            </span>
+            <span style="font-size:11px;color:#94a3b8">Active Telemetry Sync</span>
+          </div>
+
+          <div id="fert-manual-inputs-wrap" style="transition:opacity 0.2s ease">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+              <div class="form-group">
+                <label class="form-label" style="color:var(--nutrient-n)">Nitrogen (N) kg/ha</label>
+                <input type="number" id="fert-manual-n" class="form-input" value="210" min="10" max="800" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="color:var(--nutrient-p)">Phosphorus (P) kg/ha</label>
+                <input type="number" id="fert-manual-p" class="form-input" value="16" min="2" max="150" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="color:var(--nutrient-k)">Potassium (K) kg/ha</label>
+                <input type="number" id="fert-manual-k" class="form-input" value="145" min="20" max="800" />
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+              <div class="form-group">
+                <label class="form-label" style="color:var(--nutrient-ph)">Soil pH</label>
+                <input type="number" id="fert-manual-ph" class="form-input" value="6.5" step="0.1" min="3.5" max="10.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="color:#38bdf8">Soil Moisture %</label>
+                <input type="number" id="fert-manual-moisture" class="form-input" value="42" min="5" max="100" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="color:#fb923c">Temperature °C</label>
+                <input type="number" id="fert-manual-temperature" class="form-input" value="28" min="5" max="55" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;font-size:12px;color:#94a3b8;line-height:1.5">
+            💡 <b>Sensor Integration:</b> When connected to the physical ESP32 Soil Scout node, real-time NPK, pH, moisture, and temperature are ingested directly into the STCR calibration model. Manual sliders allow farmer overrides for laboratory soil test card readings.
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="fert-loading-indicator" class="loading-wrap" style="display:none;margin:30px 0">
+        <div class="spinner"></div>
+        <p class="loading-text">Computing agronomic fertilizer dosages & verified prices…</p>
+      </div>
+
+      <!-- Results Container -->
+      <div id="fert-results-wrap">
+        <!-- 3. Soil Diagnostics Card -->
+        <div class="glass-card mb-24" id="fert-soil-diagnosis-card">
+          <!-- Populated dynamically by fertilizer.js -->
+        </div>
+
+        <!-- 4. Recommended Fertilizer Prescriptions -->
+        <div class="mb-24">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div>
+              <h2 style="font-size:20px;font-weight:700;color:#f1f5f9">
+                🌱 Smart Fertilizer Recommendation
+              </h2>
+              <p style="font-size:13px;color:#94a3b8">
+                Scientifically calibrated crop nutrient doses using Indian Soil Test Crop Response (STCR) protocols. Unnecessary fertilizers are withheld when soil reserves are adequate.
+              </p>
+            </div>
+            <span class="chip success" style="font-size:12px">STCR Validated</span>
+          </div>
+
+          <div class="fert-card-grid" id="fert-recommended-grid">
+            <!-- Populated dynamically with fertilizer cards -->
+          </div>
+        </div>
+
+        <!-- 5. Fertilizer Cost Calculator & Field Budget -->
+        <div class="glass-card mb-24">
+          <div class="card-title mb-16" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span>💰</span> <span>Fertilizer Cost Calculator & Field Budget</span>
+            </span>
+            <span style="font-size:12px;color:#cbd5e1" id="fert-subsidy-note">
+              Direct Subsidy Supported by Govt of India
+            </span>
+          </div>
+
+          <!-- KPI Summary Grid -->
+          <div class="fert-kpi-row">
+            <div class="fert-kpi-card highlight">
+              <div class="kpi-label">Estimated Total Field Cost</div>
+              <div class="kpi-number" id="fert-kpi-total-cost">₹0</div>
+              <div style="font-size:11px;color:#fcd34d;margin-top:4px">Based on full bags to purchase</div>
+            </div>
+
+            <div class="fert-kpi-card">
+              <div class="kpi-label">Total Bags Required</div>
+              <div class="kpi-number" id="fert-kpi-total-bags">0 Bags</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">Standard 45kg & 50kg bags</div>
+            </div>
+
+            <div class="fert-kpi-card">
+              <div class="kpi-label">Estimated Cost / Acre</div>
+              <div class="kpi-number" id="fert-kpi-cost-per-acre">₹0</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">Unit input expenditure</div>
+            </div>
+
+            <div class="fert-kpi-card">
+              <div class="kpi-label">Pricing Status</div>
+              <div style="font-size:18px;font-weight:700;color:#34d399;margin:6px 0">✓ Verified MRP</div>
+              <div style="font-size:11px;color:#94a3b8">Statutory DBT/NBS ceilings</div>
+            </div>
+          </div>
+
+          <!-- Interactive Area Recalculation Slider -->
+          <div class="fert-slider-group" style="background:rgba(255,255,255,0.02);padding:14px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.06)">
+            <div class="fert-slider-head">
+              <span><b>Adjust Cultivated Field Area:</b> <span id="fert-area-unit-label">acres</span></span>
+              <span style="font-size:12px;color:#38bdf8">Drag slider to dynamically recalculate field quantities & costs</span>
+            </div>
+            <input type="range" id="fert-slider-area" min="0.5" max="25" step="0.5" value="2.5" style="width:100%;accent-color:#10b981;cursor:pointer" />
+          </div>
+
+          <!-- Itemized Breakdown Table -->
+          <div class="fert-table-wrap" style="margin-top:16px">
+            <table class="fert-price-table">
+              <thead>
+                <tr>
+                  <th>Fertilizer</th>
+                  <th>Total Field Req (kg)</th>
+                  <th>Bag Weight</th>
+                  <th>Price / Bag</th>
+                  <th>Bags to Buy</th>
+                  <th>Proportional Cost</th>
+                  <th>Estimated Cost (Full Bags)</th>
+                </tr>
+              </thead>
+              <tbody id="fert-calc-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:11px;color:#94a3b8;margin-top:10px">
+            * Note: Retail dealers sell fertilizers in complete sealed bags (45kg for Urea, 50kg for DAP/MOP/SSP). Proportional cost indicates exact chemical requirement value, while estimated cost reflects actual bags purchased.
+          </p>
+        </div>
+
+        <!-- 6. Current Fertilizer Prices in India Table -->
+        <div class="glass-card mb-24">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div>
+              <h2 style="font-size:18px;font-weight:700;color:#f1f5f9;display:flex;align-items:center;gap:8px">
+                <span>🏷️</span> <span>Current Fertilizer Prices in India</span>
+              </h2>
+              <p style="font-size:12px;color:#94a3b8" id="fert-price-last-updated">
+                Official Rates Verified: October 2026
+              </p>
+            </div>
+            <span class="fert-verified-pill">
+              ✓ Department of Fertilizers (GoI)
+            </span>
+          </div>
+
+          <div class="fert-table-wrap">
+            <table class="fert-price-table">
+              <thead>
+                <tr>
+                  <th>Fertilizer & Grade</th>
+                  <th>Price per Bag</th>
+                  <th>Bag Weight</th>
+                  <th>Price per kg</th>
+                  <th>Price Source & Subsidy Type</th>
+                  <th>Verification</th>
+                </tr>
+              </thead>
+              <tbody id="fert-price-table-tbody">
+                <!-- Populated dynamically from price catalog -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:#94a3b8">
+            <div>
+              <b>Transparency Policy:</b> Statutory controlled fertilizers (Neem-Coated Urea) adhere strictly to Central Government gazetted MRPs. P&K fertilizers reflect Nutrient Based Subsidy (NBS) mandated maximum ceiling rates. If verified current prices are unavailable in remote locations, check with local primary agricultural cooperative societies (PACS).
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Machine Learning Integration & Research Insights -->
+        <div id="fert-ml-insights-container">
+          <!-- Populated dynamically with ML insights -->
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="btn-group mt-24">
+          <button class="btn btn-primary" onclick="exportFarmerReportPDF()">
+            <span>📄</span> <span>Download Action Plan with Fertilizer Schedule (PDF)</span>
+          </button>
+          <button class="btn btn-secondary" onclick="navigate('dashboard')">
+            <span>📊</span> Back to Farm Dashboard
+          </button>
+          <button class="btn btn-secondary" onclick="navigate('soil-analysis')">
+            <span>🧪</span> Back to Soil Analysis
+          </button>
         </div>
       </div>
     </div>
@@ -3322,6 +3656,7 @@
 <script src="js/rotation.js"></script>
 <script src="js/simulation.js"></script>
 <script src="js/recommendation.js"></script>
+<script src="js/fertilizer.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/gpsZones.js"></script>
 <script src="js/dairyfeed.js"></script>
