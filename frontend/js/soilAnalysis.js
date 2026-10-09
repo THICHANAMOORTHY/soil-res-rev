@@ -258,29 +258,24 @@ async function pollSensorOnce() {
     const data = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`);
     if (soilDataMode !== 'live') return; // Exit if user switched mode during network request
     
-    // Display readings whenever telemetry data exists
-    if (data.reading) {
-      if (dot) dot.className = data.connected ? 'sensor-live-dot connected' : 'sensor-live-dot standby';
+    // Display readings ONLY when device is actively connected and online
+    if (data.connected && data.reading) {
+      if (dot) dot.className = 'sensor-live-dot connected';
       if (text) {
-        if (data.connected) {
-          text.textContent = isTa
-            ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
-            : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
-        } else {
-          text.textContent = isTa
-            ? `🟡 காத்திருப்பு · சாதனம் "${data.device_id}" · கடைசி அளவீடு ${data.seconds_ago} வினாடிகளுக்கு முன் பெறப்பட்டது`
-            : `🟡 Standby · "${data.device_id}" last seen ${data.seconds_ago}s ago (waiting for next interval)`;
-        }
+        text.textContent = isTa
+          ? `🟢 சாதனம் ஆன் செய்யப்பட்டுள்ளது · சாதனம் "${data.device_id}" · நேரலை சமிக்ஞை (${data.seconds_ago} வினாடிகளுக்கு முன்)`
+          : `🟢 Device is ON · "${data.device_id}" transmitting realtime telemetry (${data.seconds_ago}s ago)`;
       }
       updateLiveSensorDisplay(data.reading);
     } else {
-      // No reading has been received yet
+      // Device is OFF or disconnected (>60s without telemetry) — clear all cards so no stale/fake data is shown
       if (dot) dot.className = 'sensor-live-dot offline';
       if (text) {
         const devName = data.device_id || 'Soil-Scout-01';
+        const agoText = (data.seconds_ago && data.seconds_ago < 86400) ? ` (last seen ${data.seconds_ago}s ago)` : '';
         text.textContent = isTa
-          ? `🔴 சாதனம் ஆஃப் (OFF) செய்யப்பட்டுள்ளது · சாதனம் "${devName}" ஆஃப்லைனில் உள்ளது. நேரலை தரவுகளுக்கு சாதனத்தை ஆன் செய்யவும்.`
-          : `🔴 Device is OFF / Disconnected · "${devName}" is offline. Power ON physical sensor to view realtime telemetry.`;
+          ? `🔴 சாதனம் ஆஃப் (OFF) செய்யப்பட்டுள்ளது · சாதனம் "${devName}" ஆஃப்லைனில் உள்ளது${agoText}. நேரலை தரவுகளுக்கு சாதனத்தை இயக்கவும்.`
+          : `🔴 Device is OFF / Disconnected · "${devName}" is offline${agoText}. Power ON physical sensor to view realtime telemetry.`;
       }
       clearLiveSensorReadings();
     }
@@ -668,19 +663,29 @@ async function runInstantMlPrediction() {
     let payload = {};
     if (soilDataMode === 'live') {
       const latestCheck = await apiGet(`/soil-sensor/latest?farm_id=${state.farm_id}`).catch(() => ({ connected: false }));
-      if (latestCheck.connected && latestCheck.reading) {
-        payload = {
-          n: latestCheck.reading.nitrogen,
-          p: latestCheck.reading.phosphorus,
-          k: latestCheck.reading.potassium,
-          temperature: latestCheck.reading.air_temperature,
-          humidity: latestCheck.reading.soil_moisture,
-          ph: latestCheck.reading.ph,
-          farm_id: state.farm_id
-        };
-      } else {
-        payload = { farm_id: state.farm_id };
+      if (!latestCheck.connected || !latestCheck.reading) {
+        container.innerHTML = `
+          <div class="glass-card mt-24 p-24" style="text-align:center;border:1px dashed rgba(239, 68, 68, 0.4);background:rgba(239, 68, 68, 0.04)">
+            <div style="font-size:32px;margin-bottom:8px">🔌</div>
+            <div style="font-size:18px;font-weight:700;color:var(--red-400);margin-bottom:6px">
+              ${isTa ? 'சென்சார் சாதனம் தற்போது ஆஃப் செய்யப்பட்டுள்ளது' : 'Real Hardware Sensor is Currently OFF'}
+            </div>
+            <div style="color:var(--text-muted);font-size:14px;max-width:540px;margin:0 auto">
+              ${isTa ? 'நேரலை பயிர் கணிப்பை பெற உங்கள் ESP32 / Soil Scout சாதனத்தை இயக்கவும், அல்லது கைமுறை உள்ளீட்டு முறைக்கு (Manual Entry) மாறவும்.' : 'Please power ON your ESP32 / Soil Scout probe to stream live readings, or switch to Manual Entry mode to test with sliders.'}
+            </div>
+          </div>
+        `;
+        return;
       }
+      payload = {
+        n: latestCheck.reading.nitrogen,
+        p: latestCheck.reading.phosphorus,
+        k: latestCheck.reading.potassium,
+        temperature: latestCheck.reading.air_temperature,
+        humidity: latestCheck.reading.soil_moisture,
+        ph: latestCheck.reading.ph,
+        farm_id: state.farm_id
+      };
     } else {
       payload = {
         n: parseFloat(document.getElementById('n-slider')?.value) || 0,

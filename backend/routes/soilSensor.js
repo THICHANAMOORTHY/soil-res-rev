@@ -312,8 +312,9 @@ router.get('/latest', (req, res) => {
     hardware_on: isConnected,
     seconds_ago: Math.max(0, Math.round(ageMs / 1000)),
     device_id: status.device_id || 'Soil-Scout-01',
-    reading: status.last_reading,
-    message: isConnected ? 'Real hardware online and streaming.' : `Sensor idle (last packet received ${Math.round(ageMs / 1000)}s ago).`
+    reading: isConnected ? status.last_reading : null,
+    last_reading: status.last_reading,
+    message: isConnected ? 'Real hardware online and streaming.' : `Sensor offline (last packet received ${Math.round(ageMs / 1000)}s ago).`
   });
 });
 
