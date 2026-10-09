@@ -20,7 +20,7 @@ const KNOWN_API_ROUTES = [
   'soil-analysis', 'crop-history', 'candidate-crops', 'crop-evaluation',
   'optimize-rotation', 'soil-simulation', 'recommendation', 'dashboard',
   'weather', 'report', 'chat', 'gps-zones', 'crops', 'farms', 'seasons',
-  'farmers', 'health', 'db-status', 'auth', 'soil-sensor', 'dairyfeed', 'silage', 'orgs'
+  'farmers', 'health', 'db-status', 'auth', 'soil-sensor', 'sensor-data', 'dairyfeed', 'silage', 'orgs'
 ];
 
 app.use((req, res, next) => {
@@ -45,7 +45,7 @@ app.use('/api/report',           require('./routes/report'));
 app.use('/api/chat',             require('./routes/chat'));
 app.use('/api/gps-zones',        require('./routes/gpsZones'));
 app.use('/api/auth',             require('./routes/auth'));
-app.use('/api/soil-sensor',      require('./routes/soilSensor'));
+app.use(['/api/soil-sensor', '/api/sensor-data'], require('./routes/soilSensor'));
 app.use('/api/dairyfeed',        require('./routes/dairyFeed'));
 app.use('/api/silage',           require('./routes/dairyFeed'));
 app.use('/api/orgs',             require('./routes/orgs'));

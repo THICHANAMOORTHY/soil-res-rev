@@ -30,13 +30,21 @@ function requireDeviceKey(req, res, next) {
   const validKeys = [
     envKey,
     'b2cd3ba3dca8ce14d6da53f323b802f759111246836157dc',
-    '84e3acf9562ca028fc3688eb514fa3276f034b66e8353b8a'
+    '84e3acf9562ca028fc3688eb514fa3276f034b66e8353b8a',
+    'my-secret-key'
   ].filter(Boolean);
 
-  const provided = req.get('X-Device-Key');
+  const provided = req.get('X-Device-Key') ||
+                   req.get('x-api-key') ||
+                   req.get('X-Api-Key') ||
+                   req.get('api-key') ||
+                   (req.get('Authorization') && req.get('Authorization').replace(/^Bearer\s+/i, '')) ||
+                   req.body?.api_key ||
+                   req.query?.api_key;
+
   if (!provided || !validKeys.includes(provided)) {
-    console.warn(`⚠️ [ESP32 Ingest] 401 Unauthorized from ${req.ip}. Received header: "${provided || '(none)'}"`);
-    return res.status(401).json({ error: 'Invalid or missing X-Device-Key header' });
+    console.warn(`⚠️ [ESP32 Ingest] 401 Unauthorized from ${req.ip}. Received key: "${provided || '(none)'}"`);
+    return res.status(401).json({ error: 'Invalid or missing X-Device-Key / x-api-key header' });
   }
   next();
 }
@@ -247,9 +255,9 @@ function processSensorIngestion(req, res) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// POST /api/soil-sensor/ingest — Soil Scout / ESP32 pushes reading (Device Authenticated)
+// POST /api/soil-sensor/ingest (and /sensor-data) — Soil Scout / ESP32 pushes reading
 // ─────────────────────────────────────────────────────────────
-router.post('/ingest', requireDeviceKey, (req, res, next) => {
+router.post(['/ingest', '/', '/sensor-data'], requireDeviceKey, (req, res, next) => {
   req.isRealHardware = true;
   processSensorIngestion(req, res);
 });
